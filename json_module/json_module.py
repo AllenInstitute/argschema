@@ -19,10 +19,14 @@ json_module_schema = {
             "type": "string",
             "format": "output_path",
             "description":"file path to output json file"
-        }
+        },
         "log_level": {
             "type": "string",
-            "enum": ["DEBUG","INFO","WARNING","ERROR","CRITICAL"],
+            "enum": [ logging.DEBUG, 
+                      logging.INFO, 
+                      logging.WARNING, 
+                      logging.ERROR, 
+                      logging.CRITICAL ],
             "description": "set the logging level of the module"
         }
     }
@@ -101,13 +105,14 @@ def smart_merge(a, b, path=None,merge_keys = None,overwrite_with_none=False):
                 a[key] = b[key]
     return a
 
-class JsonModule():
+class JsonModule( object ):
 
     def __init__(self,
-        input=None, #dictionary input as option instead of --input_json
-        schema_extension = None, #json schema for extending the base class schema
-        base_schema = json_module_schema, #base schema of json module, defined above
-        json_validator = jsonschema.Draft4Validator): #base validator for schema
+                 input=None, #dictionary input as option instead of --input_json
+                 schema_extension = None, #json schema for extending the base class schema
+                 base_schema = json_module_schema, #base schema of json module, defined above
+                 json_validator = jsonschema.Draft4Validator, #base validator for schema
+                 logger_name=None): #name used by logging module
 
         #merge the schema extension into base_schema
         schema = self.add_to_schema(base_schema, schema_extension)
@@ -148,8 +153,8 @@ class JsonModule():
         validator.validate(self.args)
 
         #set the log level and initialize logger
-        self.set_log_level_by_string(self.args['log_level'])
-        self.logger = logging.getLogger()
+        print "hey forrest I don't know why 'log_level' doesn't exist in self.args"
+        self.logger = self.initialize_logger(logger_name, self.args.get('log_level', logging.ERROR))
 
     @staticmethod
     def add_to_schema(oldschema,newschema,merge_keys=['required']):
@@ -159,20 +164,10 @@ class JsonModule():
         return smart_merge(oldschema,newschema,merge_keys)
 
     @staticmethod
-    def set_log_level_by_string(lls):
-        if lls =='DEBUG':
-            log_level = logging.DEBUG
-        elif lls == 'WARNING':
-            log_level = logging.WARNING
-        elif lls == 'ERROR':
-            log_level = logging.ERROR
-        elif lls == 'INFO':
-            log_level = logging.INFO
-        elif lls == 'CRITICAL':
-            log_level = logging.CRITICAL
-        else:
-            log_level = logging.ERROR
-        logging.basicConfig(level=log_level)
+    def initialize_logger(name, level):
+        logging.basicConfig()
+        logger = logging.getLogger(name)
+        logger.setLevel(level=level)
 
     def run(self):
         print "running! with args"
