@@ -22,11 +22,7 @@ json_module_schema = {
         },
         "log_level": {
             "type": "string",
-            "enum": [ logging.DEBUG, 
-                      logging.INFO, 
-                      logging.WARNING, 
-                      logging.ERROR, 
-                      logging.CRITICAL ],
+            "enum": [ "DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL" ],
             "description": "set the logging level of the module"
         }
     }
@@ -153,8 +149,11 @@ class JsonModule( object ):
         validator.validate(self.args)
 
         #set the log level and initialize logger
+        print "*********"
         print "hey forrest I don't know why 'log_level' doesn't exist in self.args"
-        self.logger = self.initialize_logger(logger_name, self.args.get('log_level', logging.ERROR))
+        print self.args
+        print "*********"
+        self.logger = self.initialize_logger(logger_name, self.args.get('log_level'))
 
     @staticmethod
     def add_to_schema(oldschema,newschema,merge_keys=['required']):
@@ -164,7 +163,12 @@ class JsonModule( object ):
         return smart_merge(oldschema,newschema,merge_keys)
 
     @staticmethod
-    def initialize_logger(name, level):
+    def initialize_logger(name, level_name):
+        if level_name is None:
+            level_name = "ERROR"
+        
+        level = logging.getLevelName(level_name)
+
         logging.basicConfig()
         logger = logging.getLogger(name)
         logger.setLevel(level=level)
