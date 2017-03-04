@@ -20,6 +20,11 @@ json_module_schema = {
             "format": "output_path",
             "description":"file path to output json file"
         }
+        "log_level": {
+            "type": "string",
+            "enum": ["DEBUG","INFO","WARNING","ERROR","CRITICAL"],
+            "description": "set the logging level of the module"
+        }
     }
 }
 
@@ -142,12 +147,32 @@ class JsonModule():
         #validate the combined dictionary against the validator    
         validator.validate(self.args)
 
+        #set the log level and initialize logger
+        self.set_log_level_by_string(self.args['log_level'])
+        self.logger = logging.getLogger()
+
     @staticmethod
     def add_to_schema(oldschema,newschema,merge_keys=['required']):
         #merges the old schema into the new schema
         #presently the newschema strictly replaces
         #keys in the oldschema except for keys found in merge_keys
         return smart_merge(oldschema,newschema,merge_keys)
+
+    @staticmethod
+    def set_log_level_by_string(lls):
+        if lls =='DEBUG':
+            log_level = logging.DEBUG
+        elif lls == 'WARNING':
+            log_level = logging.WARNING
+        elif lls == 'ERROR':
+            log_level = logging.ERROR
+        elif lls == 'INFO':
+            log_level = logging.INFO
+        elif lls == 'CRITICAL':
+            log_level = logging.CRITICAL
+        else:
+            log_level = logging.ERROR
+        logging.basicConfig(level=log_level)
 
     def run(self):
         print "running! with args"
