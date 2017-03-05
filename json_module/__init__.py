@@ -2,31 +2,12 @@ import jsonschema, os, logging, argparse
 import tempfile
 import json
 import argparse
+from marshmallow import Schema, fields, pprint
+from marshmallow_enum import EnumField
+from marshmallow_jsonschema import JSONSchema
+from enum import Enum
 
 
-json_module_schema = {
-    "$schema":"http://json-schema.org/schema#",
-    "type": "object",
-    "title": "a generic module",
-    "description": "a generic module description",
-    "properties": {
-        "input_json": { 
-            "type": "string",
-            "format": "input_path",
-            "description":"file path of input json file" 
-        },
-        "output_json": {
-            "type": "string",
-            "format": "output_path",
-            "description":"file path to output json file"
-        },
-        "log_level": {
-            "type": "string",
-            "enum": ["DEBUG","INFO","WARNING","ERROR","CRITICAL"],
-            "description": "set the logging level of the module"
-        }
-    }
-}
 
 def args_to_dict(argsobj):
     d = {}
@@ -100,23 +81,42 @@ def smart_merge(a, b, path=None,merge_keys = None,overwrite_with_none=False):
                 #otherwise replace entire leaf with b
                 a[key] = b[key]
     return a
+class EnumField(EnumField):
+
+    def _jsonschema_type_mapping(self):
+        return {
+            'type': 'string',
+            'enum':[val.name for val in self.enum],
+            'description':self.metadata['metadata']['description']
+        }
+
+class LoggingEnum(Enum):
+    DEBUG = logging.DEBUG
+    INFO = logging.INFO
+    ERROR = logging.ERROR
+    CRITICAL = logging.CRITICAL
+    WARNING = logging.WARNING
+
+class ModuleParameters(Schema):
+    input_json = fields.Str(metadata={'description':"file path of input json file"})
+    output_json = fields.Str(metadata={'description':"file path to output json file"})
+    log_level = EnumField(LoggingEnum,metadata={'description':"set the logging level of the module"})
 
 class JsonModule():
 
     def __init__(self,
         input=None, #dictionary input as option instead of --input_json
-        schema_extension = None, #json schema for extending the base class schema
-        base_schema = json_module_schema, #base schema of json module, defined above
+        marshmallow_schema = ModuleParameters(), #schema for parsing arguments
         json_validator = jsonschema.Draft4Validator,
         args = None,
-        logger_name = 'json_module'): #base validator for schema
+        logger_name = 'json_module'): 
 
-        #merge the schema extension into base_schema
-        schema = self.add_to_schema(base_schema, schema_extension)
-
+        result = JSONSchema().dump(marshmallow_schema)
+        schema = result.data
+        print json.dumps(schema,indent=4)
         #validate the schema
-        json_validator.check_schema(schema)
-        self.schema = schema
+        #json_validator.check_schema(schema)
+        self.schema = result.data
 
         #setup a validator with custom format checking
         checker = jsonschema.FormatChecker()
@@ -144,10 +144,13 @@ class JsonModule():
                 jsonargs = json.load(fp)
 
         #merge the command line dictionary into the inputJson
-        self.args = smart_merge(jsonargs,argsdict)
+        args = smart_merge(jsonargs,argsdict)
+        result = marshmallow_schema.load(args)
 
+        self.args = result.data
+        print result.errors
         #validate the combined dictionary against the validator    
-        validator.validate(self.args)
+        #validator.validate(self.args)
 
         #set the log level and initialize logger
         #set the log level and initialize logger
@@ -155,7 +158,7 @@ class JsonModule():
         print "hey forrest I don't know why 'log_level' doesn't exist in self.args"
         print self.args
         print "*********"
-        self.logger = self.initialize_logger(logger_name, self.args.get('log_level'))
+        self.logger = self.initialize_logger(logger_name, self.args.get('log_level',None))
 
     @staticmethod
     def add_to_schema(oldschema,newschema,merge_keys=['required']):
@@ -165,11 +168,11 @@ class JsonModule():
         return smart_merge(oldschema,newschema,merge_keys)
 
     @staticmethod
-    def initialize_logger(name, level_name):
-        if level_name is None:
-            level_name = "ERROR"
+    def initialize_logger(name, log_level_enum):
+        if log_level_enum is None:
+            log_level_enum = LoggingEnum.ERROR
         
-        level = logging.getLevelName(level_name)
+        level = logging.getLevelName(log_level_enum.name)
 
         logging.basicConfig()
         logger = logging.getLogger(name)
@@ -257,38 +260,20 @@ def validate_input_path(entry):
     return True
 
 def main():
-    schema = {
-        "$schema": "http://json-schema.org/draft-04/schema#",
-        "title": "some module",
-        "description": "an example module",
-        "type": "object",
-        "properties": {
-            "input_json": {
-                "description": "path to input json",
-                "type": "string",
-                "format": "input_path"
-            },
-            "some_string": {
-                "description": "path to some file that must exist",
-                "type": "string"
-            },
-            "nested": {
-                "type": "object",
-                "properties": {
-                    "a": { "type": "array", "items": { "type": "integer" } },
-                    "b": { "type": "integer" }
-                },
-                "required": ["a"]
-                }
-            }
-    }
+    class renderParameters(Schema):
+        host = fields.Str(metadata={'description':'render host'},required=True)
+        port = fields.Int(metadata={'description':'render port'},required=True)
+        owner = fields.Str(metadata={'description':'render owner'},required=True)
+        project = fields.Str(metadata={'description':'render project'},required=True)
 
-    example = {
-        "nested": { "a": [ 1, 2, 3 ] }
-        }
+    class parameterExtension(ModuleParameters):
+        a = fields.Int(metadata={'description':'value for a'},required=True)
+        b = fields.Int(metadata={'description':'value for b'},required=True)
+        render = fields.Nested(renderParameters)
+        
+    input ={'a':5}
+    jm = JsonModule(input=input,marshmallow_schema=parameterExtension())
 
-    jm = JsonModule(schema_extension=schema,input=example)
-    jm.run()
 if __name__ == "__main__": main()
 
 
