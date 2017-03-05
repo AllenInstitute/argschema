@@ -174,6 +174,7 @@ class JsonModule():
         logging.basicConfig()
         logger = logging.getLogger(name)
         logger.setLevel(level=level)
+        return logger
 
     def run(self):
         print "running! with args"
@@ -230,12 +231,6 @@ def build_schema_arguments(schema, arguments=None, path=None):
                     # the "items" section can also be a list, but this
                     # isn't supported by argparse AFAICT
                     raise Exception("hetergenous array item types not supported")
-
-            # set the required flag
-            # DAVID, I don't think we want this because we want command line options to be optional
-            # the schema validator will take care of this
-            #if prop_name in required_props:
-            #    arg['required'] = True
 
             arguments[arg_name] = arg
 
