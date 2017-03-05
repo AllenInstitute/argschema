@@ -109,7 +109,7 @@ class JsonModule():
         base_schema = json_module_schema, #base schema of json module, defined above
         json_validator = jsonschema.Draft4Validator,
         args = None,
-        logname = 'json_module'): #base validator for schema
+        logger_name = 'json_module'): #base validator for schema
 
         #merge the schema extension into base_schema
         schema = self.add_to_schema(base_schema, schema_extension)
@@ -150,8 +150,12 @@ class JsonModule():
         validator.validate(self.args)
 
         #set the log level and initialize logger
-        self.set_log_level_by_string(self.args.get('log_level',None))
-        self.logger = logging.getLogger(logname)
+        #set the log level and initialize logger
+        print "*********"
+        print "hey forrest I don't know why 'log_level' doesn't exist in self.args"
+        print self.args
+        print "*********"
+        self.logger = self.initialize_logger(logger_name, self.args.get('log_level'))
 
     @staticmethod
     def add_to_schema(oldschema,newschema,merge_keys=['required']):
@@ -161,20 +165,15 @@ class JsonModule():
         return smart_merge(oldschema,newschema,merge_keys)
 
     @staticmethod
-    def set_log_level_by_string(lls):
-        if lls =='DEBUG':
-            log_level = logging.DEBUG
-        elif lls == 'WARNING':
-            log_level = logging.WARNING
-        elif lls == 'ERROR':
-            log_level = logging.ERROR
-        elif lls == 'INFO':
-            log_level = logging.INFO
-        elif lls == 'CRITICAL':
-            log_level = logging.CRITICAL
-        else:
-            log_level = logging.ERROR
-        logging.basicConfig(level=log_level)
+    def initialize_logger(name, level_name):
+        if level_name is None:
+            level_name = "ERROR"
+        
+        level = logging.getLevelName(level_name)
+
+        logging.basicConfig()
+        logger = logging.getLogger(name)
+        logger.setLevel(level=level)
 
     def run(self):
         print "running! with args"
@@ -286,24 +285,15 @@ def main():
                 },
                 "required": ["a"]
                 }
-            },
-        "required": [ "input_json" ]
+            }
     }
 
     example = {
-        "input_json": "hi",
         "nested": { "a": [ 1, 2, 3 ] }
         }
 
-    try:
-        jsonschema.validate(example, schema, format_checker=FormatChecker())
-    except jsonschema.ValidationError as e:
-        print e.cause
-
-    parser = schema_argparser(schema)
-    args = parser.parse_args()
-    print args
-
+    jm = JsonModule(schema_extension=schema,input=example)
+    jm.run()
 if __name__ == "__main__": main()
 
 
