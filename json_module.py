@@ -19,7 +19,7 @@ json_module_schema = {
             "type": "string",
             "format": "output_path",
             "description":"file path to output json file"
-        }
+        },
         "log_level": {
             "type": "string",
             "enum": ["DEBUG","INFO","WARNING","ERROR","CRITICAL"],
