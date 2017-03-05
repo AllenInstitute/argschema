@@ -9,5 +9,5 @@ setup(name='json_module',
        json_files, or dictionary objects. Providing a common wrapper for data processing modules.',
       author='Forrest Collman,David Feng',
       author_email='forrestc@alleninstitute.org',
-      packages=['json_module'],
+      py_modules=['json_module'],
       install_requires=required)
