@@ -119,16 +119,18 @@ class ModuleParameters(mm.Schema):
 
     def load_with_defaults(self, *args, **kwargs):
         result = self.load(*args, **kwargs)
-        
+
         # this is debatable
-        schemas = [ self ]
+        schemas = [ (self, result.data) ]
         while schemas:
-            schema = schemas.pop()
+            schema, data = schemas.pop()
             for k,v in schema.declared_fields.iteritems():
                 if isinstance(v, mm.fields.Nested):
-                    schemas.append(v.schema)
+                    if k not in data:
+                        data[k] = {}
+                    schemas.append((v.schema, data[k]))
                 elif v.default != mm.missing and k not in result.data:
-                    result.data[k] = v.default
+                    data[k] = v.default
 
         return result
 

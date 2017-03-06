@@ -49,6 +49,7 @@ def test_log_catch():
 class TestExtension(mm.Schema):
     a = mm.fields.Str(metadata={'description':'a string'})
     b = mm.fields.Int(metadata={'description':'an integer'}) 
+    c = mm.fields.Int(metadata={'description':'an integer'}, default=10) 
 
 class SimpleExtension(ModuleParameters):
     test = mm.fields.Nested(TestExtension)
