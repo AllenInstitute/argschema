@@ -81,9 +81,8 @@ import py
 class InputFile(mm.fields.Str):
     def _serialize(self,value,attr,obj):
         return str(value)
-    def _deserialize(self,value,attr,data):
-         return self._validated(value)
-    def _validated(self,value):
+
+    def _validate(self,value):
         print 'value',value
         p = py.path.local(value)
 
@@ -95,12 +94,7 @@ class InputFile(mm.fields.Str):
             except IOError:
                 self.fail('invalid')
         return p
-    def _jsonschema_type_mapping(self):
-        return {
-            'type': 'string',
-            'format':'input_path',
-            'description':self.metadata['metadata']['description']
-        }
+
 
 class OptionList(mm.fields.Field):
     def __init__(self, options, *args, **kwargs):
@@ -112,14 +106,16 @@ class OptionList(mm.fields.Field):
 
     def _validate(self,  value):
         if value not in self.options:
-            raise mm.ValidationError
+            raise mm.ValidationError("%s is not a valid option" % value)
+
+        return value
 
 class ModuleParameters(mm.Schema):
     input_json = InputFile(metadata={'description':"file path of input json file"})
     output_json = mm.fields.Str(metadata={'description':"file path to output json file"})
     log_level = OptionList([ 'DEBUG', 'INFO', 'WARNING', 'ERROR', 'CRITICAL' ],
-                           metadata={'description':"set the logging level of the module"}, 
-                           default="ERROR")
+                           metadata={'description':"set the logging level of the module"},
+                           default='ERROR')
 
 class ParseError(Exception):
     pass
@@ -132,23 +128,32 @@ class JsonModule( object ):
         logger_name = 'json_module'): 
 
         schema = schema_type()
-
+        
         #convert schema to argparse object
         p = schema_argparser(schema)
         argsobj = p.parse_args(args)
         argsdict = args_to_dict(argsobj)
 
-        #merge the command line dictionary into the input json
-        args = smart_merge(input_data, argsdict)
+        if argsobj.input_json is not None:
+            jsonargs = json.load(open(argsobj.input_json, 'r'))
+        else:
+            jsonargs = input_data if input_data else {}
 
+        #merge the command line dictionary into the input json
+        args = smart_merge(jsonargs, argsdict)
+
+
+        # validate with load!
         result = schema.load(args)
+
+        # result = schema.load(args)
         if len(result.errors)>0:
             raise mm.ValidationError(json.dumps(result.errors, indent=2))
 
         self.schema_args = result
         self.args = result.data
         
-        self.logger = self.initialize_logger(logger_name, self.args.get('log_level'))
+        self.logger = self.initialize_logger(logger_name, self.args.get('log_level', 'ERROR'))
 
     @staticmethod
     def initialize_logger(name, log_level):
@@ -191,8 +196,8 @@ def build_schema_arguments(schema, arguments=None, path=None):
                 # it's a simple type, apply the mapping
                 arg['type'] = FIELD_TYPE_MAP[field_type]
 
-            if field.default != mm.missing:
-                arg['default'] = field.default
+            #if field.default != mm.missing:
+            #    arg['default'] = field.default
 
             arguments[arg_name] = arg
 
