@@ -28,11 +28,11 @@ def test_simple_example(tmpdir):
     example = {
         "input_json":str(file_in),
         "output_json":str(file_out),
-        "log_level":"ERROR"
+        "log_level":"CRITICAL"
     }
     jm=JsonModule(input_data=example)
-    print jm.logger
-    print jm.args
+
+    assert jm.args['log_level'] == 'CRITICAL'
 
 def test_log_catch():
     try:
@@ -45,6 +45,7 @@ def test_log_catch():
         assert True
         return
     assert False
+
 
 class TestExtension(mm.Schema):
     a = mm.fields.Str(metadata={'description':'a string'})
