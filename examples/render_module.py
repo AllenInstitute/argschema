@@ -1,45 +1,21 @@
-from json_module import JsonModule
+from json_module import JsonModule,ModuleParameters
+import marshmallow as mm
+import renderapi
+
+class RenderClientParameters(ModuleParameters):
+    host = mm.fields.Str(required=True,metadata={'description':'render host'})
+    port = mm.fields.Int(required=True,metadata={'description':'render post integer'})
+    owner = mm.fields.Str(required=True,metadata={'description':'render default owner'})
+    project = mm.fields.Str(required=True,metadata={'description':'render default project'})
+    client_scripts = mm.fields.Str(required=True,metadata={'description':'path to render client scripts'})
+
+class RenderParameters(ModuleParameters):
+    render = mm.fields.Nested(RenderClientParameters)
 
 class RenderModule(JsonModule):
-    
-    def __init__(self,input=None,schema_extension=None):
-        schema = {
-            "description":"a generic module for interacting with render",
-            "properties":{
-                "render":{
-                    "type":"object",
-                    "title":"Render Parameters",
-                    "description":"This specifies parameters for connecting to render host",
-                    "properties":{
-                        "host":{
-                            "type":"string",
-                            "description":"url of render host"
-                            },
-                        "port":{
-                            "type":"integer",
-                            "description":"port of render host"
-                            },
-                        "owner":{
-                            "type":"string",
-                            "description":"name of default render owner"
-                        },
-                        "project":{
-                            "type":"string",
-                            "description":"name of default render project"
-                        },
-                        "client_scripts":{
-                            "type": "string",
-                            "format": "input_path",
-                            "description":"path to render client scripts"
-                        }                        
-                    },
-                    "required": [ "host", "port", "owner", "project", "client_scripts" ]                
-                }
-            }
-        }
-        schema=self.add_to_schema(schema,schema_extension)
-        JsonModule.__init__(self,input=input,schema_extension=schema)
-        #self.render = renderapi.render.connect(**self.args['render'])
+    def __init__(self,*args,**kwargs):
+        super(RenderModule,self).__init__(*args,**kwargs)
+        self.render=renderapi.render.connect(**self.args['render'])
 
 if __name__ == '__main__':
     example_input={
@@ -51,7 +27,7 @@ if __name__ == '__main__':
             "client_scripts":"/pipeline/render/render-ws-java-client/src/main/scripts"
         }
     }
-    module = RenderModule(input=example_input)
+    module = RenderModule(input_data=example_input)
     module.run()
 
     bad_input={
@@ -63,5 +39,5 @@ if __name__ == '__main__':
             "client_scripts":"/pipeline/render/render-ws-java-client/src/main/scripts"
         }
     }
-    module = RenderModule(input=bad_input)
+    module = RenderModule(input_data=bad_input)
     module.run()
