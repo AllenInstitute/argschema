@@ -117,8 +117,8 @@ class ModuleParameters(mm.Schema):
                            metadata={'description':"set the logging level of the module"},
                            default='ERROR')
 
-    def load(self, *args, **kwargs):
-        result = super(ModuleParameters, self).load(*args, **kwargs)
+    def load_with_defaults(self, *args, **kwargs):
+        result = self.load(*args, **kwargs)
         
         # this is debatable
         schemas = [ self ]
@@ -155,7 +155,7 @@ class JsonModule( object ):
         args = smart_merge(jsonargs, argsdict)
 
         # validate with load!
-        result = schema.load(args)
+        result = schema.load_with_defaults(args)
 
         if len(result.errors)>0:
             raise mm.ValidationError(json.dumps(result.errors, indent=2))
