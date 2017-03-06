@@ -4,12 +4,6 @@ import json
 import argparse
 import marshmallow as mm
 
-#from marshmallow_enum import EnumField
-#from marshmallow_jsonschema import JSONSchema
-#from enum import Enum
-
-
-
 def args_to_dict(argsobj):
     d = {}
     argsdict = vars(argsobj)
@@ -83,6 +77,31 @@ def smart_merge(a, b, path=None,merge_keys = None,overwrite_with_none=False):
                 a[key] = b[key]
     return a
 
+import py
+class InputFile(mm.fields.Str):
+    def _serialize(self,value,attr,obj):
+        return str(value)
+    def _deserialize(self,value,attr,data):
+         return self._validated(value)
+    def _validated(self,value):
+        print 'value',value
+        p = py.path.local(value)
+
+        if not os.path.isfile(value):
+            self.fail('invalid')
+        else:
+            try:
+                os.access(value,os.R_OK)    
+            except IOError:
+                self.fail('invalid')
+        return p
+    def _jsonschema_type_mapping(self):
+        return {
+            'type': 'string',
+            'format':'input_path',
+            'description':self.metadata['metadata']['description']
+        }
+
 class OptionList(mm.fields.Field):
     def __init__(self, options, *args, **kwargs):
         self.options = options
@@ -95,59 +114,41 @@ class OptionList(mm.fields.Field):
         if value not in self.options:
             raise mm.ValidationError
 
-class InputPath(mm.fields.Str):
-    def _validate(self, value):
-        if value is not None and not os.path.exists(value):
-            raise mm.ValidationError("%s does not exist" % value)
-    
-
 class ModuleParameters(mm.Schema):
-    input_json = InputPath(metadata={'description':"file path of input json file"}, required=False)
-    output_json = mm.fields.Str(metadata={'description':"file path to output json file"}, require=False)
+    input_json = InputFile(metadata={'description':"file path of input json file"})
+    output_json = mm.fields.Str(metadata={'description':"file path to output json file"})
     log_level = OptionList([ 'DEBUG', 'INFO', 'WARNING', 'ERROR', 'CRITICAL' ],
                            metadata={'description':"set the logging level of the module"}, 
                            default="ERROR")
 
+class ParseError(Exception):
+    pass
+
 class JsonModule( object ):
     def __init__(self,
-        schema = None, # schema for parsing arguments
-        input_data = None, # dictionary input as option instead of --input_json
+        input_data = None, #dictionary input as option instead of --input_json
+        schema_type = ModuleParameters, #schema for parsing arguments
+        args = None,
         logger_name = 'json_module'): 
 
-        if schema is None:
-            schema = ModuleParameters()
+        schema = schema_type()
 
-        # convert schema to argparse object
+        #convert schema to argparse object
         p = schema_argparser(schema)
-
-        #use that parseargs object to parse command line inputs
-        argsobj = p.parse_args()
-
-        #convert the command line object into command line dictionary
+        argsobj = p.parse_args(args)
         argsdict = args_to_dict(argsobj)
-        
-        #if input_json is not provided, use input
-        if argsobj.input_json is None:
-            if input_data is None: #if input is not provided 
-                jsonargs = {} #the the json inputs are empty
-            else:
-                jsonargs = input_data
-        #otherwise read in the json file from path
-        else: 
-            with open(argsobj.input_json, 'r') as fp:
-                jsonargs = json.load(fp)
 
         #merge the command line dictionary into the input json
-        args = smart_merge(input_data, argsdict)        
-        result = schema.load(args)
+        args = smart_merge(input_data, argsdict)
 
-        if result.errors:
+        result = schema.load(args)
+        if len(result.errors)>0:
             raise mm.ValidationError(json.dumps(result.errors, indent=2))
 
         self.schema_args = result
         self.args = result.data
-
-        self.logger = self.initialize_logger(logger_name, self.args['log_level'])
+        
+        self.logger = self.initialize_logger(logger_name, self.args.get('log_level'))
 
     @staticmethod
     def initialize_logger(name, log_level):
@@ -185,8 +186,7 @@ def build_schema_arguments(schema, arguments=None, path=None):
 
             field_type = type(field)
             if isinstance(field_type, mm.fields.List):
-                # can't handle this yet
-                pass
+                raise NotImplementedError("fields.List is not a supported type, YET")
             elif type(field) in FIELD_TYPE_MAP:
                 # it's a simple type, apply the mapping
                 arg['type'] = FIELD_TYPE_MAP[field_type]
@@ -197,7 +197,6 @@ def build_schema_arguments(schema, arguments=None, path=None):
             arguments[arg_name] = arg
 
     return arguments
-
         
 def schema_argparser(schema):
     """ given a jsonschema, build an argparse.ArgumentParser """
@@ -211,14 +210,6 @@ def schema_argparser(schema):
     return parser
 
 
-#@jsonschema.FormatChecker.cls_checks('input_path', raises=IOError)
-def validate_input_path(entry):
-    if not os.path.exists(entry):
-        #return False
-        raise IOError("input_path '%s' does not exist" % entry)
-
-    return True
-
 def main():
     class renderParameters(mm.Schema):
         host = mm.fields.Str(metadata={'description':'render host'},required=True)
@@ -229,11 +220,10 @@ def main():
     class parameterExtension(ModuleParameters):
         a = mm.fields.Int(metadata={'description':'value for a'},required=True)
         b = mm.fields.Int(metadata={'description':'value for b'},required=True)
-        render = mm.fields.Nested(renderParameters)
+        #render = mm.fields.Nested(renderParameters)
         
-    # input ={'a':5}
-    # jm = JsonModule(input_data=input,schema=parameterExtension())
-    jm = JsonModule(schema=parameterExtension())
+    input ={'a':5, 'b': 15}
+    jm = JsonModule(input_data=input, schema_type=parameterExtension)
 
 if __name__ == "__main__": main()
 

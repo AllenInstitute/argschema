@@ -1,11 +1,12 @@
 import pytest
-from json_module import JsonModule
+from json_module import JsonModule, ModuleParameters,ParseError
 import tempfile
 import os
 import json
 import logging
 from exceptions import IOError
 from jsonschema import ValidationError
+from marshmallow import Schema, fields, pprint
 
 def test_bad_path():
     try:
@@ -14,7 +15,7 @@ def test_bad_path():
            "output_json":"another example",
            "log_level":"DEBUG"}
         jm=JsonModule(input=example)
-    except IOError:
+    except ParseError:
         assert True
         return
     assert False
@@ -37,48 +38,27 @@ def test_simple_example(tmpdir):
 def test_log_catch():
     try:
         example = {
-         "log_level":"NOTACHOICE"
+            "log_level":"NOTACHOICE"
         }
         jm = JsonModule(input=example)
-    except ValidationError:
+    except ParseError:
         assert True
         return
     assert False
 
-class SimpleExtension(JsonModule):
-    
-        def __init__(self,input=None,schema_extension=None,*args,**kwargs):
-            schema = {
-                "description":"a generic module ex",
-                "properties":{
-                    "test":{
-                        "type":"object",
-                        "title":"test Parameters",
-                        "description":"This specifies parameters for connecting to test",
-                        "properties":{
-                            "a":{
-                                "type":"string",
-                                "description":"a string"
-                                },
-                            "b":{
-                                "type":"integer",
-                                "description":"an integer"
-                                }              
-                        },
-                        "required": [ "a" ]                
-                    }
-                }
-            }
-            schema=self.add_to_schema(schema,schema_extension)
-            JsonModule.__init__(self,*args,input=input,schema_extension=schema,**kwargs)
-            #self.render = renderapi.render.connect(**self.args['render'])
+class TestExtension(Schema):
+    a = fields.Str(metadata={'description':'a string'})
+    b = fields.Int(metadata={'description':'an integer'})    
+class SimpleExtension(ModuleParameters):
+    test = fields.Nested(TestExtension)
+
 
 def test_simple_extension_required():
     
     example1 = {}
     try:
-        mod = SimpleExtension(example1)
-    except ValidationError:
+        mod = JsonModule(input=example1,schema = SimpleExtension)
+    except ParseError:
         assert True
         return 
     assert False
@@ -93,7 +73,7 @@ SimpleExtension_example_valid={
 
 def test_simple_extension_pass(): 
 
-    mod = SimpleExtension(input=SimpleExtension_example_valid)
+    mod = JsonModule(input=SimpleExtension_example_valid,schema=SimpleExtension)
     assert mod.args['test']['a']=='hello'
     assert mod.args['test']['b']==1
 
@@ -102,7 +82,7 @@ def test_simple_extension_write_pass(tmpdir):
     file.write(json.dumps(SimpleExtension_example_valid))
 
     args = ['--input_json',str(file)]
-    mod = SimpleExtension(args=args)
+    mod = JsonModule(schema=SimpleExtension,args=args)    
     assert mod.args['test']['a']=='hello'
     assert mod.args['test']['b']==1
     assert mod.logger.getEffectiveLevel() == logging.ERROR
@@ -110,7 +90,6 @@ def test_simple_extension_write_pass(tmpdir):
 def test_simple_extension_write_debug_level(tmpdir):
     file = tmpdir.join('testinput.json')
     file.write(json.dumps(SimpleExtension_example_valid))
-
     args = ['--input_json',str(file),'--log_level','DEBUG']
-    mod = SimpleExtension(args=args)
-    assert mod.args['log_level']=='DEBUG'
+    mod = JsonModule(schema=SimpleExtension,args=args)
+    assert mod.logger.getEffectiveLevel() == logging.DEBUG
