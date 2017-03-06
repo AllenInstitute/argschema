@@ -83,16 +83,15 @@ class InputFile(mm.fields.Str):
         return str(value)
 
     def _validate(self,value):
-        print 'value',value
         p = py.path.local(value)
 
         if not os.path.isfile(value):
-            self.fail('invalid')
+            raise mm.ValidationError("%s is not a file" % value)
         else:
             try:
                 os.access(value,os.R_OK)    
             except IOError:
-                self.fail('invalid')
+                raise mm.ValidationError("%s is not readable" % value)
         return p
 
 
@@ -111,28 +110,11 @@ class OptionList(mm.fields.Field):
         return value
 
 class ModuleParameters(mm.Schema):
-    input_json = InputFile(metadata={'description':"file path of input json file"})
-    output_json = mm.fields.Str(metadata={'description':"file path to output json file"})
+    input_json = InputFile(metadata={'description':"file path of input json file"}, default='')
+    output_json = mm.fields.Str(metadata={'description':"file path to output json file"}, default='')
     log_level = OptionList([ 'DEBUG', 'INFO', 'WARNING', 'ERROR', 'CRITICAL' ],
                            metadata={'description':"set the logging level of the module"},
                            default='ERROR')
-
-    def load_with_defaults(self, *args, **kwargs):
-        result = self.load(*args, **kwargs)
-
-        # this is debatable
-        schemas = [ (self, result.data) ]
-        while schemas:
-            schema, data = schemas.pop()
-            for k,v in schema.declared_fields.iteritems():
-                if isinstance(v, mm.fields.Nested):
-                    if k not in data:
-                        data[k] = {}
-                    schemas.append((v.schema, data[k]))
-                elif v.default != mm.missing and k not in result.data:
-                    data[k] = v.default
-
-        return result
 
 class JsonModule( object ):
     def __init__(self,
@@ -149,7 +131,10 @@ class JsonModule( object ):
         argsdict = args_to_dict(argsobj)
 
         if argsobj.input_json is not None:
-            jsonargs = json.load(open(argsobj.input_json, 'r'))
+            result = schema.load(argsdict)
+            if 'input_json' in result.errors:
+                raise mm.ValidationError(result.errors['input_json'])
+            jsonargs = json.load(open(result.data['input_json'], 'r'))
         else:
             jsonargs = input_data if input_data else {}
 
@@ -157,7 +142,7 @@ class JsonModule( object ):
         args = smart_merge(jsonargs, argsdict)
 
         # validate with load!
-        result = schema.load_with_defaults(args)
+        result = self.load_schema_with_defaults(schema, args)
 
         if len(result.errors)>0:
             raise mm.ValidationError(json.dumps(result.errors, indent=2))
@@ -166,6 +151,24 @@ class JsonModule( object ):
         self.args = result.data
 
         self.logger = self.initialize_logger(logger_name, self.args.get('log_level'))
+
+    @staticmethod
+    def load_schema_with_defaults(schema, args):
+        result = schema.load(args)
+
+        # this is debatable
+        schemas = [ (schema, result.data) ]
+        while schemas:
+            schema, data = schemas.pop()
+            for k,v in schema.declared_fields.iteritems():
+                if isinstance(v, mm.fields.Nested):
+                    if k not in data:
+                        data[k] = {}
+                    schemas.append((v.schema, data[k]))
+                elif v.default != mm.missing and k not in result.data:
+                    data[k] = v.default
+
+        return result
 
     @staticmethod
     def initialize_logger(name, log_level):
@@ -228,19 +231,8 @@ def schema_argparser(schema):
 
 
 def main():
-    class renderParameters(mm.Schema):
-        host = mm.fields.Str(metadata={'description':'render host'},required=True)
-        port = mm.fields.Int(metadata={'description':'render port'},required=True)
-        owner = mm.fields.Str(metadata={'description':'render owner'},required=True)
-        project = mm.fields.Str(metadata={'description':'render project'},required=True)
-
-    class parameterExtension(ModuleParameters):
-        a = mm.fields.Int(metadata={'description':'value for a'},required=True)
-        b = mm.fields.Int(metadata={'description':'value for b'},required=True)
-        #render = mm.fields.Nested(renderParameters)
-        
-    input ={'a':5, 'b': 15}
-    jm = JsonModule(input_data=input, schema_type=parameterExtension)
+    jm = JsonModule()
+    print jm.args
 
 if __name__ == "__main__": main()
 
