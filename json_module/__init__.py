@@ -134,14 +134,15 @@ class JsonModule():
 
     def __init__(self,
         input=None, #dictionary input as option instead of --input_json
-        schema = ModuleParameters(), #schema for parsing arguments
+        schema = ModuleParameters, #schema for parsing arguments
         json_validator = jsonschema.Draft4Validator,
         args = None,
         logger_name = 'json_module'): 
 
+        schema = schema()
         result = JSONSchema().dump(schema)
         myjsonschema = result.data
-        
+
         print json.dumps(myjsonschema,indent=4)
         #validate the schema
         #json_validator.check_schema(schema)
@@ -303,7 +304,8 @@ def main():
         render = fields.Nested(renderParameters)
         
     input ={'a':5}
-    jm = JsonModule(input=input,schema=parameterExtension())
+    jm = JsonModule(input=input,schema=parameterExtension)
+
 
 if __name__ == "__main__": main()
 
