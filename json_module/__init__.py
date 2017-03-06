@@ -6,7 +6,7 @@ from marshmallow import Schema, fields, pprint
 from marshmallow_enum import EnumField
 from marshmallow_jsonschema import JSONSchema
 from enum import Enum
-
+import stat
 
 
 def args_to_dict(argsobj):
@@ -81,6 +81,31 @@ def smart_merge(a, b, path=None,merge_keys = None,overwrite_with_none=False):
                 #otherwise replace entire leaf with b
                 a[key] = b[key]
     return a
+
+import py
+class InputFile(fields.Str):
+    def _serialize(self,value,attr,obj):
+        return str(value)
+    def _deserialize(self,value,attr,data):
+         return self._validated(value)
+    def _validated(self,value):
+        print 'value',value
+        p = py.path.local(value)
+
+        if not os.path.isfile(value):
+            self.fail('invalid')
+        else:
+            try:
+                os.access(value,os.R_OK)    
+            except IOError:
+                self.fail('invalid')
+        return p
+    def _jsonschema_type_mapping(self):
+        return {
+            'type': 'string',
+            'format':'input_path',
+            'description':self.metadata['metadata']['description']
+        }
 class EnumField(EnumField):
 
     def _jsonschema_type_mapping(self):
@@ -98,33 +123,37 @@ class LoggingEnum(Enum):
     WARNING = logging.WARNING
 
 class ModuleParameters(Schema):
-    input_json = fields.Str(metadata={'description':"file path of input json file"})
+    input_json = InputFile(metadata={'description':"file path of input json file"})
     output_json = fields.Str(metadata={'description':"file path to output json file"})
     log_level = EnumField(LoggingEnum,metadata={'description':"set the logging level of the module"})
+
+class ParseError(Exception):
+    pass
 
 class JsonModule():
 
     def __init__(self,
         input=None, #dictionary input as option instead of --input_json
-        marshmallow_schema = ModuleParameters(), #schema for parsing arguments
+        schema = ModuleParameters(), #schema for parsing arguments
         json_validator = jsonschema.Draft4Validator,
         args = None,
         logger_name = 'json_module'): 
 
-        result = JSONSchema().dump(marshmallow_schema)
-        schema = result.data
-        print json.dumps(schema,indent=4)
+        result = JSONSchema().dump(schema)
+        myjsonschema = result.data
+        
+        print json.dumps(myjsonschema,indent=4)
         #validate the schema
         #json_validator.check_schema(schema)
-        self.schema = result.data
+        self.myjsonschema = result.data
 
         #setup a validator with custom format checking
         checker = jsonschema.FormatChecker()
         checker.checks('input_path')(validate_input_path)
-        validator = json_validator(schema,format_checker=checker)
+        validator = json_validator(myjsonschema,format_checker=checker)
 
         #convert schema to argparse object
-        p = schema_argparser(schema)
+        p = schema_argparser(myjsonschema)
 
         #use that parseargs object to parse command line inputs
         argsobj=p.parse_args(args)
@@ -145,7 +174,9 @@ class JsonModule():
 
         #merge the command line dictionary into the inputJson
         args = smart_merge(jsonargs,argsdict)
-        result = marshmallow_schema.load(args)
+        result = schema.load(args)
+        if len(result.errors)>0:
+            raise ParseError(result.errors)
 
         self.args = result.data
         print result.errors
@@ -272,7 +303,7 @@ def main():
         render = fields.Nested(renderParameters)
         
     input ={'a':5}
-    jm = JsonModule(input=input,marshmallow_schema=parameterExtension())
+    jm = JsonModule(input=input,schema=parameterExtension())
 
 if __name__ == "__main__": main()
 
