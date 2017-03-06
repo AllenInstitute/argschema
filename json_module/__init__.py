@@ -117,8 +117,20 @@ class ModuleParameters(mm.Schema):
                            metadata={'description':"set the logging level of the module"},
                            default='ERROR')
 
-class ParseError(Exception):
-    pass
+    def load(self, *args, **kwargs):
+        result = super(ModuleParameters, self).load(*args, **kwargs)
+        
+        # this is debatable
+        schemas = [ self ]
+        while schemas:
+            schema = schemas.pop()
+            for k,v in schema.declared_fields.iteritems():
+                if isinstance(v, mm.fields.Nested):
+                    schemas.append(v.schema)
+                elif v.default != mm.missing and k not in result.data:
+                    result.data[k] = v.default
+
+        return result
 
 class JsonModule( object ):
     def __init__(self,
@@ -142,18 +154,16 @@ class JsonModule( object ):
         #merge the command line dictionary into the input json
         args = smart_merge(jsonargs, argsdict)
 
-
         # validate with load!
         result = schema.load(args)
 
-        # result = schema.load(args)
         if len(result.errors)>0:
             raise mm.ValidationError(json.dumps(result.errors, indent=2))
 
         self.schema_args = result
         self.args = result.data
-        
-        self.logger = self.initialize_logger(logger_name, self.args.get('log_level', 'ERROR'))
+
+        self.logger = self.initialize_logger(logger_name, self.args.get('log_level'))
 
     @staticmethod
     def initialize_logger(name, log_level):
