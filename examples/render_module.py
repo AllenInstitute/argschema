@@ -14,7 +14,8 @@ class RenderParameters(ModuleParameters):
 
 class RenderModule(JsonModule):
     def __init__(self,*args,**kwargs):
-        super(RenderModule,self).__init__(*args,**kwargs)
+        super(RenderModule,self).__init__(schema_type = RenderParameters,*args,**kwargs)
+        print self.args
         self.render=renderapi.render.connect(**self.args['render'])
 
 if __name__ == '__main__':
