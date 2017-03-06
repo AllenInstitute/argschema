@@ -23,7 +23,8 @@ json_module_schema = {
         "log_level": {
             "type": "string",
             "enum": ["DEBUG","INFO","WARNING","ERROR","CRITICAL"],
-            "description": "set the logging level of the module"
+            "description": "set the logging level of the module",
+            "default": "ERROR"
         }
     }
 }
@@ -150,11 +151,6 @@ class JsonModule():
         validator.validate(self.args)
 
         #set the log level and initialize logger
-        #set the log level and initialize logger
-        print "*********"
-        print "hey forrest I don't know why 'log_level' doesn't exist in self.args"
-        print self.args
-        print "*********"
         self.logger = self.initialize_logger(logger_name, self.args.get('log_level'))
 
     @staticmethod
@@ -231,6 +227,9 @@ def build_schema_arguments(schema, arguments=None, path=None):
                     # the "items" section can also be a list, but this
                     # isn't supported by argparse AFAICT
                     raise Exception("hetergenous array item types not supported")
+
+            if 'default' in prop_info:
+                arg['default'] = prop_info['default']
 
             arguments[arg_name] = arg
 
