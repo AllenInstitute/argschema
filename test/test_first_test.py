@@ -13,7 +13,7 @@ def test_bad_path():
            "input_json":"a bad path",
            "output_json":"another example",
            "log_level":"DEBUG"}
-        jm=JsonModule(input_data=example)
+        jm=JsonModule(input_data=example,args=[])
 
 def test_simple_example(tmpdir):
     file_in = tmpdir.join('test_input_json.json')
@@ -26,7 +26,7 @@ def test_simple_example(tmpdir):
         "output_json":str(file_out),
         "log_level":"CRITICAL"
     }
-    jm=JsonModule(input_data=example)
+    jm=JsonModule(input_data=example,args=[])
 
     assert jm.args['log_level'] == 'CRITICAL'
 
@@ -35,7 +35,7 @@ def test_log_catch():
         example = {
             "log_level":"NOTACHOICE"
         }
-        jm = JsonModule(input_data=example)
+        jm = JsonModule(input_data=example,args=[])
         print jm.args
 
 
@@ -51,7 +51,7 @@ class SimpleExtension(ModuleParameters):
 def test_simple_extension_required():
     with pytest.raises(mm.ValidationError):
         example1 = {}
-        mod = JsonModule(input_data=example1,schema_type = SimpleExtension)
+        mod = JsonModule(input_data=example1,schema_type = SimpleExtension,args=[])
 SimpleExtension_example_invalid={
     'test':
     {
@@ -68,11 +68,11 @@ SimpleExtension_example_valid={
 }
 def test_simple_extension_fail():
     with pytest.raises(mm.ValidationError):
-        mod = JsonModule(input_data=SimpleExtension_example_invalid,schema_type=SimpleExtension)
-        
+        mod = JsonModule(input_data=SimpleExtension_example_invalid,schema_type=SimpleExtension,args=[])
+
 def test_simple_extension_pass(): 
 
-    mod = JsonModule(input_data=SimpleExtension_example_valid,schema_type=SimpleExtension)
+    mod = JsonModule(input_data=SimpleExtension_example_valid,schema_type=SimpleExtension,args=[])
     assert mod.args['test']['a']=='hello'
     assert mod.args['test']['b']==1
 
