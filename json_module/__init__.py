@@ -83,8 +83,6 @@ class InputFile(mm.fields.Str):
         return str(value)
 
     def _validate(self,value):
-        p = py.path.local(value)
-
         if not os.path.isfile(value):
             raise mm.ValidationError("%s is not a file" % value)
         else:
@@ -92,8 +90,6 @@ class InputFile(mm.fields.Str):
                 os.access(value,os.R_OK)    
             except IOError:
                 raise mm.ValidationError("%s is not readable" % value)
-        return p
-
 
 class OptionList(mm.fields.Field):
     def __init__(self, options, *args, **kwargs):
