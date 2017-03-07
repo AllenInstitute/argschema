@@ -78,9 +78,18 @@ def smart_merge(a, b, path=None,merge_keys = None,overwrite_with_none=False):
     return a
 
 import py
+
+class InputDir(mm.fields.Str):
+    def _validate(self,value):
+        if not os.path.isdir(value):
+            raise mm.ValidationError("%s is not a directory")
+        else:
+            try:
+                os.access(value,os.R_OK)
+            except:
+                raise mm.ValidationError("%s is not a readable directory"%value)
+
 class InputFile(mm.fields.Str):
-    def _serialize(self,value,attr,obj):
-        return str(value)
 
     def _validate(self,value):
         if not os.path.isfile(value):
