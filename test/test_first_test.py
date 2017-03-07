@@ -8,15 +8,12 @@ from exceptions import IOError
 import marshmallow as mm
 
 def test_bad_path():
-    try:
+    with pytest.raises(mm.ValidationError):
         example = {
            "input_json":"a bad path",
            "output_json":"another example",
            "log_level":"DEBUG"}
         jm=JsonModule(input_data=example)
-    except mm.ValidationError as e:
-        return
-    assert False
 
 def test_simple_example(tmpdir):
     file_in = tmpdir.join('test_input_json.json')
@@ -34,15 +31,12 @@ def test_simple_example(tmpdir):
     assert jm.args['log_level'] == 'CRITICAL'
 
 def test_log_catch():
-    try:
+    with pytest.raises(mm.ValidationError):
         example = {
             "log_level":"NOTACHOICE"
         }
         jm = JsonModule(input_data=example)
         print jm.args
-    except mm.ValidationError as e:
-        return
-    assert False
 
 
 class TestExtension(mm.Schema):
@@ -55,14 +49,10 @@ class SimpleExtension(ModuleParameters):
 
 
 def test_simple_extension_required():
-    
-    example1 = {}
-    try:
+    with pytest.raises(mm.ValidationError):
+        example1 = {}
         mod = JsonModule(input_data=example1,schema_type = SimpleExtension)
-    except mm.ValidationError as e:
-        return 
-    assert False
-
+    
 SimpleExtension_example_valid={
     'test':
         {
@@ -93,3 +83,20 @@ def test_simple_extension_write_debug_level(tmpdir):
     args = ['--input_json',str(file),'--log_level','DEBUG']
     mod = JsonModule(schema_type=SimpleExtension,args=args)
     assert mod.logger.getEffectiveLevel() == logging.DEBUG
+
+def test_output_path(tmpdir):
+    file = tmpdir.join('testoutput.json')
+    args = ['--output_json',str(file)]
+    mod = JsonModule(args=args)
+
+def test_output_path_cannot_write():
+    with pytest.raises(mm.ValidationError):
+        file = '/etc/notok/notalocation.json'
+        args = ['--output_json',str(file)]
+        mod = JsonModule(args=args)
+
+def test_output_path_noapath():
+    with pytest.raises(mm.ValidationError):
+        file = '@/afa\\//'
+        args = ['--output_json',str(file)]
+        mod = JsonModule(args=args)
