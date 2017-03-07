@@ -15,7 +15,6 @@ def test_bad_path():
            "log_level":"DEBUG"}
         jm=JsonModule(input_data=example)
     except mm.ValidationError as e:
-        assert True
         return
     assert False
 
@@ -42,7 +41,6 @@ def test_log_catch():
         jm = JsonModule(input_data=example)
         print jm.args
     except mm.ValidationError as e:
-        assert True
         return
     assert False
 
@@ -62,7 +60,6 @@ def test_simple_extension_required():
     try:
         mod = JsonModule(input_data=example1,schema_type = SimpleExtension)
     except mm.ValidationError as e:
-        assert True
         return 
     assert False
 

@@ -1,7 +1,7 @@
 import os, logging, argparse
 import tempfile
 import json
-import argparse
+import argparse, copy
 import marshmallow as mm
 
 def args_to_dict(argsobj):
@@ -110,8 +110,8 @@ class OptionList(mm.fields.Field):
         return value
 
 class ModuleParameters(mm.Schema):
-    input_json = InputFile(metadata={'description':"file path of input json file"}, default='')
-    output_json = mm.fields.Str(metadata={'description':"file path to output json file"}, default='')
+    input_json = InputFile(metadata={'description':"file path of input json file"})
+    output_json = mm.fields.Str(metadata={'description':"file path to output json file"})
     log_level = OptionList([ 'DEBUG', 'INFO', 'WARNING', 'ERROR', 'CRITICAL' ],
                            metadata={'description':"set the logging level of the module"},
                            default='ERROR')
@@ -154,19 +154,29 @@ class JsonModule( object ):
 
     @staticmethod
     def load_schema_with_defaults(schema, args):
-        result = schema.load(args)
+        defaults = []
 
-        # this is debatable
-        schemas = [ (schema, result.data) ]
+        # find all of the schema entries with default values
+        schemas = [ (schema, []) ]
         while schemas:
-            schema, data = schemas.pop()
-            for k,v in schema.declared_fields.iteritems():
+            subschema, path = schemas.pop()
+            for k,v in subschema.declared_fields.iteritems():
                 if isinstance(v, mm.fields.Nested):
-                    if k not in data:
-                        data[k] = {}
-                    schemas.append((v.schema, data[k]))
-                elif v.default != mm.missing and k not in result.data:
-                    data[k] = v.default
+                    schemas.append((v.schema, path + [ k ]))
+                elif v.default != mm.missing:
+                    defaults.append((path + [ k ], v.default))
+
+        # put the default entries into the args dictionary
+        args = copy.deepcopy(args)
+        for path, val in defaults:
+            d = args
+            for path_item in path[:-1]:
+                d = d.setdefault(path_item, {})
+            if path[-1] not in d:
+                d[path[-1]] = val
+
+        # load the dictionary via the schema
+        result = schema.load(args)
 
         return result
 
