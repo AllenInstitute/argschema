@@ -52,7 +52,13 @@ def test_simple_extension_required():
     with pytest.raises(mm.ValidationError):
         example1 = {}
         mod = JsonModule(input_data=example1,schema_type = SimpleExtension)
-    
+SimpleExtension_example_invalid={
+    'test':
+    {
+        'a':5,
+        'b':1
+    }
+}  
 SimpleExtension_example_valid={
     'test':
         {
@@ -60,7 +66,10 @@ SimpleExtension_example_valid={
             'b':1
         }
 }
-
+def test_simple_extension_fail():
+    with pytest.raises(mm.ValidationError):
+        mod = JsonModule(input_data=SimpleExtension_example_invalid,schema_type=SimpleExtension)
+        
 def test_simple_extension_pass(): 
 
     mod = JsonModule(input_data=SimpleExtension_example_valid,schema_type=SimpleExtension)
