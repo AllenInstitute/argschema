@@ -79,6 +79,24 @@ def smart_merge(a, b, path=None,merge_keys = None,overwrite_with_none=False):
 
 import py
 
+class OutputFile(mm.fields.Str):
+    def _validate(self,value):
+        try:
+            path = os.path.split(value)[0]
+        except:
+            raise mm.ValidationError("%s cannot be os.path.split"%value)
+
+        if not os.path.isdir(path):
+            raise mm.ValidationError("%s is not in a directory that exists"%value)
+
+        try:
+            tfile = tempfile.TemporaryFile(mode='w',dir=path)
+            tfile.write('0')
+            tfile.close()
+        except:
+            raise mm.ValidationError("%s does not appear you can write to path"%value)
+
+
 class InputDir(mm.fields.Str):
     def _validate(self,value):
         if not os.path.isdir(value):
@@ -116,7 +134,7 @@ class OptionList(mm.fields.Field):
 
 class ModuleParameters(mm.Schema):
     input_json = InputFile(metadata={'description':"file path of input json file"})
-    output_json = mm.fields.Str(metadata={'description':"file path to output json file"})
+    output_json = OutputFile(metadata={'description':"file path to output json file"})
     log_level = OptionList([ 'DEBUG', 'INFO', 'WARNING', 'ERROR', 'CRITICAL' ],
                            metadata={'description':"set the logging level of the module"},
                            default='ERROR')
