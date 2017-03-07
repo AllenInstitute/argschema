@@ -1,0 +1,6 @@
+*/build
+*/test/__*
+*/dist
+*.egg-info
+*/htmlcov
+*/test-reports
