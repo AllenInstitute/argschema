@@ -2,5 +2,5 @@
 */test/__*
 */dist
 *.egg-info
-*/htmlcov
-*/test-reports
+htmlcov
+test-reports
