@@ -8,7 +8,6 @@ from exceptions import IOError
 import marshmallow as mm
 
 def test_bad_path():
-    assert False
     with pytest.raises(mm.ValidationError):
         example = {
            "input_json":"a bad path",
