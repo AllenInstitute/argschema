@@ -1,8 +1,12 @@
-This module simplifies the development of modules that would like to define and check a particular set of input parameters, but be able to flexibly define those inputs in different ways in different contexts. 
+#json_module
+This python module simplifies the development of modules that would like to define and check a particular set of input parameters, but be able to flexibly define those inputs in different ways in different contexts. 
 
 It will allow you to 
+
 Passing a command line argument to a location of a json_file which contains the input parameters
+
 OR passing a json_dictionary directly into the module with the parameters defined
+
 AND passing parameters via the command line, in a way that will override the examples given.
 
 ## What does it do
