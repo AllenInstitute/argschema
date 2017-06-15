@@ -1,4 +1,6 @@
 # json_module
+
+
 This python module simplifies the development of modules that would like to define and check a particular set of input parameters, but be able to flexibly define those inputs in different ways in different contexts. 
 
 It will allow you to 
@@ -66,3 +68,4 @@ If you had only designed things from the beginning to allow for each of these us
 
 This is what json_module is designed to do.
 
+Copyright 2017 Allen Institute
