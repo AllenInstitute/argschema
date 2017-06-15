@@ -1,13 +1,15 @@
-#json_module
+# json_module
 This python module simplifies the development of modules that would like to define and check a particular set of input parameters, but be able to flexibly define those inputs in different ways in different contexts. 
 
 It will allow you to 
 
-Passing a command line argument to a location of a json_file which contains the input parameters
+Pass a command line argument to a location of a input_json file which contains the input parameters
 
-OR passing a json_dictionary directly into the module with the parameters defined
+OR pass a json_dictionary directly into the module with the parameters defined
 
-AND passing parameters via the command line, in a way that will override the examples given.
+AND/OR pass parameters via the command line, in a way that will override the input_json or the json_dictionary given.
+## Level of Support
+We are planning on occasional updating this tool with no fixed schedule. Community involvement is encouraged through both issues and pull requests.
 
 ## What does it do
 json_module defines two basic classes which every module should subclass, JsonModule and ModuleParameters. JsonModule takes ModuleParameters as an input which is simply an extension of the marshmallow Schema class.
