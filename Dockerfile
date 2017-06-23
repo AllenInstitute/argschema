@@ -1,8 +1,5 @@
 FROM continuumio/anaconda
-MAINTAINER Forrest Collman (forrest.collman@gmail.com)
-
-#install render python using pip from github
-#RUN pip install -e git+https://github.com/fcollman/render-python.git@master#egg=render-python
+MAINTAINER Forrest Collman (forrestc@alleninstitute.org)
 
 RUN mkdir -p /usr/local/json_module
 COPY . /usr/local/json_module
