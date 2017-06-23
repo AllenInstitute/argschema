@@ -43,6 +43,7 @@ class TestExtension(mm.Schema):
     a = mm.fields.Str(metadata={'description':'a string'})
     b = mm.fields.Int(metadata={'description':'an integer'}) 
     c = mm.fields.Int(metadata={'description':'an integer'}, default=10) 
+    d = mm.fields.List(mm.fields.Int,metadata={'description':'a list of integers'})
 
 class SimpleExtension(ModuleParameters):
     test = mm.fields.Nested(TestExtension)
@@ -56,14 +57,16 @@ SimpleExtension_example_invalid={
     'test':
     {
         'a':5,
-        'b':1
+        'b':1,
+        'd':['a',2,3]
     }
 }  
 SimpleExtension_example_valid={
     'test':
         {
             'a':"hello",
-            'b':1
+            'b':1,
+            'd':[1,5,4]
         }
 }
 def test_simple_extension_fail():
@@ -75,6 +78,8 @@ def test_simple_extension_pass():
     mod = JsonModule(input_data=SimpleExtension_example_valid,schema_type=SimpleExtension,args=[])
     assert mod.args['test']['a']=='hello'
     assert mod.args['test']['b']==1
+    assert len(mod.args['test']['d'])==3
+
 
 def test_simple_extension_write_pass(tmpdir):
     file = tmpdir.join('testinput.json')
@@ -84,6 +89,7 @@ def test_simple_extension_write_pass(tmpdir):
     mod = JsonModule(schema_type=SimpleExtension,args=args)    
     assert mod.args['test']['a']=='hello'
     assert mod.args['test']['b']==1
+    assert len(mod.args['test']['d'])==3
     assert mod.logger.getEffectiveLevel() == logging.ERROR
 
 def test_simple_extension_write_debug_level(tmpdir):
