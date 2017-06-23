@@ -1,0 +1,9 @@
+.eggs
+dist/
+htmlcov/
+*.egg-info
+test-reports/
+*.pyc
+.coverage
+.cache
+build/
