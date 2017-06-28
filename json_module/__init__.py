@@ -3,6 +3,7 @@ import tempfile
 import json
 import argparse, copy
 import marshmallow as mm
+import inspect
 
 def args_to_dict(argsobj):
     d = {}
@@ -240,7 +241,18 @@ def build_schema_arguments(schema, arguments=None, path=None):
             field_type = type(field)
             if isinstance(field, mm.fields.List):
                 arg['nargs']='*'
-                arg['type']=FIELD_TYPE_MAP[type(field.container)]
+                container_type = type(field.container)
+
+                parent_classes = inspect.getmro(container_type)[1:]
+
+                # recurse to up the class tree to find out if this is a supported type
+                while container_type not in FIELD_TYPE_MAP and len(parent_classes):
+                    container_type = parent_classes[0]
+                    parent_classes = parent_classes[1:]
+
+                if container_type in FIELD_TYPE_MAP:
+                    arg['type']=FIELD_TYPE_MAP[container_type]
+
             elif type(field) in FIELD_TYPE_MAP:
                 # it's a simple type, apply the mapping
                 arg['type'] = FIELD_TYPE_MAP[field_type]
