@@ -253,7 +253,7 @@ def build_schema_arguments(schema, arguments=None, path=None):
                 if container_type in FIELD_TYPE_MAP:
                     arg['type']=FIELD_TYPE_MAP[container_type]
                 else:
-                    raise Exception("List contains unsupported type: %s" % str(type(field.container)))
+                    logging.warning("List contains unsupported type: %s" % str(type(field.container)))
 
             elif type(field) in FIELD_TYPE_MAP:
                 # it's a simple type, apply the mapping
