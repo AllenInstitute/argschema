@@ -226,6 +226,10 @@ def build_schema_arguments(schema, arguments=None, path=None):
 
     for field_name, field in schema.declared_fields.iteritems():
         if isinstance(field, mm.fields.Nested):
+            if field.many:
+                logging.warning("many=True not supported from argparse")
+                return
+
             build_schema_arguments(field.schema,
                                    arguments,
                                    path + [ field_name ])
@@ -253,8 +257,7 @@ def build_schema_arguments(schema, arguments=None, path=None):
                 if container_type in FIELD_TYPE_MAP:
                     arg['type']=FIELD_TYPE_MAP[container_type]
                 else:
-                    raise Exception("List contains unsupported type: %s" % str(type(field.container)))
-
+                    logging.warning("List contains unsupported type: %s" % str(type(field.container)))
             elif type(field) in FIELD_TYPE_MAP:
                 # it's a simple type, apply the mapping
                 arg['type'] = FIELD_TYPE_MAP[field_type]            
