@@ -42,10 +42,10 @@ The resulting dictionary is then stored in self.args available for use.
 After that the module does some standard things, such as parsing the parameter args['log_level'] to configure a logging module at self.logger.
 
 ## How should I use it
-subclass JsonModule and ModuleParameters using the pattern found in template_module.py to define your module parameters, defining default values if you want and help statements that will be displayed by argparse as help statements, and maybe provide some example parameters for someone who is trying to figure out how to user your module (which is also a good way to rapidly test your module as you are developing it)
+subclass JsonModule and schemas.ModuleParameters using the pattern found in template_module.py to define your module parameters, defining default values if you want and help statements that will be displayed by argparse as help statements, and maybe provide some example parameters for someone who is trying to figure out how to user your module (which is also a good way to rapidly test your module as you are developing it)
 
-Note the use of InputDir and InputFile, two example custom marshmallow validators that are included in JsonModule.
-They will insure that these directory exist, or files exist before trying to run your module and provide errors to the user.
+Look at the set of fields to understand how to build custom fields, or use the default Marshmallow fields to contstruct your json Schema.  Note the use of InputDir and InputFile, two example custom marshmallow validators that are included in fields.py. They will insure that these directory exist, or files exist before trying to run your module and provide errors to the user. Also of note, fields.NumpyArray, which will convert Lists of Lists directly into numpy arrays.
+
 You can use the power of marshmallow to produce custom validators for any data type, 
 and serialize/deserialize functions that will make loading complex parameters as python objects, such as numpy arrays of parameters.
 
