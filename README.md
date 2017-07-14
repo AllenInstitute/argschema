@@ -37,7 +37,7 @@ Given that input dictionary and the command line dictionary, JsonModule then mer
 
 Next, that dictionary is parsed and validated using marshmallow to convert the raw dictionary into the types defined by the marshmallow fields.
 
-The resulting dictionary is then stored in self.args available for the module to user.
+The resulting dictionary is then stored in self.args available for use.
 
 After that the module does some standard things, such as parsing the parameter args['log_level'] to configure a logging module at self.logger.
 

@@ -13,6 +13,7 @@ setup(name='json_module',
       author='Forrest Collman,David Feng',
       author_email='forrestc@alleninstitute.org',
       packages=['json_module'],
+      url='https://github.com/AllenInstitute/json_module',
       install_requires=required,
       setup_requires=['pytest-runner'],
       tests_require=test_required)
