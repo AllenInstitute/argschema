@@ -79,6 +79,6 @@ class JsonModule( object ):
         return logger
 
     def run(self):
-        print "running! with args"
-        print json.dumps(self.args,indent=4)
+        print("running! with args")
+        print(json.dumps(self.args,indent=4))
 
