@@ -4,7 +4,6 @@ import tempfile
 import os
 import json
 import logging
-from exceptions import IOError
 import marshmallow as mm
 
 def test_bad_path():
