@@ -79,10 +79,6 @@ def smart_merge(a, b, path=None,merge_keys = None,overwrite_with_none=False):
                 a[key] = b[key]
     return a
 
-import py
-
-
-
 def build_schema_arguments(schema, arguments=None, path=None):
     """ given a jsonschema, create a dictionary of argparse arguments"""
     path = [] if path is None else path
