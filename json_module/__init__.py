@@ -217,7 +217,7 @@ class JsonModule( object ):
         print("running! with args")
         print(json.dumps(self.args,indent=4))
 
-FIELD_TYPE_MAP = { v:k for k,v in mm.Schema.TYPE_MAPPING.iteritems()}
+FIELD_TYPE_MAP = { v:k for k,v in mm.Schema.TYPE_MAPPING.items()}
 
 def build_schema_arguments(schema, arguments=None, path=None):
     """ given a jsonschema, create a dictionary of argparse arguments"""
