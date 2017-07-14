@@ -1,3 +1,5 @@
+'''Module containing custom marshmallow fields that are useful for defining schemas,
+including the base schema used by JsonModule'''
 import tempfile
 import os
 import marshmallow as mm

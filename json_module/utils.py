@@ -1,3 +1,5 @@
+'''utils.py) module that contains json_module functions for converting marshmallow schemas to argparse and
+merging dictionaries from both systems'''
 import logging, argparse
 import marshmallow as mm
 import inspect
