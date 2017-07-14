@@ -38,7 +38,7 @@ def do_join(a,b,key,merge_keys):
         return False
     #only consider if key is in merge_keys
     if key in merge_keys:
-       return True
+        return True
     else:
         return False
 
