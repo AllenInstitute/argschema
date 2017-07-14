@@ -184,7 +184,7 @@ class JsonModule( object ):
         schemas = [ (schema, []) ]
         while schemas:
             subschema, path = schemas.pop()
-            for k,v in subschema.declared_fields.iteritems():
+            for k,v in subschema.declared_fields.items():
                 if isinstance(v, mm.fields.Nested):
                     schemas.append((v.schema, path + [ k ]))
                 elif v.default != mm.missing:
@@ -224,7 +224,7 @@ def build_schema_arguments(schema, arguments=None, path=None):
     path = [] if path is None else path
     arguments = {} if arguments is None else arguments
 
-    for field_name, field in schema.declared_fields.iteritems():
+    for field_name, field in schema.declared_fields.items():
         if isinstance(field, mm.fields.Nested):
             if field.many:
                 logging.warning("many=True not supported from argparse")
@@ -276,7 +276,7 @@ def schema_argparser(schema):
 
     parser = argparse.ArgumentParser()
     
-    for arg_name, arg in arguments.iteritems():
+    for arg_name, arg in arguments.items():
         parser.add_argument(arg_name, **arg)
     return parser
 
