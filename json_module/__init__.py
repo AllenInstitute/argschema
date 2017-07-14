@@ -214,8 +214,8 @@ class JsonModule( object ):
         return logger
 
     def run(self):
-        print "running! with args"
-        print json.dumps(self.args,indent=4)
+        print("running! with args")
+        print(json.dumps(self.args,indent=4))
 
 FIELD_TYPE_MAP = { v:k for k,v in mm.Schema.TYPE_MAPPING.iteritems()}
 
@@ -283,7 +283,7 @@ def schema_argparser(schema):
 
 def main():
     jm = JsonModule()
-    print jm.args
+    print(jm.args)
 
 if __name__ == "__main__": main()
 

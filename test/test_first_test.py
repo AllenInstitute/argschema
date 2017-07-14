@@ -36,7 +36,7 @@ def test_log_catch():
             "log_level":"NOTACHOICE"
         }
         jm = JsonModule(input_data=example,args=[])
-        print jm.args
+        print(jm.args)
 
 
 class TestExtension(mm.Schema):
