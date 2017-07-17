@@ -1,27 +1,36 @@
-'''Module that contains the base class JsonModule which should be subclassed when using this library'''
+'''Module that contains the base class JsonModule which should be
+subclassed when using this library
+'''
 import json
 import logging
 from json_module import schemas
 import copy
-import utils 
+import utils
 import marshmallow as mm
 
-class JsonModule( object ):
-    '''JsonModule(input_data=None, schema_type = schemas.ModuleParameters, args = None, logger_name = 'json_module')
+
+class JsonModule(object):
+    '''JsonModule(input_data=None, schema_type = schemas.ModuleParameters,
+    args = None, logger_name = 'json_module')
     inputs)
-        input data = None, dictionary parameters as option instead of --input_json
+        input data = None, dictionary parameters as option
+            instead of --input_json
         args = None, a list of command line arguments passed to the module,
-        otherwise argparse will fill this from the command line, set to [] if you want to bypass command line parsing
-        logger_name = 'json_module', name of logger from the logging module you want to instantiate '''
+        otherwise argparse will fill this from the command line, set to
+            [] if you want to bypass command line parsing
+        logger_name = 'json_module', name of logger from the logging
+            module you want to instantiate
+    '''
+
     def __init__(self,
-        input_data = None, #dictionary input as option instead of --input_json
-        schema_type = schemas.ModuleParameters, #schema for parsing arguments
-        args = None,
-        logger_name = 'json_module'): 
+                 input_data=None,  # dictionary input as option instead of --input_json
+                 schema_type=schemas.ModuleParameters,  # schema for parsing arguments
+                 args=None,
+                 logger_name='json_module'):
 
         schema = schema_type()
-        
-        #convert schema to argparse object
+
+        # convert schema to argparse object
         p = utils.schema_argparser(schema)
         argsobj = p.parse_args(args)
         argsdict = utils.args_to_dict(argsobj)
@@ -34,42 +43,46 @@ class JsonModule( object ):
         else:
             jsonargs = input_data if input_data else {}
 
-        #merge the command line dictionary into the input json
+        # merge the command line dictionary into the input json
         args = utils.smart_merge(jsonargs, argsdict)
 
         # validate with load!
         result = self.load_schema_with_defaults(schema, args)
 
-        if len(result.errors)>0:
+        if len(result.errors) > 0:
             raise mm.ValidationError(json.dumps(result.errors, indent=2))
 
         self.schema_args = result
         self.args = result.data
 
-        self.logger = self.initialize_logger(logger_name, self.args.get('log_level'))
+        self.logger = self.initialize_logger(
+            logger_name, self.args.get('log_level'))
 
     @staticmethod
     def load_schema_with_defaults(schema, args):
         '''load_schema_with_defaults(schema, args)
-        function for deserializing the arguments dictionary (args) given the schema (schema)
-        making sure that the default values have been filled in. 
+        function for deserializing the arguments dictionary (args)
+        given the schema (schema) making sure that the default values have
+        been filled in.
         inputs)
             args: a dictionary of input arguments
-            schema: a marshmallow.Schema schema specifiying the schema the input should fit
+            schema: a marshmallow.Schema schema specifiying the schema the
+                input should fit
         outputs)
-            a deserialized dictionary of the parameters converted through marshmallow
+            a deserialized dictionary of the parameters converted
+                through marshmallow
         '''
         defaults = []
 
         # find all of the schema entries with default values
-        schemas = [ (schema, []) ]
+        schemas = [(schema, [])]
         while schemas:
             subschema, path = schemas.pop()
-            for k,v in subschema.declared_fields.items():
+            for k, v in subschema.declared_fields.items():
                 if isinstance(v, mm.fields.Nested):
-                    schemas.append((v.schema, path + [ k ]))
+                    schemas.append((v.schema, path + [k]))
                 elif v.default != mm.missing:
-                    defaults.append((path + [ k ], v.default))
+                    defaults.append((path + [k], v.default))
 
         # put the default entries into the args dictionary
         args = copy.deepcopy(args)
@@ -93,7 +106,8 @@ class JsonModule( object ):
             name) name of the logger
             log_level) log level of the logger
         outputs)
-            logger: a logging.Logger set with the name and level specified'''
+            logger: a logging.Logger set with the name and level specified
+        '''
         level = logging.getLevelName(log_level)
 
         logging.basicConfig()
@@ -102,11 +116,11 @@ class JsonModule( object ):
         return logger
 
     def run(self):
-        '''standin run method to illustrate what the arguments are after validation and parsing
-        should overwrite in your subclass 
+        '''standin run method to illustrate what the arguments are after
+        validation and parsing
+        should overwrite in your subclass
         run()
         prints the arguments using json.dumps
         '''
         print("running! with args")
-        print(json.dumps(self.args,indent=2))
-
+        print(json.dumps(self.args, indent=2))

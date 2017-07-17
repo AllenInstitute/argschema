@@ -8,4 +8,5 @@ def main():
     jm = JsonModule()
     print(jm.args)
 
-if __name__ == "__main__": main()
+if __name__ == "__main__":
+    main()
