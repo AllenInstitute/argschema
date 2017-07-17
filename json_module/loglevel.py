@@ -3,10 +3,6 @@ import logging
 
 import marshmallow as mm
 
-class LogLevelAction(argparse.Action):
-    def __call__(self, parser, namespace, values, option_string=None):
-        print(values)
-
 class LogLevel(mm.fields.Field):
     '''LogLevel is a field type that provides a setting for the loglevel of
     python.logging.  This class will both validate the input and also *set* the
@@ -25,5 +21,7 @@ class LogLevel(mm.fields.Field):
         if not hasattr(logging, value) or type(getattr(logging, value)) is not int:
             raise mm.ValidationError(
                     '{} is not a valid loglevel; try one of {}'.format(value, LogLevel.options))
+
+        # Would prefer this to be an argparse.Action subclass, but not yet sure how to implement this way
         logging.getLogger().setLevel(value)
 
