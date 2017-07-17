@@ -26,7 +26,7 @@ class JsonModule(object):
                  input_data=None,  # dictionary input as option instead of --input_json
                  schema_type=schemas.ModuleParameters,  # schema for parsing arguments
                  args=None,
-                 logger_name='json_module'):
+                 logger_name=__name__):
 
         schema = schema_type()
 
@@ -39,7 +39,8 @@ class JsonModule(object):
             result = schema.load(argsdict)
             if 'input_json' in result.errors:
                 raise mm.ValidationError(result.errors['input_json'])
-            jsonargs = json.load(open(result.data['input_json'], 'r'))
+            with open(result.data['input_json'], 'r') as j:
+                jsonargs = json.load(j)
         else:
             jsonargs = input_data if input_data else {}
 

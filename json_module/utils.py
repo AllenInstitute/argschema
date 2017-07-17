@@ -3,8 +3,9 @@ marshmallow schemas to argparse and merging dictionaries from both systems
 '''
 import logging
 import argparse
-import marshmallow as mm
+from operator import add
 import inspect
+import marshmallow as mm
 
 FIELD_TYPE_MAP = {v: k for k, v in mm.Schema.TYPE_MAPPING.items()}
 
@@ -17,7 +18,7 @@ def args_to_dict(argsobj):
         root = d
         for i in range(len(parts)):
             if i == (len(parts) - 1):
-                root[parts[i]] = argsdict.get(field, None)
+                root[parts[i]] = argsdict.get(field)
             else:
                 if parts[i] not in root.keys():
                     root[parts[i]] = {}
@@ -25,39 +26,36 @@ def args_to_dict(argsobj):
     return d
 
 
-def merge_value(a, b, key):
-    # attempt to merge these keys, first pass use simple addition
-    # raise an exception if this fails
+def merge_value(a, b, key, func=add):
+    '''attempt to merge these keys using function defined by
+    func (default to add) raise an exception if this fails
+    '''
     try:
-        return a[key] + b[key]
+        return func(a[key], b[key])
     except:
         raise Exception("Cannot merge this key {},\
          for values {} and {} of types {} and {}".format
                         (key, a[key], b[key], type(a[key]), type(b[key])))
 
 
-def do_join(a, b, key, merge_keys):
-    # determine if we should/can attempt to merge a[key],b[key]
-    # if merge_keys is not specified, then no
+def do_join(a, b, key, merge_keys=None):
+    '''determine if we should/can attempt to merge a[key],b[key]
+    if merge_keys is not specified, then no
+    '''
     if merge_keys is None:
         return False
     # only consider if key is in merge_keys
-    if key in merge_keys:
-        return True
-    else:
-        return False
+    return key in merge_keys
 
 
 def smart_merge(a, b, path=None, merge_keys=None, overwrite_with_none=False):
     """merges dictionary b into dictionary a
     being careful not to write things with None
     """
-    if a is None:
-        return b
-    if b is None:
-        return a
-    if path is None:
-        path = []
+    a = {} if a is None else a
+    b = {} if b is None else b
+    path = [] if path is None else path
+
     for key in b:
         if key in a:
             if isinstance(a[key], dict) and isinstance(b[key], dict):
@@ -65,11 +63,9 @@ def smart_merge(a, b, path=None, merge_keys=None, overwrite_with_none=False):
                 smart_merge(a[key], b[key], path + [str(key)], merge_keys)
             elif a[key] == b[key]:
                 pass  # same leaf value, so don't bother
-            elif b[key] is None:  # b dictionary has no entry for key
+            elif b[key] is None:
                 if overwrite_with_none:
                     a[key] = b[key]
-                else:
-                    pass  # then don't alter a's
             else:
                 # in this case we are potentially overwriting a's value with b's
                 # determine if we should try to merge
@@ -82,8 +78,6 @@ def smart_merge(a, b, path=None, merge_keys=None, overwrite_with_none=False):
             if b[key] is None:
                 if overwrite_with_none:
                     a[key] = b[key]
-                else:
-                    pass  # don't do anything because b's leaf is None
             else:
                 # otherwise replace entire leaf with b
                 a[key] = b[key]

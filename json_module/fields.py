@@ -3,6 +3,7 @@ defining schemas, including the base schema used by JsonModule
 '''
 import tempfile
 import os
+import errno
 import marshmallow as mm
 import numpy as np
 
@@ -42,22 +43,26 @@ class OutputFile(mm.fields.Str):
     '''
     def _validate(self, value):
         try:
-            path = os.path.split(value)[0]
-        except:
-            raise mm.ValidationError("%s cannot be os.path.split" % value)
-
-        if len(path) > 0:
-            if not os.path.isdir(path):
-                raise mm.ValidationError(
-                    "%s is not in a directory that exists" % value)
-
+            path = os.path.dirname(value)
+        except Exception as e:
+            raise mm.ValidationError("%s cannot be os.path.dirname-ed" % value)
         try:
-            tfile = tempfile.TemporaryFile(mode='w', dir=path)
-            tfile.write('0')
-            tfile.close()
-        except:
-            raise mm.ValidationError(
-                "%s does not appear you can write to path" % value)
+            with tempfile.TemporaryFile(mode='w', dir=path) as tfile:
+                tfile.write('0')
+        except Exception as e:
+            if isinstance(e, OSError):
+                if e.errno == errno.ENOENT:
+                    raise mm.ValidationError(
+                        "%s is not in a directory that exists" % value)
+                elif e.errno == errno.EACCES:
+                    raise mm.ValidationError(
+                        "%s does not appear you can write to path" % value)
+                else:
+                    raise mm.ValidationError(
+                        "Unknown OSError: {}".format(e.message))
+            else:
+                raise mm.ValidationError(
+                    "Unknown Exception: {}".format(e.message))
 
 
 class InputDir(mm.fields.Str):
@@ -68,12 +73,9 @@ class InputDir(mm.fields.Str):
     def _validate(self, value):
         if not os.path.isdir(value):
             raise mm.ValidationError("%s is not a directory")
-        else:
-            try:
-                os.access(value, os.R_OK)
-            except:
-                raise mm.ValidationError(
-                    "%s is not a readable directory" % value)
+        elif not os.access(value, os.R_OK):
+            raise mm.ValidationError(
+                "%s is not a readable directory" % value)
 
 
 class InputFile(mm.fields.Str):
@@ -84,11 +86,8 @@ class InputFile(mm.fields.Str):
     def _validate(self, value):
         if not os.path.isfile(value):
             raise mm.ValidationError("%s is not a file" % value)
-        else:
-            try:
-                os.access(value, os.R_OK)
-            except IOError:
-                raise mm.ValidationError("%s is not readable" % value)
+        elif not os.access(value, os.R_OK):
+            raise mm.ValidationError("%s is not readable" % value)
 
 
 class OptionList(mm.fields.Field):
