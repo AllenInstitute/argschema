@@ -1,3 +1,5 @@
+'''utils.py) module that contains json_module functions for converting marshmallow schemas to argparse and
+merging dictionaries from both systems'''
 import logging, argparse
 import marshmallow as mm
 import inspect
@@ -36,7 +38,7 @@ def do_join(a,b,key,merge_keys):
         return False
     #only consider if key is in merge_keys
     if key in merge_keys:
-       return True
+        return True
     else:
         return False
 
@@ -76,10 +78,6 @@ def smart_merge(a, b, path=None,merge_keys = None,overwrite_with_none=False):
                 #otherwise replace entire leaf with b
                 a[key] = b[key]
     return a
-
-import py
-
-
 
 def build_schema_arguments(schema, arguments=None, path=None):
     """ given a jsonschema, create a dictionary of argparse arguments"""
