@@ -68,6 +68,9 @@ output_file_example = {
     'output_file': 'output.file'
 }
 
+enoent_outfile_example = {
+    'output_file': os.path.join('path', 'to', 'output.file')
+}
 
 def test_relative_file_input():
     with open(input_file_example['input_file'], 'w') as fp:
@@ -81,6 +84,23 @@ def test_relative_file_input_failed():
     with pytest.raises(mm.ValidationError):
         mod = JsonModule(
             input_data=input_file_example, schema_type=BasicInputFile, args=[])
+
+
+def test_access_inputfile_failed():
+    with open(input_file_example['input_file'], 'w') as fp:
+        fp.write('test')
+    os.chmod(input_file_example['input_file'], 0222)
+    with pytest.raises(mm.ValidationError):
+        mod = JsonModule(
+            input_data=input_file_example, schema_type=BasicInputFile, args=[])
+    os.remove(input_file_example['input_file'])
+
+
+def test_enoent_outputfile_failed():
+    with pytest.raises(mm.ValidationError):
+        mod = JsonModule(
+            input_data=enoent_outfile_example,
+            schema_type=BasicOutputFile, args=[])
 
 
 def test_output_file_relative():
