@@ -2,6 +2,7 @@ import tempfile
 import os
 import marshmallow as mm
 import numpy as np
+from .slice import Slice
 
 class NumpyArray(mm.fields.List):
     '''NumpyArray is a marshmallow.fields.Str List subclass 
