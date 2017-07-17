@@ -4,7 +4,7 @@ import logging, argparse
 import marshmallow as mm
 import inspect
 
-FIELD_TYPE_MAP = { v:k for k,v in mm.Schema.TYPE_MAPPING.iteritems()}
+FIELD_TYPE_MAP = { v:k for k,v in mm.Schema.TYPE_MAPPING.items()}
 
 def args_to_dict(argsobj):
     d = {}
@@ -84,7 +84,7 @@ def build_schema_arguments(schema, arguments=None, path=None):
     path = [] if path is None else path
     arguments = {} if arguments is None else arguments
 
-    for field_name, field in schema.declared_fields.iteritems():
+    for field_name, field in schema.declared_fields.items():
         if isinstance(field, mm.fields.Nested):
             if field.many:
                 logging.warning("many=True not supported from argparse")
@@ -136,6 +136,6 @@ def schema_argparser(schema):
 
     parser = argparse.ArgumentParser()
     
-    for arg_name, arg in arguments.iteritems():
+    for arg_name, arg in arguments.items():
         parser.add_argument(arg_name, **arg)
     return parser

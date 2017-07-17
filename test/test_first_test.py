@@ -5,7 +5,6 @@ import tempfile
 import os
 import json
 import logging
-from exceptions import IOError
 import marshmallow as mm
 
 def test_bad_path():
@@ -37,7 +36,7 @@ def test_log_catch():
             "log_level":"NOTACHOICE"
         }
         jm = JsonModule(input_data=example,args=[])
-        print jm.args
+        print(jm.args)
 
 class TestExtension(mm.Schema):
     a = mm.fields.Str(metadata={'description':'a string'})

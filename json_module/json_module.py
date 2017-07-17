@@ -65,7 +65,7 @@ class JsonModule( object ):
         schemas = [ (schema, []) ]
         while schemas:
             subschema, path = schemas.pop()
-            for k,v in subschema.declared_fields.iteritems():
+            for k,v in subschema.declared_fields.items():
                 if isinstance(v, mm.fields.Nested):
                     schemas.append((v.schema, path + [ k ]))
                 elif v.default != mm.missing:
