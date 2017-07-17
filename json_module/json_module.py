@@ -3,7 +3,7 @@ subclassed when using this library
 '''
 import json
 import logging
-from json_module import schemas
+from . import schemas
 import copy
 import utils
 import marshmallow as mm
