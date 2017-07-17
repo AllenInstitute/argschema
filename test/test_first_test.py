@@ -16,6 +16,8 @@ def test_bad_path():
         jm = JsonModule(input_data=example, args=[])
 
 
+
+
 def test_simple_example(tmpdir):
     file_in = tmpdir.join('test_input_json.json')
     file_in.write('nonesense')
@@ -31,6 +33,7 @@ def test_simple_example(tmpdir):
     assert jm.args['log_level'] == 'CRITICAL'
 
 
+
 def test_log_catch():
     with pytest.raises(mm.ValidationError):
         example = {"log_level": "NOTACHOICE"}
@@ -38,7 +41,7 @@ def test_log_catch():
         print(jm.args)
 
 
-class TestExtension(mm.Schema):
+class MyExtension(mm.Schema):
     a = mm.fields.Str(metadata={'description': 'a string'})
     b = mm.fields.Int(metadata={'description': 'an integer'})
     c = mm.fields.Int(metadata={'description': 'an integer'}, default=10)
@@ -47,7 +50,7 @@ class TestExtension(mm.Schema):
 
 
 class SimpleExtension(ModuleParameters):
-    test = mm.fields.Nested(TestExtension)
+    test = mm.fields.Nested(MyExtension)
 
 
 class BasicInputFile(ModuleParameters):
@@ -88,6 +91,7 @@ def test_output_file_relative():
         input_data=output_file_example, schema_type=BasicOutputFile, args=[])
 
 
+
 def test_simple_extension_required():
     with pytest.raises(mm.ValidationError):
         example1 = {}
@@ -112,7 +116,11 @@ SimpleExtension_example_valid = {
             'd': [1, 5, 4]
         }
 }
-
+@pytest.fixture(scope='module')
+def simple_extension_file(tmpdir_factory):
+    file_ = tmpdir_factory.mktemp('test').join('testinput.json')
+    file_.write(json.dumps(SimpleExtension_example_valid))
+    return file_
 
 def test_simple_extension_fail():
     with pytest.raises(mm.ValidationError):
@@ -130,11 +138,8 @@ def test_simple_extension_pass():
     assert len(mod.args['test']['d']) == 3
 
 
-def test_simple_extension_write_pass(tmpdir):
-    file_ = tmpdir.join('testinput.json')
-    file_.write(json.dumps(SimpleExtension_example_valid))
-
-    args = ['--input_json', str(file_)]
+def test_simple_extension_write_pass(simple_extension_file):
+    args = ['--input_json', str(simple_extension_file)]
     mod = JsonModule(schema_type=SimpleExtension, args=args)
     assert mod.args['test']['a'] == 'hello'
     assert mod.args['test']['b'] == 1
@@ -142,10 +147,8 @@ def test_simple_extension_write_pass(tmpdir):
     assert mod.logger.getEffectiveLevel() == logging.ERROR
 
 
-def test_simple_extension_write_debug_level(tmpdir):
-    file_ = tmpdir.join('testinput.json')
-    file_.write(json.dumps(SimpleExtension_example_valid))
-    args = ['--input_json', str(file_), '--log_level', 'DEBUG']
+def test_simple_extension_write_debug_level(simple_extension_file):
+    args = ['--input_json', str(simple_extension_file), '--log_level', 'DEBUG']
     mod = JsonModule(schema_type=SimpleExtension, args=args)
     assert mod.logger.getEffectiveLevel() == logging.DEBUG
 
@@ -168,3 +171,13 @@ def test_output_path_noapath():
         file_ = '@/afa\\//'
         args = ['--output_json', str(file_)]
         mod = JsonModule(args=args)
+
+def test_simple_extension_write_overwrite(simple_extension_file):
+    args = ['--input_json', str(simple_extension_file),'--test.b','5']
+    mod = JsonModule(schema_type=SimpleExtension, args=args)
+    assert mod.args['test']['b'] == 5
+
+def test_simple_extension_write_overwrite_list(simple_extension_file):
+    args = ['--input_json', str(simple_extension_file),'--test.d','6','7','8','9']
+    mod = JsonModule(schema_type=SimpleExtension, args=args)
+    assert len(mod.args['test']['d']) == 4
