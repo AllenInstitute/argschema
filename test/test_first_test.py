@@ -131,10 +131,10 @@ def test_simple_extension_pass():
 
 
 def test_simple_extension_write_pass(tmpdir):
-    file = tmpdir.join('testinput.json')
-    file.write(json.dumps(SimpleExtension_example_valid))
+    file_ = tmpdir.join('testinput.json')
+    file_.write(json.dumps(SimpleExtension_example_valid))
 
-    args = ['--input_json', str(file)]
+    args = ['--input_json', str(file_)]
     mod = JsonModule(schema_type=SimpleExtension, args=args)
     assert mod.args['test']['a'] == 'hello'
     assert mod.args['test']['b'] == 1
@@ -143,28 +143,28 @@ def test_simple_extension_write_pass(tmpdir):
 
 
 def test_simple_extension_write_debug_level(tmpdir):
-    file = tmpdir.join('testinput.json')
-    file.write(json.dumps(SimpleExtension_example_valid))
-    args = ['--input_json', str(file), '--log_level', 'DEBUG']
+    file_ = tmpdir.join('testinput.json')
+    file_.write(json.dumps(SimpleExtension_example_valid))
+    args = ['--input_json', str(file_), '--log_level', 'DEBUG']
     mod = JsonModule(schema_type=SimpleExtension, args=args)
     assert mod.logger.getEffectiveLevel() == logging.DEBUG
 
 
 def test_output_path(tmpdir):
-    file = tmpdir.join('testoutput.json')
-    args = ['--output_json', str(file)]
+    file_ = tmpdir.join('testoutput.json')
+    args = ['--output_json', str(file_)]
     mod = JsonModule(args=args)
 
 
 def test_output_path_cannot_write():
     with pytest.raises(mm.ValidationError):
-        file = '/etc/notok/notalocation.json'
-        args = ['--output_json', str(file)]
+        file_ = '/etc/notok/notalocation.json'
+        args = ['--output_json', str(file_)]
         mod = JsonModule(args=args)
 
 
 def test_output_path_noapath():
     with pytest.raises(mm.ValidationError):
-        file = '@/afa\\//'
-        args = ['--output_json', str(file)]
+        file_ = '@/afa\\//'
+        args = ['--output_json', str(file_)]
         mod = JsonModule(args=args)
