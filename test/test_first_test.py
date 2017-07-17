@@ -181,3 +181,4 @@ def test_simple_extension_write_overwrite_list(simple_extension_file):
     args = ['--input_json', str(simple_extension_file),'--test.d','6','7','8','9']
     mod = JsonModule(schema_type=SimpleExtension, args=args)
     assert len(mod.args['test']['d']) == 4
+
