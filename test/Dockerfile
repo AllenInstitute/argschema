@@ -1,4 +1,9 @@
-FROM fcollman/argschema
+FROM continuumio/anaconda
+MAINTAINER Forrest Collman (forrestc@alleninstitute.org)
+RUN mkdir -p /usr/local/argschema
+COPY . /usr/local/argschema
+WORKDIR /usr/local/argschema
+RUN python setup.py install 
 WORKDIR test
 RUN pip install -r test_requirements.txt --upgrade
 RUN useradd -ms /bin/bash test
