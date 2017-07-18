@@ -11,7 +11,7 @@ OR pass a json_dictionary directly into the module with the parameters defined
 
 AND/OR pass parameters via the command line, in a way that will override the input_json or the json_dictionary given.
 ## Level of Support
-We are planning on occasional updating this tool with no fixed schedule. Community involvement is encouraged through both issues and pull requests.
+We are planning on occasional updating this tool with no fixed schedule. Community involvement is encouraged through both issues and pull requests.  Please make pull requests against the dev branch, as we will test changes there before merging into master.
 
 ## What does it do
 argschema defines two basic classes which every module should subclass, ArgSchemaParser and ArgSchema. ArgSchemaParser takes ArgSchema as an input which is simply an extension of the marshmallow Schema class.
