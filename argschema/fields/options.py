@@ -1,6 +1,7 @@
 '''marshmallow fields related to choosing amongst a set of options'''
 import marshmallow as mm
 
+
 class OptionList(mm.fields.Field):
     '''OptionList is a marshmallow field which enforces that this field
        is one of a finite set of options.
