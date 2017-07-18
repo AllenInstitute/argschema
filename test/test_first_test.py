@@ -1,6 +1,6 @@
 import pytest
-from json_module import JsonModule, ModuleParameters
-from json_module.fields import InputFile, OutputFile
+from argschema import ArgSchemaParser, ArgSchema
+from argschema.fields import InputFile, OutputFile
 import os
 import json
 import logging
@@ -13,7 +13,7 @@ def test_bad_path():
             "input_json": "a bad path",
             "output_json": "another example",
             "log_level": "DEBUG"}
-        jm = JsonModule(input_data=example, args=[])
+        jm = ArgSchemaParser(input_data=example, args=[])
 
 
 
@@ -28,7 +28,7 @@ def test_simple_example(tmpdir):
         "input_json": str(file_in),
         "output_json": str(file_out),
         "log_level": "CRITICAL"}
-    jm = JsonModule(input_data=example, args=[])
+    jm = ArgSchemaParser(input_data=example, args=[])
 
     assert jm.args['log_level'] == 'CRITICAL'
 
@@ -37,7 +37,7 @@ def test_simple_example(tmpdir):
 def test_log_catch():
     with pytest.raises(mm.ValidationError):
         example = {"log_level": "NOTACHOICE"}
-        jm = JsonModule(input_data=example, args=[])
+        jm = ArgSchemaParser(input_data=example, args=[])
         print(jm.args)
 
 
@@ -49,16 +49,16 @@ class MyExtension(mm.Schema):
                        metadata={'description': 'a list of integers'})
 
 
-class SimpleExtension(ModuleParameters):
+class SimpleExtension(ArgSchema):
     test = mm.fields.Nested(MyExtension)
 
 
-class BasicInputFile(ModuleParameters):
+class BasicInputFile(ArgSchema):
     input_file = InputFile(required=True,
                            metadata={'description': 'a simple file'})
 
 
-class BasicOutputFile(ModuleParameters):
+class BasicOutputFile(ArgSchema):
     output_file = OutputFile(required=True,
                              metadata={'decription': 'a simple output file'})
 
@@ -78,14 +78,14 @@ enoent_outfile_example = {
 def test_relative_file_input():
     with open(input_file_example['input_file'], 'w') as fp:
         fp.write("test")
-    mod = JsonModule(
+    mod = ArgSchemaParser(
         input_data=input_file_example, schema_type=BasicInputFile, args=[])
     os.remove(input_file_example['input_file'])
 
 
 def test_relative_file_input_failed():
     with pytest.raises(mm.ValidationError):
-        mod = JsonModule(
+        mod = ArgSchemaParser(
             input_data=input_file_example, schema_type=BasicInputFile, args=[])
 
 
@@ -94,20 +94,20 @@ def test_access_inputfile_failed():
         fp.write('test')
     os.chmod(input_file_example['input_file'], 0222)
     with pytest.raises(mm.ValidationError):
-        mod = JsonModule(
+        mod = ArgSchemaParser(
             input_data=input_file_example, schema_type=BasicInputFile, args=[])
     os.remove(input_file_example['input_file'])
 
 
 def test_enoent_outputfile_failed():
     with pytest.raises(mm.ValidationError):
-        mod = JsonModule(
+        mod = ArgSchemaParser(
             input_data=enoent_outfile_example,
             schema_type=BasicOutputFile, args=[])
 
 
 def test_output_file_relative():
-    mod = JsonModule(
+    mod = ArgSchemaParser(
         input_data=output_file_example, schema_type=BasicOutputFile, args=[])
 
 
@@ -115,7 +115,7 @@ def test_output_file_relative():
 def test_simple_extension_required():
     with pytest.raises(mm.ValidationError):
         example1 = {}
-        mod = JsonModule(
+        mod = ArgSchemaParser(
             input_data=example1, schema_type=SimpleExtension, args=[])
 
 
@@ -144,13 +144,13 @@ def simple_extension_file(tmpdir_factory):
 
 def test_simple_extension_fail():
     with pytest.raises(mm.ValidationError):
-        mod = JsonModule(
+        mod = ArgSchemaParser(
             input_data=SimpleExtension_example_invalid,
             schema_type=SimpleExtension, args=[])
 
 
 def test_simple_extension_pass():
-    mod = JsonModule(
+    mod = ArgSchemaParser(
         input_data=SimpleExtension_example_valid,
         schema_type=SimpleExtension, args=[])
     assert mod.args['test']['a'] == 'hello'
@@ -160,7 +160,7 @@ def test_simple_extension_pass():
 
 def test_simple_extension_write_pass(simple_extension_file):
     args = ['--input_json', str(simple_extension_file)]
-    mod = JsonModule(schema_type=SimpleExtension, args=args)
+    mod = ArgSchemaParser(schema_type=SimpleExtension, args=args)
     assert mod.args['test']['a'] == 'hello'
     assert mod.args['test']['b'] == 1
     assert len(mod.args['test']['d']) == 3
@@ -169,36 +169,36 @@ def test_simple_extension_write_pass(simple_extension_file):
 
 def test_simple_extension_write_debug_level(simple_extension_file):
     args = ['--input_json', str(simple_extension_file), '--log_level', 'DEBUG']
-    mod = JsonModule(schema_type=SimpleExtension, args=args)
+    mod = ArgSchemaParser(schema_type=SimpleExtension, args=args)
     assert mod.logger.getEffectiveLevel() == logging.DEBUG
 
 
 def test_output_path(tmpdir):
     file_ = tmpdir.join('testoutput.json')
     args = ['--output_json', str(file_)]
-    mod = JsonModule(args=args)
+    mod = ArgSchemaParser(args=args)
 
 
 def test_output_path_cannot_write():
     with pytest.raises(mm.ValidationError):
         file_ = '/etc/notok/notalocation.json'
         args = ['--output_json', str(file_)]
-        mod = JsonModule(args=args)
+        mod = ArgSchemaParser(args=args)
 
 
 def test_output_path_noapath():
     with pytest.raises(mm.ValidationError):
         file_ = '@/afa\\//'
         args = ['--output_json', str(file_)]
-        mod = JsonModule(args=args)
+        mod = ArgSchemaParser(args=args)
 
 def test_simple_extension_write_overwrite(simple_extension_file):
     args = ['--input_json', str(simple_extension_file),'--test.b','5']
-    mod = JsonModule(schema_type=SimpleExtension, args=args)
+    mod = ArgSchemaParser(schema_type=SimpleExtension, args=args)
     assert mod.args['test']['b'] == 5
 
 def test_simple_extension_write_overwrite_list(simple_extension_file):
     args = ['--input_json', str(simple_extension_file),'--test.d','6','7','8','9']
-    mod = JsonModule(schema_type=SimpleExtension, args=args)
+    mod = ArgSchemaParser(schema_type=SimpleExtension, args=args)
     assert len(mod.args['test']['d']) == 4
 

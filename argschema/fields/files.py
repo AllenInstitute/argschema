@@ -1,39 +1,8 @@
-'''Module containing custom marshmallow fields that are useful for
-defining schemas, including the base schema used by JsonModule
-'''
-import tempfile
+'''marshmallow fields related to validating input and output file paths'''
 import os
-import errno
 import marshmallow as mm
-import numpy as np
-
-
-class NumpyArray(mm.fields.List):
-    '''NumpyArray is a marshmallow.fields.Str List subclass
-    NumpyArray(dtype=None,*args,**kwargs)
-    which will convert any numpy compatible set of lists into a
-    numpy array after deserialization and convert it back to a list when
-    serializing, if dtype is given (as a numpy.dtype)
-    the array will be converted to the type, otherwise numpy will decide
-    what type it should be.
-    '''
-    def __init__(self, dtype=None, *args, **kwargs):
-        self.dtype = dtype
-        super(NumpyArray, self).__init__(*args, **kwargs)
-
-    def _deserialize(self, value, attr, obj):
-        mylist = super(NumpyArray, self)._serialize(value, attr, obj)
-        if self.dtype is not None:
-            myarray = np.array(mylist, dtype=self.dtype)
-        else:
-            myarray = np.array(mylist)
-        return myarray
-
-    def _serialize(self, value, attr, obj):
-        if value is None:
-            return None
-        return mm.fields.List._serialize(self, value.tolist(), attr, obj)
-
+import tempfile
+import errno
 
 class OutputFile(mm.fields.Str):
     '''OutputFile marshamallow.fields.Str subclass which is a path to a
@@ -88,23 +57,3 @@ class InputFile(mm.fields.Str):
             raise mm.ValidationError("%s is not a file" % value)
         elif not os.access(value, os.R_OK):
             raise mm.ValidationError("%s is not readable" % value)
-
-
-class OptionList(mm.fields.Field):
-    '''OptionList is a marshmallow field which enforces that this field
-       is one of a finite set of options.
-       OptionList(options,*args,**kwargs) where options is a list of
-       json compatible options which this option will be enforced to belong
-    '''
-    def __init__(self, options, *args, **kwargs):
-        self.options = options
-        super(OptionList, self).__init__(*args, **kwargs)
-
-    def _serialize(self, value, attr, obj):
-        return value
-
-    def _validate(self, value):
-        if value not in self.options:
-            raise mm.ValidationError("%s is not a valid option" % value)
-
-        return value

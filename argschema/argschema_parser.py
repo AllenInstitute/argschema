@@ -1,4 +1,4 @@
-'''Module that contains the base class JsonModule which should be
+'''Module that contains the base class ArgSchemaParser which should be
 subclassed when using this library
 '''
 import json
@@ -9,22 +9,22 @@ import utils
 import marshmallow as mm
 
 
-class JsonModule(object):
-    '''JsonModule(input_data=None, schema_type = schemas.ModuleParameters,
-    args = None, logger_name = 'json_module')
+class ArgSchemaParser(object):
+    '''ArgSchemaParser(input_data=None, schema_type = schemas.ArgSchema,
+    args = None, logger_name = 'argschema')
     inputs)
         input data = None, dictionary parameters as option
             instead of --input_json
         args = None, a list of command line arguments passed to the module,
         otherwise argparse will fill this from the command line, set to
             [] if you want to bypass command line parsing
-        logger_name = 'json_module', name of logger from the logging
+        logger_name = 'argschema', name of logger from the logging
             module you want to instantiate
     '''
 
     def __init__(self,
                  input_data=None,  # dictionary input as option instead of --input_json
-                 schema_type=schemas.ModuleParameters,  # schema for parsing arguments
+                 schema_type=schemas.ArgSchema,  # schema for parsing arguments
                  args=None,
                  logger_name=__name__):
 

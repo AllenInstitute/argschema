@@ -1,4 +1,4 @@
-# json_module
+# argschema
 
 
 This python module simplifies the development of modules that would like to define and check a particular set of input parameters, but be able to flexibly define those inputs in different ways in different contexts. 
@@ -14,9 +14,9 @@ AND/OR pass parameters via the command line, in a way that will override the inp
 We are planning on occasional updating this tool with no fixed schedule. Community involvement is encouraged through both issues and pull requests.
 
 ## What does it do
-json_module defines two basic classes which every module should subclass, JsonModule and ModuleParameters. JsonModule takes ModuleParameters as an input which is simply an extension of the marshmallow Schema class.
+argschema defines two basic classes which every module should subclass, ArgSchemaParser and ArgSchema. ArgSchemaParser takes ArgSchema as an input which is simply an extension of the marshmallow Schema class.
 
-JsonModule then takes that schema, and builds a argparse parser from the schema using a standard pattern to convert the schema.
+ArgSchemaParser then takes that schema, and builds a argparse parser from the schema using a standard pattern to convert the schema.
 Nested elements of the schema are specified with a "." 
 
 so the json 
@@ -29,11 +29,11 @@ so the json
 would map to the command line arguments
 --nested.a 5 --b a
 
-JsonModule then parses the command line arguments into a  dictionary using argparse, and then reformatting the dictionary to have the proper nested structure to match the schema it was provided.
+ArgSchemaParser then parses the command line arguments into a  dictionary using argparse, and then reformatting the dictionary to have the proper nested structure to match the schema it was provided.
 
-Next, JsonModule reads either the input_data if it was passed, or takes the path of the input_json and reads that in as a dictionary.  
+Next, ArgSchemaParser reads either the input_data if it was passed, or takes the path of the input_json and reads that in as a dictionary.  
 
-Given that input dictionary and the command line dictionary, JsonModule then merges the two dictionaries, where the command line dictionary takes precendence. 
+Given that input dictionary and the command line dictionary, ArgSchemaParser then merges the two dictionaries, where the command line dictionary takes precendence. 
 
 Next, that dictionary is parsed and validated using marshmallow to convert the raw dictionary into the types defined by the marshmallow fields.
 
@@ -42,7 +42,7 @@ The resulting dictionary is then stored in self.args available for use.
 After that the module does some standard things, such as parsing the parameter args['log_level'] to configure a logging module at self.logger.
 
 ## How should I use it
-subclass JsonModule and schemas.ModuleParameters using the pattern found in template_module.py to define your module parameters, defining default values if you want and help statements that will be displayed by argparse as help statements, and maybe provide some example parameters for someone who is trying to figure out how to user your module (which is also a good way to rapidly test your module as you are developing it)
+subclass ArgSchemaParser and schemas.ArgSchema using the pattern found in template_module.py to define your module parameters, defining default values if you want and help statements that will be displayed by argparse as help statements, and maybe provide some example parameters for someone who is trying to figure out how to user your module (which is also a good way to rapidly test your module as you are developing it)
 
 Look at the set of fields to understand how to build custom fields, or use the default Marshmallow fields to contstruct your json Schema.  Note the use of InputDir and InputFile, two example custom marshmallow validators that are included in fields.py. They will insure that these directory exist, or files exist before trying to run your module and provide errors to the user. Also of note, fields.NumpyArray, which will convert Lists of Lists directly into numpy arrays.
 
@@ -66,6 +66,6 @@ Your code is now pretty useful, but its so useful you start running it on larger
 
 If you had only designed things from the beginning to allow for each of these use cases over the lifetime of your module.
 
-This is what json_module is designed to do.
+This is what argschema is designed to do.
 
 Copyright 2017 Allen Institute

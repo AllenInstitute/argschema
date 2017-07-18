@@ -2,8 +2,8 @@ import marshmallow as mm
 from .fields import OptionList, InputFile, OutputFile
 
 
-class ModuleParameters(mm.Schema):
-    '''The base marshmallow schema used by JsonModule to identify input and
+class ArgSchema(mm.Schema):
+    '''The base marshmallow schema used by ArgSchemaParser to identify input and
     output json files
     and the log_level
     '''
