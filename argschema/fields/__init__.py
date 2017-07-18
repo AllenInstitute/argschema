@@ -2,3 +2,5 @@
 from files import OutputFile, InputDir, InputFile
 from numpy import NumpyArray
 from options import OptionList
+
+__all__ = ['OutputFile', 'InputDir', 'InputFile', 'NumpyArray', 'OptionList']

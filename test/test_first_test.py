@@ -1,6 +1,6 @@
 import pytest
 from argschema import ArgSchemaParser, ArgSchema
-from argschema.fields import InputFile, OutputFile
+from argschema.fields import InputFile, OutputFile, NumpyArray
 import os
 import json
 import logging
@@ -16,8 +16,6 @@ def test_bad_path():
         jm = ArgSchemaParser(input_data=example, args=[])
 
 
-
-
 def test_simple_example(tmpdir):
     file_in = tmpdir.join('test_input_json.json')
     file_in.write('nonesense')
@@ -31,7 +29,6 @@ def test_simple_example(tmpdir):
     jm = ArgSchemaParser(input_data=example, args=[])
 
     assert jm.args['log_level'] == 'CRITICAL'
-
 
 
 def test_log_catch():
@@ -75,6 +72,7 @@ enoent_outfile_example = {
     'output_file': os.path.join('path', 'to', 'output.file')
 }
 
+
 def test_relative_file_input():
     with open(input_file_example['input_file'], 'w') as fp:
         fp.write("test")
@@ -111,7 +109,6 @@ def test_output_file_relative():
         input_data=output_file_example, schema_type=BasicOutputFile, args=[])
 
 
-
 def test_simple_extension_required():
     with pytest.raises(mm.ValidationError):
         example1 = {}
@@ -124,7 +121,7 @@ SimpleExtension_example_invalid = {
     {
         'a': 5,
         'b': 1,
-        'd': ['a',2,3]
+        'd': ['a', 2, 3]
     }
 }
 
@@ -136,11 +133,14 @@ SimpleExtension_example_valid = {
             'd': [1, 5, 4]
         }
 }
+
+
 @pytest.fixture(scope='module')
 def simple_extension_file(tmpdir_factory):
     file_ = tmpdir_factory.mktemp('test').join('testinput.json')
     file_.write(json.dumps(SimpleExtension_example_valid))
     return file_
+
 
 def test_simple_extension_fail():
     with pytest.raises(mm.ValidationError):
@@ -192,13 +192,34 @@ def test_output_path_noapath():
         args = ['--output_json', str(file_)]
         mod = ArgSchemaParser(args=args)
 
+
 def test_simple_extension_write_overwrite(simple_extension_file):
-    args = ['--input_json', str(simple_extension_file),'--test.b','5']
+    args = ['--input_json', str(simple_extension_file), '--test.b', '5']
     mod = ArgSchemaParser(schema_type=SimpleExtension, args=args)
     assert mod.args['test']['b'] == 5
 
+
 def test_simple_extension_write_overwrite_list(simple_extension_file):
-    args = ['--input_json', str(simple_extension_file),'--test.d','6','7','8','9']
+    args = ['--input_json', str(simple_extension_file),
+            '--test.d', '6', '7', '8', '9']
     mod = ArgSchemaParser(schema_type=SimpleExtension, args=args)
     assert len(mod.args['test']['d']) == 4
 
+
+numpy_array_test = {
+    'a': [[1, 2],
+          [3, 4]]
+}
+
+
+class NumpyFileuint16(ArgSchema):
+    a = NumpyArray(
+        dtype='uint16', required=True, metadata={
+            'decription': 'list of lists representing numpy array'})
+
+
+def test_numpy():
+    mod = ArgSchemaParser(
+        input_data=numpy_array_test, schema_type=NumpyFileuint16, args=[])
+    assert mod.args['a'].shape == (2, 2)
+    assert mod.args['a'].dtype == 'uint16'
