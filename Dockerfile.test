@@ -5,6 +5,7 @@ COPY . /usr/local/argschema
 WORKDIR /usr/local/argschema
 RUN python setup.py install 
 WORKDIR test
+RUN pip install --disable-pip-version-check -U setuptools
 RUN pip install -r test_requirements.txt --upgrade
 RUN useradd -ms /bin/bash test
 RUN chmod -R 777 ..
