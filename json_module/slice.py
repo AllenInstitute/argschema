@@ -11,6 +11,9 @@ class Slice(mm.fields.Field):
         super(Slice, self).__init__(metadata={'description': 'slice the dataset'}, default=slice(None))
 
     def _deserialize(self, value, attr, obj):
-        args = tuple([int(c) if c else None for c in value.split(':')])
-        return slice(*args)
+        try:
+            args = tuple([int(c) if c else None for c in value.split(':')])
+            return slice(*args)
+        except:
+            raise mm.ValidationError('{} is not a properly formatted slice'.format(value))
 
