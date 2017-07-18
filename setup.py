@@ -1,4 +1,4 @@
-from setuptools import setup
+from setuptools import setup, find_packages
 
 with open('requirements.txt', 'r') as f:
     required = f.read().splitlines()
@@ -12,7 +12,7 @@ setup(name='argschema',
        json_files, or dictionary objects. Providing a common wrapper for data processing modules.',
       author='Forrest Collman,David Feng',
       author_email='forrestc@alleninstitute.org',
-      packages=['argschema'],
+      packages=find_packages(),
       url='https://github.com/AllenInstitute/argschema',
       install_requires=required,
       setup_requires=['pytest-runner'],
