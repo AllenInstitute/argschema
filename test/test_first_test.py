@@ -90,7 +90,7 @@ def test_relative_file_input_failed():
 def test_access_inputfile_failed():
     with open(input_file_example['input_file'], 'w') as fp:
         fp.write('test')
-    os.chmod(input_file_example['input_file'], 0222)
+    os.chmod(input_file_example['input_file'], 0o222)
     with pytest.raises(mm.ValidationError):
         mod = ArgSchemaParser(
             input_data=input_file_example, schema_type=BasicInputFile, args=[])
