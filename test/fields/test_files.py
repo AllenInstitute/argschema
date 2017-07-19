@@ -31,8 +31,13 @@ def test_outputfile_no_write(tmpdir):
 
 def test_outputfile_not_a_path():
     with pytest.raises(mm.ValidationError):
+<<<<<<< HEAD
         mod = ArgSchemaParser(
             input_data={'output_file': 10}, schema_type=BasicOutputFile, args=[])
+=======
+        mod = ArgSchemaParser(input_data={'output_file': 10},
+                              schema_type=BasicOutputFile, args=[])
+>>>>>>> 8b26fb99f1b267b1ead73e9ef8904ea890e70f46
 
 
 def test_enoent_outputfile_failed():
@@ -66,9 +71,14 @@ def test_output_path_noapath():
         args = ['--output_json', str(file_)]
         mod = ArgSchemaParser(args=args)
 
+<<<<<<< HEAD
 # INPUT FILE TESTS
 
 
+=======
+
+# INPUT FILE TESTS
+>>>>>>> 8b26fb99f1b267b1ead73e9ef8904ea890e70f46
 class BasicInputFile(ArgSchema):
     input_file = InputFile(required=True,
                            metadata={'description': 'a simple file'})
@@ -102,16 +112,24 @@ def test_access_inputfile_failed():
             input_data=input_file_example, schema_type=BasicInputFile, args=[])
     os.remove(input_file_example['input_file'])
 
+<<<<<<< HEAD
 # INPUTDIR TESTS
 
+=======
+>>>>>>> 8b26fb99f1b267b1ead73e9ef8904ea890e70f46
 
+# INPUTDIR TESTS
 class BasicInputDir(ArgSchema):
     input_dir = InputDir(required=True,
                          metadata={'description': 'a simple file'})
 
 
 def test_basic_inputdir(tmpdir):
+<<<<<<< HEAD
     input_data = {
+=======
+    input_data ={
+>>>>>>> 8b26fb99f1b267b1ead73e9ef8904ea890e70f46
         'input_dir': str(tmpdir)
     }
     mod = ArgSchemaParser(input_data=input_data,
@@ -123,8 +141,13 @@ def test_bad_inputdir():
         'input_dir': 'not_a_dir'
     }
     with pytest.raises(mm.ValidationError):
+<<<<<<< HEAD
         mod = ArgSchemaParser(input_data=input_data,
                               schema_type=BasicInputDir, args=[])
+=======
+        mod = ArgSchemaParser(
+            input_data=input_data, schema_type=BasicInputDir, args=[])
+>>>>>>> 8b26fb99f1b267b1ead73e9ef8904ea890e70f46
 
 
 def test_inputdir_no_access(tmpdir):
@@ -134,5 +157,10 @@ def test_inputdir_no_access(tmpdir):
         'input_dir': input_dir
     }
     with pytest.raises(mm.ValidationError):
+<<<<<<< HEAD
         mod = ArgSchemaParser(input_data=input_data,
                               schema_type=BasicInputDir, args=[])
+=======
+        mod = ArgSchemaParser(
+            input_data=input_data, schema_type=BasicInputDir, args=[])
+>>>>>>> 8b26fb99f1b267b1ead73e9ef8904ea890e70f46

@@ -7,7 +7,11 @@ import marshmallow as mm
 
 class OptionSchema(ArgSchema):
     a = OptionList([1, 2, 3], required=True, metadata={
+<<<<<<< HEAD
         'decription': 'a slice object'})
+=======
+            'decription': 'a slice object'})
+>>>>>>> 8b26fb99f1b267b1ead73e9ef8904ea890e70f46
 
 
 def test_option_list():

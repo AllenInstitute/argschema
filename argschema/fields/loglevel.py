@@ -18,9 +18,11 @@ class LogLevel(mm.fields.Str):
         super(LogLevel, self).__init__(*args, **kwargs)
 
     def _validate(self, value):
-        if not hasattr(logging, value) or type(getattr(logging, value)) is not int:
+        if (not hasattr(logging, value) or
+                type(getattr(logging, value)) is not int):
             raise mm.ValidationError(
-                '{} is not a valid loglevel; try one of {}'.format(value, LogLevel.options))
+                    '{} is not a valid loglevel; try one of {}'.format(
+                        value, LogLevel.options))
 
         # Would prefer this to be an argparse.Action subclass, but not yet sure how to implement this way
         logging.getLogger().setLevel(value)
