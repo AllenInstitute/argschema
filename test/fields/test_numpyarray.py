@@ -22,28 +22,31 @@ def test_numpy():
     assert mod.args['a'].shape == (2, 2)
     assert mod.args['a'].dtype == 'uint16'
 
+
 def test_bad_shape():
     bad_shape = {
-        'a':[[1,2],[3]]
+        'a': [[1, 2], [3]]
     }
     with pytest.raises(mm.ValidationError):
         mod = ArgSchemaParser(
             input_data=bad_shape, schema_type=NumpyFileuint16, args=[])
 
+
 def test_bad_data():
     bad_shape = {
-        'a':[['a','b']]
+        'a': [['a', 'b']]
     }
     with pytest.raises(mm.ValidationError):
         mod = ArgSchemaParser(
             input_data=bad_shape, schema_type=NumpyFileuint16, args=[])
-            
+
+
 def test_serialize():
     schema = NumpyFileuint16()
     object_dict = {
-        'a':np.array([1,2])
+        'a': np.array([1, 2])
     }
-    (json_dict,errors)=schema.dump(object_dict)
-    assert(len(errors)==0)
-    assert(type(json_dict['a'])==list)
-    assert(len(json_dict['a'])==2)
+    (json_dict, errors) = schema.dump(object_dict)
+    assert(len(errors) == 0)
+    assert(type(json_dict['a']) == list)
+    assert(len(json_dict['a']) == 2)

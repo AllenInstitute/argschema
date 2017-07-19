@@ -8,7 +8,8 @@ class OptionList(mm.fields.Field):
        OptionList(options,*args,**kwargs) where options is a list of
        json compatible options which this option will be enforced to belong
     '''
-    def __init__(self, options, option_type=None, *args,**kwargs):
+
+    def __init__(self, options, option_type=None, *args, **kwargs):
         self.options = options
         self.option_type = option_type
         super(OptionList, self).__init__(*args, **kwargs)

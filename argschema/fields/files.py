@@ -11,6 +11,7 @@ class OutputFile(mm.fields.Str):
        (presently tested by opening a temporary file to that
        location)
     '''
+
     def _validate(self, value):
         try:
             path = os.path.dirname(value)
@@ -40,6 +41,7 @@ class InputDir(mm.fields.Str):
        a directory that exists and that the user can access
        (presently checked with os.access)
     '''
+
     def _validate(self, value):
         if not os.path.isdir(value):
             raise mm.ValidationError("%s is not a directory")
@@ -53,6 +55,7 @@ class InputFile(mm.fields.Str):
        file location which can be read by the user
        (presently passes os.path.isfile and os.access = R_OK)
     '''
+
     def _validate(self, value):
         if not os.path.isfile(value):
             raise mm.ValidationError("%s is not a file" % value)

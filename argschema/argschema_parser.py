@@ -118,10 +118,8 @@ class ArgSchemaParser(object):
 
     def run(self):
         '''standin run method to illustrate what the arguments are after
-        validation and parsing
-        should overwrite in your subclass
-        run()
-        prints the arguments using json.dumps
+        validation and parsing should overwrite in your subclass
+        run() prints the arguments using json.dumps
         '''
         print("running! with args")
         print(json.dumps(self.args, indent=2))

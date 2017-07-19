@@ -5,6 +5,7 @@ import logging
 import marshmallow as mm
 from argschema import ArgSchemaParser, ArgSchema
 
+
 def test_bad_path():
     with pytest.raises(mm.ValidationError):
         example = {
@@ -110,7 +111,6 @@ def test_simple_extension_write_debug_level(simple_extension_file):
     args = ['--input_json', str(simple_extension_file), '--log_level', 'DEBUG']
     mod = ArgSchemaParser(schema_type=SimpleExtension, args=args)
     assert mod.logger.getEffectiveLevel() == logging.DEBUG
-
 
 
 def test_simple_extension_write_overwrite(simple_extension_file):
