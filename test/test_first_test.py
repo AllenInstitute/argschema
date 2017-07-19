@@ -124,7 +124,3 @@ def test_simple_extension_write_overwrite_list(simple_extension_file):
             '--test.d', '6', '7', '8', '9']
     mod = ArgSchemaParser(schema_type=SimpleExtension, args=args)
     assert len(mod.args['test']['d']) == 4
-
-
-def test_autofail():
-    assert(1==2)
