@@ -2,7 +2,7 @@ import pytest
 from argschema import ArgSchemaParser, ArgSchema
 from argschema.fields import NumpyArray
 import marshmallow as mm
-
+import numpy as np
 
 numpy_array_test = {
     'a': [[1, 2],
@@ -29,6 +29,7 @@ def test_bad_shape():
     with pytest.raises(mm.ValidationError):
         mod = ArgSchemaParser(
             input_data=bad_shape, schema_type=NumpyFileuint16, args=[])
+
 def test_bad_data():
     bad_shape = {
         'a':[['a','b']]
@@ -36,3 +37,13 @@ def test_bad_data():
     with pytest.raises(mm.ValidationError):
         mod = ArgSchemaParser(
             input_data=bad_shape, schema_type=NumpyFileuint16, args=[])
+            
+def test_serialize():
+    schema = NumpyFileuint16()
+    object_dict = {
+        'a':np.array([1,2])
+    }
+    (json_dict,errors)=schema.dump(object_dict)
+    assert(len(errors)==0)
+    assert(type(json_dict['a'])==list)
+    assert(len(json_dict['a'])==2)
