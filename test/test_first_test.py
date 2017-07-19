@@ -123,4 +123,10 @@ def test_simple_extension_write_overwrite_list(simple_extension_file):
     args = ['--input_json', str(simple_extension_file),
             '--test.d', '6', '7', '8', '9']
     mod = ArgSchemaParser(schema_type=SimpleExtension, args=args)
+    mod.run()
     assert len(mod.args['test']['d']) == 4
+
+def test_bad_input_json_argparse():
+    args = ['--input_json', 'not_a_file.json']
+    with pytest.raises(mm.ValidationError): 
+        mod = ArgSchemaParser(schema_type=SimpleExtension, args=args)
