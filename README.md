@@ -1,3 +1,4 @@
+[![CircleCI](https://circleci.com/gh/AllenInstitute/argschema.svg?style=svg)](https://circleci.com/gh/AllenInstitute/argschema)
 # argschema
 
 
