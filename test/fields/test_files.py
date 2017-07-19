@@ -129,7 +129,7 @@ def test_inputdir_no_access(tmpdir):
     input_dir = tmpdir.mkdir('no_access')
     input_dir.chmod(0o222)
     input_data = {
-        'input_dir': input_dir
+        'input_dir': str(input_dir)
     }
     with pytest.raises(mm.ValidationError):
         mod = ArgSchemaParser(input_data=input_data,
