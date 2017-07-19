@@ -49,4 +49,7 @@ jobs:
       - store_artifacts:
           path: test-reports
           destination: test-reports
-          
+      - run:
+          name: upload coverage
+          command: |
+          bash <(curl -s https://codecov.io/bash)
