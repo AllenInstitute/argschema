@@ -102,3 +102,5 @@ ENV/
 .mypy_cache/
 
 test-reports/
+
+argschema/bin
