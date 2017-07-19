@@ -5,7 +5,7 @@ import marshmallow as mm
 import os
 
 
-##OUTPUT FILE TESTS
+# OUTPUT FILE TESTS
 class BasicOutputFile(ArgSchema):
     output_file = OutputFile(required=True,
                              metadata={'decription': 'a simple output file'})
@@ -18,17 +18,21 @@ enoent_outfile_example = {
     'output_file': os.path.join('path', 'to', 'output.file')
 }
 
+
 def test_outputfile_no_write(tmpdir):
-    outdir=tmpdir.mkdir('cannot_write_here')
+    outdir = tmpdir.mkdir('cannot_write_here')
     outdir.chmod(0o222)
     outfile = outdir.join('test')
     with pytest.raises(mm.ValidationError):
-        mod = ArgSchemaParser(input_data={'output_file':str(outfile)},
+        mod = ArgSchemaParser(input_data={'output_file': str(outfile)},
                               schema_type=BasicOutputFile)
+
 
 def test_outputfile_not_a_path():
     with pytest.raises(mm.ValidationError):
-        mod = ArgSchemaParser(input_data={'output_file':10},schema_type=BasicOutputFile,args=[])
+        mod = ArgSchemaParser(input_data={'output_file': 10},
+                              schema_type=BasicOutputFile, args=[])
+
 
 def test_enoent_outputfile_failed():
     with pytest.raises(mm.ValidationError):
@@ -36,9 +40,11 @@ def test_enoent_outputfile_failed():
             input_data=enoent_outfile_example,
             schema_type=BasicOutputFile, args=[])
 
+
 def test_output_file_relative():
     mod = ArgSchemaParser(
         input_data=output_file_example, schema_type=BasicOutputFile, args=[])
+
 
 def test_output_path(tmpdir):
     file_ = tmpdir.join('testoutput.json')
@@ -59,7 +65,8 @@ def test_output_path_noapath():
         args = ['--output_json', str(file_)]
         mod = ArgSchemaParser(args=args)
 
-#INPUT FILE TESTS
+
+# INPUT FILE TESTS
 class BasicInputFile(ArgSchema):
     input_file = InputFile(required=True,
                            metadata={'description': 'a simple file'})
@@ -68,6 +75,7 @@ class BasicInputFile(ArgSchema):
 input_file_example = {
     'input_file': 'relative.file'
 }
+
 
 def test_relative_file_input():
     with open(input_file_example['input_file'], 'w') as fp:
@@ -92,31 +100,36 @@ def test_access_inputfile_failed():
             input_data=input_file_example, schema_type=BasicInputFile, args=[])
     os.remove(input_file_example['input_file'])
 
-#INPUTDIR TESTS
 
+# INPUTDIR TESTS
 class BasicInputDir(ArgSchema):
     input_dir = InputDir(required=True,
-                           metadata={'description': 'a simple file'})
+                         metadata={'description': 'a simple file'})
+
 
 def test_basic_inputdir(tmpdir):
     input_data ={
-        'input_dir':str(tmpdir)
+        'input_dir': str(tmpdir)
     }
-    mod = ArgSchemaParser(input_data = input_data, schema_type=BasicInputDir,args=[])
+    mod = ArgSchemaParser(input_data=input_data,
+                          schema_type=BasicInputDir, args=[])
+
 
 def test_bad_inputdir():
-    input_data ={
-        'input_dir':'not_a_dir'
+    input_data = {
+        'input_dir': 'not_a_dir'
     }
     with pytest.raises(mm.ValidationError):
-        mod = ArgSchemaParser(input_data = input_data, schema_type=BasicInputDir,args=[])
+        mod = ArgSchemaParser(
+            input_data=input_data, schema_type=BasicInputDir, args=[])
+
 
 def test_inputdir_no_access(tmpdir):
     input_dir = tmpdir.mkdir('no_access')
     input_dir.chmod(0o222)
-    input_data ={
-        'input_dir':input_dir
+    input_data = {
+        'input_dir': input_dir
     }
     with pytest.raises(mm.ValidationError):
-        mod = ArgSchemaParser(input_data = input_data, schema_type=BasicInputDir,args=[])
-
+        mod = ArgSchemaParser(
+            input_data=input_data, schema_type=BasicInputDir, args=[])

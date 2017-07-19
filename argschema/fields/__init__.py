@@ -7,4 +7,5 @@ from .options import OptionList
 from .loglevel import LogLevel
 from .slice import Slice
 
-__all__ += ['OutputFile', 'InputDir', 'InputFile', 'NumpyArray', 'OptionList','LogLevel','Slice']
+__all__ += ['OutputFile', 'InputDir', 'InputFile', 'NumpyArray', 'OptionList',
+            'LogLevel', 'Slice']
