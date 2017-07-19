@@ -8,10 +8,6 @@ class OptionList(mm.fields.Field):
        OptionList(options,*args,**kwargs) where options is a list of
        json compatible options which this option will be enforced to belong
     '''
-<<<<<<< HEAD
-
-=======
->>>>>>> 8b26fb99f1b267b1ead73e9ef8904ea890e70f46
     def __init__(self, options, option_type=None, *args, **kwargs):
         self.options = options
         self.option_type = option_type

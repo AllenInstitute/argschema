@@ -7,15 +7,10 @@ class Slice(mm.fields.Field):
     numpy slicing. Examples: "10:20", "40", ":30", "10:2:40"'''
 
     def __init__(self, *args, **kwargs):
-<<<<<<< HEAD
-        super(Slice, self).__init__(
-            metadata={'description': 'slice the dataset'}, default=slice(None))
-=======
         kwargs['metadata'] = kwargs.get(
             'metadata', {'description': 'slice the dataset'})
         kwargs['default'] = kwargs.get('default', slice(None))
         super(Slice, self).__init__(*args, **kwargs)
->>>>>>> 8b26fb99f1b267b1ead73e9ef8904ea890e70f46
 
     def _deserialize(self, value, attr, obj):
         try:

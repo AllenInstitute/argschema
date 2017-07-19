@@ -49,8 +49,4 @@ def test_serialize():
     (json_dict, errors) = schema.dump(object_dict)
     assert(len(errors) == 0)
     assert(type(json_dict['a']) == list)
-<<<<<<< HEAD
-    assert(len(json_dict['a']) == 2)
-=======
     assert(json_dict['a'] == object_dict['a'].tolist())
->>>>>>> 8b26fb99f1b267b1ead73e9ef8904ea890e70f46
