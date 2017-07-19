@@ -10,7 +10,9 @@ class LogLevel(mm.fields.Field):
     options = ['FATAL', 'CRITICAL', 'ERROR', 'WARN', 'WARNING', 'INFO', 'DEBUG']
 
     def __init__(self, *args, **kwargs):
-        super(LogLevel, self).__init__(metadata={'description': 'set log level'}, default='WARN')
+        kwargs['metadata']=kwargs.get('metadata',{'description': 'set log level'})
+        kwargs['default']=kwargs.get('default','WARN')
+        super(LogLevel, self).__init__(*args,**kwargs)
 
     def _serialize(self, value, attr, obj):
         return value;

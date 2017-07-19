@@ -1,5 +1,5 @@
 import marshmallow as mm
-from .fields import OptionList, InputFile, OutputFile
+from .fields import LogLevel, InputFile, OutputFile
 
 
 class ArgSchema(mm.Schema):
@@ -11,7 +11,6 @@ class ArgSchema(mm.Schema):
         metadata={'description': "file path of input json file"})
     output_json = OutputFile(
         metadata={'description': "file path to output json file"})
-    log_level = OptionList(
-        ['DEBUG', 'INFO', 'WARNING', 'ERROR', 'CRITICAL'],
+    log_level = LogLevel(
         default='ERROR', metadata={
             'description': "set the logging level of the module"})
