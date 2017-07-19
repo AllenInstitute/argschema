@@ -126,3 +126,5 @@ def test_simple_extension_write_overwrite_list(simple_extension_file):
     assert len(mod.args['test']['d']) == 4
 
 
+def test_autofail():
+    assert(1==2)
