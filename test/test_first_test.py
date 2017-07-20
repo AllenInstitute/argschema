@@ -78,7 +78,7 @@ SimpleExtension_example_valid = {
 @pytest.fixture(scope='module')
 def simple_extension_file(tmpdir_factory):
     file_ = tmpdir_factory.mktemp('test').join('testinput.json')
-    file_.write(json.dumps(SimpleExtension_example_valid))
+    file_.write(json.dumps(SimpleExtension_example_valid))    
     return file_
 
 
@@ -101,6 +101,7 @@ def test_simple_extension_pass():
 def test_simple_extension_write_pass(simple_extension_file):
     args = ['--input_json', str(simple_extension_file)]
     mod = ArgSchemaParser(schema_type=SimpleExtension, args=args)
+    print json.dumps(mod.args,indent=2)
     assert mod.args['test']['a'] == 'hello'
     assert mod.args['test']['b'] == 1
     assert len(mod.args['test']['d']) == 3
