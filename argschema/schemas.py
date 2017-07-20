@@ -11,7 +11,8 @@ class DefaultSchema(mm.Schema):
     def make_object(self, in_data):
         for name, field in self.fields.items():
             if name not in in_data:
-                in_data[name] = field.default
+                if field.default is not None:
+                    in_data[name] = field.default
         return in_data
 
 
