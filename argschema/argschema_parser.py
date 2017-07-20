@@ -48,7 +48,7 @@ class ArgSchemaParser(object):
         args = utils.smart_merge(jsonargs, argsdict)
 
         # validate with load!
-        result = schema.load(args)
+        result = self.load_schema_with_defaults(schema, args)
         if len(result.errors) > 0:
             raise mm.ValidationError(json.dumps(result.errors, indent=2))
 
@@ -57,6 +57,48 @@ class ArgSchemaParser(object):
 
         self.logger = self.initialize_logger(
             logger_name, self.args.get('log_level'))
+
+    @staticmethod
+    def load_schema_with_defaults(schema, args, safedefaults=True):
+        """load_schema_with_defaults(schema, args)
+        function for deserializing the arguments dictionary (args)
+        given the schema (schema) making sure that the default values have
+        been filled in.
+        inputs)
+            args: a dictionary of input arguments
+            schema: a marshmallow.Schema schema specifiying the schema the
+                input should fit
+        outputs)
+            a deserialized dictionary of the parameters converted
+                through marshmallow
+        """
+        if (not isinstance(schema, schemas.DefaultSchema) and
+                safedefaults==False):
+            defaults = []
+
+            # find all of the schema entries with default values
+            schemata = [(schema, [])]
+            while schemata:
+                subschema, path = schemata.pop()
+                for k, v in subschema.declared_fields.items():
+                    if isinstance(v, mm.fields.Nested):
+                        schemata.append((v.schema, path + [k]))
+                    elif v.default != mm.missing:
+                        defaults.append((path + [k], v.default))
+
+            # put the default entries into the args dictionary
+            args = copy.deepcopy(args)
+            for path, val in defaults:
+                d = args
+                for path_item in path[:-1]:
+                    d = d.setdefault(path_item, {})
+                if path[-1] not in d:
+                    d[path[-1]] = val
+
+        # load the dictionary via the schema
+        result = schema.load(args)
+
+        return result
 
     @staticmethod
     def initialize_logger(name, log_level):
