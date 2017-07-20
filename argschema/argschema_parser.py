@@ -26,7 +26,7 @@ class ArgSchemaParser(object):
                  input_data=None,  # dictionary input as option instead of --input_json
                  schema_type=schemas.ArgSchema,  # schema for parsing arguments
                  args=None,
-                 logger_name=__name__):
+                 logger_name=__name__, **kwargs):
 
         schema = schema_type()
 
@@ -48,7 +48,7 @@ class ArgSchemaParser(object):
         args = utils.smart_merge(jsonargs, argsdict)
 
         # validate with load!
-        result = self.load_schema_with_defaults(schema, args)
+        result = self.load_schema_with_defaults(schema, args, **kwargs)
         if len(result.errors) > 0:
             raise mm.ValidationError(json.dumps(result.errors, indent=2))
 
@@ -59,7 +59,7 @@ class ArgSchemaParser(object):
             logger_name, self.args.get('log_level'))
 
     @staticmethod
-    def load_schema_with_defaults(schema, args, safedefaults=True):
+    def load_schema_with_defaults(schema, args, safedefaults=True, **kwargs):
         """load_schema_with_defaults(schema, args)
         function for deserializing the arguments dictionary (args)
         given the schema (schema) making sure that the default values have
@@ -73,7 +73,7 @@ class ArgSchemaParser(object):
                 through marshmallow
         """
         if (not isinstance(schema, schemas.DefaultSchema) and
-                safedefaults==False):
+                not safedefaults):
             defaults = []
 
             # find all of the schema entries with default values
