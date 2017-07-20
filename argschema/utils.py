@@ -14,7 +14,7 @@ FIELD_TYPE_MAP = {v: k for k, v in mm.Schema.TYPE_MAPPING.items()}
 def args_to_dict(argsobj):
     d = {}
     argsdict = vars(argsobj)
-    for field, v in argsdict.iteritems():
+    for field, v in argsdict.items():
         if v is not None:
             parts = field.split('.')
             root = d
