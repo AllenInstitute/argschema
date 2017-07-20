@@ -38,7 +38,7 @@ def test_log_catch():
 
 
 class MyExtension(mm.Schema):
-    a = mm.fields.Str(metadata={'description': 'a string'})
+    a = mm.fields.Str(metadata={'description': 'a string'},required=True)
     b = mm.fields.Int(metadata={'description': 'an integer'})
     c = mm.fields.Int(metadata={'description': 'an integer'}, default=10)
     d = mm.fields.List(mm.fields.Int,
