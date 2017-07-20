@@ -147,7 +147,7 @@ class MyExtensionOld(mm.Schema):
 
 
 class SimpleExtensionOld(ArgSchema):
-    test = mm.fields.Nested(MyExtension, default=None, required=True)
+    test = mm.fields.Nested(MyExtensionOld, default=None, required=True)
 
 def test_simple_extension_old_pass():
     mod = ArgSchemaParser(
@@ -157,3 +157,4 @@ def test_simple_extension_old_pass():
     assert mod.args['test']['b'] == 1
     assert mod.args['test']['c'] == 10
     assert len(mod.args['test']['d']) == 3
+
