@@ -158,3 +158,46 @@ def test_simple_extension_old_pass():
     assert mod.args['test']['c'] == 10
     assert len(mod.args['test']['d']) == 3
 
+class RecursiveSchema(argschema.schemas.DefaultSchema):
+    children = mm.fields.Nested("self",many=True,
+                                metadata={'description': 'children of this node'})
+    name = mm.fields.Str(default = "anonymous",
+                           metadata={'description': 'name of this node'})
+
+class ExampleRecursiveSchema(ArgSchema):
+    tree = mm.fields.Nested(RecursiveSchema, required=True)
+
+recursive_data = {
+    'tree': {
+                'name':'root',
+                'children':[
+                    {
+                        "name":'child1'
+                    },
+                    {
+                        "name":"branch1",
+                        "children":[
+                            {
+                                "name":"subchild1"
+                            },
+                            {
+                            },
+                            {    
+                            }
+                        ]
+                    }
+                ]
+            }
+    }
+
+
+def test_recursive_schema():
+    mod = ArgSchemaParser(
+        input_data=recursive_data,
+        schema_type=ExampleRecursiveSchema, args=[])
+    assert mod.args['tree']['name'] == 'root'
+    assert len(mod.args['tree']['children']) == 2
+    assert mod.args['tree']['children'][0]['name'] == 'child1'
+    assert mod.args['tree']['children'][1]['name'] == 'branch1'
+    assert len(mod.args['tree']['children'][1]['children']) == 3 
+    assert mod.args['tree']['children'][1]['children'][2]['name']=='anonymous'
