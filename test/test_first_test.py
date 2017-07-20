@@ -96,6 +96,7 @@ def test_simple_extension_pass():
         schema_type=SimpleExtension, args=[])
     assert mod.args['test']['a'] == 'hello'
     assert mod.args['test']['b'] == 1
+    assert mod.args['test']['c'] == 10
     assert len(mod.args['test']['d']) == 3
 
 
@@ -106,6 +107,7 @@ def test_simple_extension_write_pass(simple_extension_file):
         args=args)
     assert mod.args['test']['a'] == 'hello'
     assert mod.args['test']['b'] == 1
+    assert mod.args['test']['c'] == 10
     assert len(mod.args['test']['d']) == 3
     assert mod.logger.getEffectiveLevel() == logging.ERROR
 
