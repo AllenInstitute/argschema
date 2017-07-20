@@ -4,6 +4,7 @@ import json
 import logging
 import marshmallow as mm
 from argschema import ArgSchemaParser, ArgSchema
+import argschema
 
 
 def test_bad_path():
@@ -37,8 +38,8 @@ def test_log_catch():
         print(jm.args)
 
 
-class MyExtension(mm.Schema):
-    a = mm.fields.Str(metadata={'description': 'a string'},required=True)
+class MyExtension(argschema.schemas.DefaultSchema):
+    a = mm.fields.Str(metadata={'description': 'a string'})
     b = mm.fields.Int(metadata={'description': 'an integer'})
     c = mm.fields.Int(metadata={'description': 'an integer'}, default=10)
     d = mm.fields.List(mm.fields.Int,
@@ -46,7 +47,7 @@ class MyExtension(mm.Schema):
 
 
 class SimpleExtension(ArgSchema):
-    test = mm.fields.Nested(MyExtension)
+    test = mm.fields.Nested(MyExtension, default=None, required=True)
 
 
 def test_simple_extension_required():
@@ -78,7 +79,7 @@ SimpleExtension_example_valid = {
 @pytest.fixture(scope='module')
 def simple_extension_file(tmpdir_factory):
     file_ = tmpdir_factory.mktemp('test').join('testinput.json')
-    file_.write(json.dumps(SimpleExtension_example_valid))    
+    file_.write(json.dumps(SimpleExtension_example_valid))
     return file_
 
 
@@ -100,8 +101,9 @@ def test_simple_extension_pass():
 
 def test_simple_extension_write_pass(simple_extension_file):
     args = ['--input_json', str(simple_extension_file)]
-    mod = ArgSchemaParser(schema_type=SimpleExtension, args=args)
-    print json.dumps(mod.args,indent=2)
+    mod = ArgSchemaParser(
+        input_data=SimpleExtension_example_valid, schema_type=SimpleExtension,
+        args=args)
     assert mod.args['test']['a'] == 'hello'
     assert mod.args['test']['b'] == 1
     assert len(mod.args['test']['d']) == 3
@@ -129,5 +131,5 @@ def test_simple_extension_write_overwrite_list(simple_extension_file):
 
 def test_bad_input_json_argparse():
     args = ['--input_json', 'not_a_file.json']
-    with pytest.raises(mm.ValidationError): 
+    with pytest.raises(mm.ValidationError):
         mod = ArgSchemaParser(schema_type=SimpleExtension, args=args)
