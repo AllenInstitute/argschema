@@ -5,10 +5,10 @@ from .argschema_parser import ArgSchemaParser
 from .deprecated import JsonModule, ModuleParameters
 
 
-def main():
+def main():  # pragma: no cover
     jm = ArgSchemaParser()
     print(jm.args)
 
 
-if __name__ == "__main__":
+if __name__ == "__main__":  # pragma: no cover
     main()
