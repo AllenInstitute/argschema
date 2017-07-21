@@ -12,9 +12,12 @@ class NumpyArray(mm.fields.List):
     the array will be converted to the type, otherwise numpy will decide
     what type it should be.
     '''
+
     def __init__(self, dtype=None, *args, **kwargs):
         self.dtype = dtype
-        super(NumpyArray, self).__init__(mm.fields.Field, *args, **kwargs)
+        native_type = type(np.zeros(1,dtype).tolist()[0])
+        field_type = mm.Schema.TYPE_MAPPING.get(native_type,mm.fields.Float)
+        super(NumpyArray, self).__init__(field_type, *args, **kwargs)
 
     def _deserialize(self, value, attr, obj):
         mylist = super(NumpyArray, self)._serialize(value, attr, obj)
