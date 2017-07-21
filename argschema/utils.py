@@ -5,31 +5,33 @@ import logging
 import argparse
 from operator import add
 import inspect
-import marshmallow as mm
 import collections
+import marshmallow as mm
+
 FIELD_TYPE_MAP = {v: k for k, v in mm.Schema.TYPE_MAPPING.items()}
 
 
 def args_to_dict(argsobj):
     d = {}
     argsdict = vars(argsobj)
-    for field in argsdict.keys():
-        parts = field.split('.')
-        root = d
-        for i in range(len(parts)):
-            if i == (len(parts) - 1):
-                root[parts[i]] = argsdict.get(field)
-            else:
-                if parts[i] not in root.keys():
-                    root[parts[i]] = {}
-                root = root[parts[i]]
+    for field, v in argsdict.items():
+        if v is not None:
+            parts = field.split('.')
+            root = d
+            for i in range(len(parts)):
+                if i == (len(parts) - 1):
+                    root[parts[i]] = v
+                else:
+                    if parts[i] not in root.keys():
+                        root[parts[i]] = {}
+                    root = root[parts[i]]
     return d
 
 
 def merge_value(a, b, key, func=add):
-    '''attempt to merge these keys using function defined by
+    """attempt to merge these keys using function defined by
     func (default to add) raise an exception if this fails
-    '''
+    """
     try:
         return func(a[key], b[key])
     except:
@@ -39,9 +41,9 @@ def merge_value(a, b, key, func=add):
 
 
 def do_join(a, b, key, merge_keys=None):
-    '''determine if we should/can attempt to merge a[key],b[key]
+    """determine if we should/can attempt to merge a[key],b[key]
     if merge_keys is not specified, then no
-    '''
+    """
     if merge_keys is None:
         return False
     # only consider if key is in merge_keys
@@ -138,8 +140,7 @@ def build_schema_arguments(schema, arguments=None, path=None):
 
 
 def schema_argparser(schema):
-    """ given a jsonschema, build an argparse.ArgumentParser """
-
+    """given a jsonschema, build an argparse.ArgumentParser"""
     arguments = build_schema_arguments(schema)
 
     parser = argparse.ArgumentParser()

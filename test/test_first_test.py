@@ -4,6 +4,7 @@ import json
 import logging
 import marshmallow as mm
 from argschema import ArgSchemaParser, ArgSchema
+import argschema
 
 
 def test_bad_path():
@@ -37,7 +38,7 @@ def test_log_catch():
         print(jm.args)
 
 
-class MyExtension(mm.Schema):
+class MyExtension(argschema.schemas.DefaultSchema):
     a = mm.fields.Str(metadata={'description': 'a string'})
     b = mm.fields.Int(metadata={'description': 'an integer'})
     c = mm.fields.Int(metadata={'description': 'an integer'}, default=10)
@@ -46,7 +47,7 @@ class MyExtension(mm.Schema):
 
 
 class SimpleExtension(ArgSchema):
-    test = mm.fields.Nested(MyExtension)
+    test = mm.fields.Nested(MyExtension, default=None, required=True)
 
 
 def test_simple_extension_required():
@@ -95,14 +96,18 @@ def test_simple_extension_pass():
         schema_type=SimpleExtension, args=[])
     assert mod.args['test']['a'] == 'hello'
     assert mod.args['test']['b'] == 1
+    assert mod.args['test']['c'] == 10
     assert len(mod.args['test']['d']) == 3
 
 
 def test_simple_extension_write_pass(simple_extension_file):
     args = ['--input_json', str(simple_extension_file)]
-    mod = ArgSchemaParser(schema_type=SimpleExtension, args=args)
+    mod = ArgSchemaParser(
+        input_data=SimpleExtension_example_valid, schema_type=SimpleExtension,
+        args=args)
     assert mod.args['test']['a'] == 'hello'
     assert mod.args['test']['b'] == 1
+    assert mod.args['test']['c'] == 10
     assert len(mod.args['test']['d']) == 3
     assert mod.logger.getEffectiveLevel() == logging.ERROR
 
@@ -126,7 +131,93 @@ def test_simple_extension_write_overwrite_list(simple_extension_file):
     mod.run()
     assert len(mod.args['test']['d']) == 4
 
+
 def test_bad_input_json_argparse():
     args = ['--input_json', 'not_a_file.json']
-    with pytest.raises(mm.ValidationError): 
+    with pytest.raises(mm.ValidationError):
         mod = ArgSchemaParser(schema_type=SimpleExtension, args=args)
+
+
+# TESTS DEMONSTRATING BAD BEHAVIOR OF DEFAULT LOADING
+class MyExtensionOld(mm.Schema):
+    a = mm.fields.Str(metadata={'description': 'a string'})
+    b = mm.fields.Int(metadata={'description': 'an integer'})
+    c = mm.fields.Int(metadata={'description': 'an integer'}, default=10)
+    d = mm.fields.List(mm.fields.Int,
+                       metadata={'description': 'a list of integers'})
+
+
+class OldArgSchema(mm.Schema):
+    """The base marshmallow schema used by ArgSchemaParser to identify
+    input and output json files and the log_level which is classed from
+    marshmallow.Schema and does not have behavior to require defaults.
+    """
+
+    input_json = argschema.fields.InputFile(
+        metadata={'description': "file path of input json file"})
+    output_json = argschema.fields.OutputFile(
+        metadata={'description': "file path to output json file"})
+    log_level = argschema.fields.LogLevel(
+        default='ERROR', metadata={
+            'description': "set the logging level of the module"})
+
+
+class SimpleExtensionOld(OldArgSchema):
+    test = mm.fields.Nested(MyExtensionOld, default=None, required=True)
+
+
+def test_simple_extension_old_pass():
+    mod = ArgSchemaParser(
+        input_data=SimpleExtension_example_valid,
+        schema_type=SimpleExtensionOld, args=[], safedefaults=False)
+    assert mod.args['test']['a'] == 'hello'
+    assert mod.args['test']['b'] == 1
+    assert mod.args['test']['c'] == 10
+    assert len(mod.args['test']['d']) == 3
+
+
+class RecursiveSchema(argschema.schemas.DefaultSchema):
+    children = mm.fields.Nested("self", many=True,
+                                metadata={
+                                    'description': 'children of this node'})
+    name = mm.fields.Str(default="anonymous",
+                         metadata={'description': 'name of this node'})
+
+
+class ExampleRecursiveSchema(ArgSchema):
+    tree = mm.fields.Nested(RecursiveSchema, required=True)
+
+recursive_data = {
+    'tree': {
+                'name': 'root',
+                'children': [
+                    {
+                        "name": 'child1'
+                    },
+                    {
+                        "name": "branch1",
+                        "children": [
+                            {
+                                "name": "subchild1"
+                            },
+                            {
+                            },
+                            {
+                            }
+                        ]
+                    }
+                ]
+            }
+    }
+
+
+def test_recursive_schema():
+    mod = ArgSchemaParser(
+        input_data=recursive_data,
+        schema_type=ExampleRecursiveSchema, args=[])
+    assert mod.args['tree']['name'] == 'root'
+    assert len(mod.args['tree']['children']) == 2
+    assert mod.args['tree']['children'][0]['name'] == 'child1'
+    assert mod.args['tree']['children'][1]['name'] == 'branch1'
+    assert len(mod.args['tree']['children'][1]['children']) == 3
+    assert mod.args['tree']['children'][1]['children'][2]['name'] == 'anonymous'
