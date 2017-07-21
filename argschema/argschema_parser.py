@@ -96,6 +96,7 @@ class ArgSchemaParser(object):
         else:
             jsonargs = input_data if input_data else {}
 
+        self.logger = self.initialize_logger(logger_name,'WARNING')
         # merge the command line dictionary into the input json
         args = utils.smart_merge(jsonargs, argsdict)
 
@@ -110,10 +111,9 @@ class ArgSchemaParser(object):
         self.logger = self.initialize_logger(
             logger_name, self.args.get('log_level'))
 
-    @staticmethod
-    def load_schema_with_defaults(schema, args):
+    def load_schema_with_defaults(self  ,schema, args):
         """load_schema_with_defaults(schema, args)
-        function for deserializing the arguments dictionary (args)
+        method for deserializing the arguments dictionary (args)
         given the schema (schema) making sure that the default values have
         been filled in.
         inputs)
@@ -128,6 +128,11 @@ class ArgSchemaParser(object):
         is_non_default = contains_non_default_schemas(schema)
         if (not is_recursive) and is_non_default:
             # throw a warning
+            self.logger.warning("""DEPRECATED:You are using a Schema which contains 
+            a Schema which is not subclassed from argschema.DefaultSchema, 
+            default values will not work correctly in this case, 
+            this use is deprecated, and future versions will not fill in default 
+            values when you use non-DefaultSchema subclasses""")
             args = fill_defaults(schema, args)
         if is_recursive and is_non_default:
             raise mm.ValidationError(
