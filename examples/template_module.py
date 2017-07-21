@@ -8,7 +8,7 @@ import json
 class MyOutputParams(mm.Schema):
     name = mm.fields.Str(required=True, metadata={
                          'description': 'name of vector'})
-    inc_array = NumpyArray(dtype=np.int, required=True, metadata={
+    inc_array = NumpyArray(dtype=np.float, required=True, metadata={
                            'description': 'incremented array'})
 
 
@@ -17,7 +17,7 @@ class MyNestedParameters(mm.Schema):
                          'description': 'name of vector'})
     increment = mm.fields.Int(required=True, metadata={
                               'description': 'value to increment'})
-    array = NumpyArray(dtype=np.uint8, required=True, metadata={
+    array = NumpyArray(dtype=np.float, required=True, metadata={
                        'description': 'array to increment'})
     write_output = Boolean(required=False, default=True)
 
