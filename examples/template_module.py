@@ -35,13 +35,13 @@ class MyModule(ArgSchemaParser):
 if __name__ == '__main__':
     example_input = {
         "inc": {
-            "name": "example_output",
+            "name": "from_dictionary",
             "increment": 5,
             "array": [0, 2, 5],
 
             "write_output": True
         },
-        "output_json": "output.json"
+        "output_json": "output_dictionary.json"
     }
     mod = MyModule(input_data=example_input)
     inc_params = mod.args['inc']
