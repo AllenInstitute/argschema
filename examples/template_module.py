@@ -1,18 +1,19 @@
 from argschema import ArgSchemaParser, ArgSchema
+from argschema.schemas import DefaultSchema
 from argschema.fields import OutputFile, NumpyArray, Boolean
 import marshmallow as mm
 import numpy as np
 import json
 
 
-class MyOutputParams(mm.Schema):
+class MyOutputParams(DefaultSchema):
     name = mm.fields.Str(required=True, metadata={
                          'description': 'name of vector'})
     inc_array = NumpyArray(dtype=np.float, required=True, metadata={
                            'description': 'incremented array'})
 
 
-class MyNestedParameters(mm.Schema):
+class MyNestedParameters(DefaultSchema):
     name = mm.fields.Str(required=True, metadata={
                          'description': 'name of vector'})
     increment = mm.fields.Int(required=True, metadata={
