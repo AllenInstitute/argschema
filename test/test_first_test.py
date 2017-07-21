@@ -201,3 +201,18 @@ def test_recursive_schema():
     assert mod.args['tree']['children'][1]['name'] == 'branch1'
     assert len(mod.args['tree']['children'][1]['children']) == 3 
     assert mod.args['tree']['children'][1]['children'][2]['name']=='anonymous'
+
+class BadRecursiveSchema(mm.Schema):
+    children = mm.fields.Nested("self",many=True,
+                                metadata={'description': 'children of this node'})
+    name = mm.fields.Str(default = "anonymous",
+                           metadata={'description': 'name of this node'})
+
+class BadExampleRecursiveSchema(ArgSchema):
+    tree = mm.fields.Nested(BadRecursiveSchema, required=True)
+
+def bad_test_recursive_schema():
+    with pytest.raises(mm.ValidationError):
+        mod = ArgSchemaParser(input_data=recursive_data,
+                            schema_type=BadExampleRecursiveSchema, args=[])
+
