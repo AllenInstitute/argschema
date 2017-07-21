@@ -15,14 +15,11 @@ class NumpyArray(mm.fields.List):
 
     def __init__(self, dtype=None, *args, **kwargs):
         self.dtype = dtype
-        native_type = type(np.zeros(1,dtype).tolist()[0])
-        field_type = mm.Schema.TYPE_MAPPING.get(native_type,mm.fields.Float)
-        super(NumpyArray, self).__init__(field_type, *args, **kwargs)
+        super(NumpyArray, self).__init__(mm.fields.Field, *args, **kwargs)
 
     def _deserialize(self, value, attr, obj):
-        mylist = super(NumpyArray, self)._serialize(value, attr, obj)
         try:
-            return np.array(mylist, dtype=self.dtype)
+            return np.array(value, dtype=self.dtype)
         except ValueError as e:
             raise mm.ValidationError(
                 'Cannot create numpy array with type {} from data.'.format(
