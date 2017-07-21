@@ -11,7 +11,6 @@ class MyNestedParameters(mm.Schema):
     name = mm.fields.Str(required=True,metadata={'description':'name of vector'})
     increment = mm.fields.Int(required=True,metadata={'description':'value to increment'})
     array = NumpyArray(dtype=np.int,required=True,metadata={'description':'array to increment'})
-    output_path = OutputFile(required=True,metadata={'description':'path to write result'})
     write_output = Boolean(required=False,default=True)
 
 class MyParameters(ArgSchema):
@@ -27,9 +26,10 @@ if __name__ == '__main__':
             "name":"example_output",
             "increment":5,
             "array":[0,2,5],
-            "output_path":"output.json",
+            
             "write_output":True
-        }
+        },
+        "output_json":"output.json"
     }
     mod = MyModule(input_data=example_input)
     inc_params=mod.args['inc']
@@ -43,7 +43,7 @@ if __name__ == '__main__':
         out_json,errors = out_schema.dump(output)
         assert not errors
         print out_json
-        with open(inc_params['output_path'],'w') as fp:
+        with open(mod.args['output_json'],'w') as fp:
             json.dump(out_json,fp)
 
 
