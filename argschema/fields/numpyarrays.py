@@ -12,14 +12,14 @@ class NumpyArray(mm.fields.List):
     the array will be converted to the type, otherwise numpy will decide
     what type it should be.
     '''
+
     def __init__(self, dtype=None, *args, **kwargs):
         self.dtype = dtype
         super(NumpyArray, self).__init__(mm.fields.Field, *args, **kwargs)
 
     def _deserialize(self, value, attr, obj):
-        mylist = super(NumpyArray, self)._serialize(value, attr, obj)
         try:
-            return np.array(mylist, dtype=self.dtype)
+            return np.array(value, dtype=self.dtype)
         except ValueError as e:
             raise mm.ValidationError(
                 'Cannot create numpy array with type {} from data.'.format(

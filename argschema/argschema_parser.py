@@ -122,4 +122,4 @@ class ArgSchemaParser(object):
         run() prints the arguments using json.dumps
         '''
         print("running! with args")
-        print(json.dumps(self.args, indent=2))
+        print(self.args)
