@@ -1,6 +1,6 @@
 [![CircleCI](https://circleci.com/gh/AllenInstitute/argschema.svg?style=svg)](https://circleci.com/gh/AllenInstitute/argschema)
 [![codecov.io](https://codecov.io/github/AllenInstitute/argschema/coverage.svg?branch=master)](https://codecov.io/github/AllenInstitute/argschema?branch=master)
-[![Documentation Status](https://readthedocs.org/projects/argschema/badge/)](http://nadekobot.readthedocs.io/en/master/)
+[![Documentation Status](https://readthedocs.org/projects/argschema/badge/)](http://argschema.readthedocs.io/en/master/)
 # argschema
 
 
