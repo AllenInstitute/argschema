@@ -5,8 +5,9 @@
 
 argschema documentation
 =====================================
-This python module enables python programs to specify and validate their input parameters via a schema,
- while allowing those parameters to be passed into it in different ways in different contexts. 
+
+This python module enables python programs to specify and validate 
+their input parameters via a schema, while allowing those parameters to be passed into it in different ways in different contexts. 
 
 In particular it will allow you to 
 
@@ -19,9 +20,7 @@ In all cases, it will merge these different parameters into a single dictionary 
 The User Guide
 --------------
 
-This part of the documentation, which is mostly prose, begins with some
-background information about Requests, then focuses on step-by-step
-instructions for getting the most out of Requests.
+This is where you should start to understand how to user argschema
 
 .. toctree::
    :maxdepth: 2
@@ -30,6 +29,7 @@ instructions for getting the most out of Requests.
 
 API
 ---
+
 .. toctree::
    :maxdepth: 2
 
@@ -51,12 +51,13 @@ We are planning on occasional updating this tool with no fixed schedule.
 Community involvement is encouraged through both issues and pull requests.  
 Please make pull requests against the dev branch, as we will test changes there before merging into master.
 
-- Issue Tracker: github.com/AllenInstitute/argschema/issues
-- Source Code: github.com/AllenInstitute/argschema
+- Issue Tracker: https://github.com/AllenInstitute/argschema/issues
+- Source Code: https://github.com/AllenInstitute/argschema
 
 
 
 License
 -------
 
-The project is licensed under the BSD license.
+`The project is licensed under the BSD Clause 2 license with a non-commercial use clause. 
+<https://raw.githubusercontent.com/AllenInstitute/argschema/master/LICENSE.txt>`_

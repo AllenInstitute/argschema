@@ -99,28 +99,45 @@ argschema uses marshmallow (http://marshmallow.readthedocs.io/)
 under the hood to define the parameters schemas.  It comes with a basic set of fields
 that you can use to define your schemas. One powerful feature of Marshmallow is that you
 can define custom fields that do arbitrary validation.
-:class:`argschema.fields` contains all the built-in marshmallow fields, 
+:class:`~argschema.fields` contains all the built-in marshmallow fields, 
 but also some useful custom ones, 
-such as :class:`argschema.fields.InputFile`, 
-:class:`argschema.fields.OutputFile`, 
-:class:`argschema.fields.InputDir` that validate that the paths exist and have the proper
+such as :class:`~argschema.fields.InputFile`, 
+:class:`~argschema.fields.OutputFile`, 
+:class:`~argschema.fields.InputDir` that validate that the paths exist and have the proper
 permissions to allow files to be read or written.
 
-Other fields, such as :class:`argschema.fields.NumpyArray` will deserialize ordered lists of lists
+Other fields, such as :class:`~argschema.fields.NumpyArray` will deserialize ordered lists of lists
 directly into a numpy array of your choosing.
 
-Finally, an important Field to know is :class:`argschema.fields.Nested`, which allows you to define
-heirarchical nested structures.  The template_module example shows how you can use these fields together
-to define a slighly more complex parameter structures
+Finally, an important Field to know is :class:`~argschema.fields.Nested`, which allows you to define
+heirarchical nested structures.  Note, that if you use Nested schemas, your Nested schemas should
+subclass :class:`~argschema.schemas.DefaultSchema` in order that they properly fill in default values,
+as :class:`marshmallow.Schema` does not do that by itself.
+
+The template_module example shows how you might combine these features
+to define a more complex parameter structure.
 
 .. literalinclude:: ../../examples/template_module.py
     :caption: template_module.py
 
+so now if run the example commands found in run_template.sh
+
+.. literalinclude:: ../../examples/input.json
+    :caption: input.json
+
 .. code-block:: bash
 
+    $ python template_module.py \
+        --output_json output_command.json \
+        --inc.name from_command \
+        --inc.increment 2
+    {u'name': u'from_command', u'inc_array': [2.0, 4.0, 7.0]}
+    $ python template_module.py \
+        --input_json input.json \
+        --output_json output_fromjson.json
+    {u'name': u'from_json', u'inc_array': [4.0, 3.0, 2.0]}
     $ python template_module.py
-    WARNING:root:List contains unsupported type: <class 'marshmallow.fields.Field'>
-    {u'name': u'from_dictionary', u'inc_array': [5.0, 7.0, 10.0]}
+    {u'name': u'from_dictionary', u'inc_array': [5.0, 7.0, 10.0]}    
 
 Installation
 ------------
