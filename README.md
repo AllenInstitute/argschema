@@ -1,6 +1,7 @@
 [![CircleCI](https://circleci.com/gh/AllenInstitute/argschema.svg?style=svg)](https://circleci.com/gh/AllenInstitute/argschema)
 [![codecov.io](https://codecov.io/github/AllenInstitute/argschema/coverage.svg?branch=master)](https://codecov.io/github/AllenInstitute/argschema?branch=master)
-|docs|
+(![readthedocs.io](https://readthedocs.org/projects/docs/badge/?version=master))
+(http://argschema.readthedocs.io/en/master/?badge=master)
 # argschema
 
 
