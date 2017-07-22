@@ -4,14 +4,15 @@ import marshmallow as mm
 
 
 class NumpyArray(mm.fields.List):
-    '''NumpyArray is a marshmallow.fields.Str List subclass
-    NumpyArray(dtype=None,*args,**kwargs)
+    """NumpyArray is a marshmallow.fields.List subclass
     which will convert any numpy compatible set of lists into a
     numpy array after deserialization and convert it back to a list when
-    serializing, if dtype is given (as a numpy.dtype)
-    the array will be converted to the type, otherwise numpy will decide
-    what type it should be.
-    '''
+    serializing, 
+
+    Args:
+        dtype (numpy.Dtype): dtype specifying the desired data type. if dtype is given the array will be converted to the type, otherwise numpy will decide what type it should be. (Default=None)
+    """
+
 
     def __init__(self, dtype=None, *args, **kwargs):
         self.dtype = dtype
