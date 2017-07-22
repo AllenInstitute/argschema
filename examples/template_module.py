@@ -1,7 +1,6 @@
 from argschema import ArgSchemaParser, ArgSchema
 from argschema.fields import OutputFile, NumpyArray, Boolean, Int, Str, Nested
 from argschema.schemas import DefaultSchema
-import marshmallow as mm
 import numpy as np
 import json
 
@@ -26,13 +25,14 @@ class MyModule(ArgSchemaParser):
             schema_type=MyParameters, *args, **kwargs)
 
 #this is another schema we will use to validate and deserialize our output
-class MyOutputParams(mm.Schema):
+class MyOutputParams(DefaultSchema):
     name = Str(required=True, metadata={
         'description': 'name of vector'})
     inc_array = NumpyArray(dtype=np.float, required=True, metadata={
                            'description': 'incremented array'})
 
 if __name__ == '__main__':
+    
     # this defines a default dictionary that will be used if input_json is not specified
     example_input = {
         "inc": {
@@ -61,14 +61,19 @@ if __name__ == '__main__':
 
     # if the parameters are set as such write the output
     if inc_params['write_output']:
+        
         # initiliaze the output schema
         out_schema = MyOutputParams()
+        
         # serialize the output dictionary to a json compatible dictionary of basic types
         out_json, errors = out_schema.dump(output)
+        
         # assert there are no problems
         assert not errors
-        # print the results
+        
+        # print the results to the terminal
         print out_json
+        
         #write the result to a json file where specified by output_json
         with open(mod.args['output_json'], 'w') as fp:
             json.dump(out_json, fp)
