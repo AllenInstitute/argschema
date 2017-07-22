@@ -1,5 +1,6 @@
 [![CircleCI](https://circleci.com/gh/AllenInstitute/argschema.svg?style=svg)](https://circleci.com/gh/AllenInstitute/argschema)
 [![codecov.io](https://codecov.io/github/AllenInstitute/argschema/coverage.svg?branch=master)](https://codecov.io/github/AllenInstitute/argschema?branch=master)
+|docs|
 # argschema
 
 
@@ -71,3 +72,8 @@ If you had only designed things from the beginning to allow for each of these us
 This is what argschema is designed to do.
 
 Copyright 2017 Allen Institute
+
+.. |docs| image:: https://readthedocs.org/projects/docs/badge/?version=master
+    :alt: Documentation Status
+    :scale: 100%
+    :target: https://docs.readthedocs.io/en/master/?badge=master
