@@ -107,12 +107,13 @@ class ArgSchemaParser(object):
                  logger_name=__name__):
 
         schema = schema_type()
-        self.logger = LogLevel.initialize(logger_name)
 
         # convert schema to argparse object
         p = utils.schema_argparser(schema)
         argsobj = p.parse_args(args)
         argsdict = utils.args_to_dict(argsobj)
+
+        self.logger = LogLevel.initialize(logger_name, logging.INFO)
 
         if argsobj.input_json is not None:
             result = schema.load(argsdict)
@@ -130,6 +131,9 @@ class ArgSchemaParser(object):
         result = self.load_schema_with_defaults(schema, args)
         if len(result.errors) > 0:
             raise mm.ValidationError(json.dumps(result.errors, indent=2))
+
+        if 'log_level' in args:
+            self.logger.setLevel(args['log_level'])
 
         self.schema_args = result
         self.args = result.data

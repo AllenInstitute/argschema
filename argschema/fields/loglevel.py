@@ -28,13 +28,13 @@ class LogLevel(mm.fields.Str):
             level = int(value)
             logging.getLogger().setLevel(level)
             return level
-        except SyntaxError:
+        except ValueError:
             raise mm.ValidationError(
                     '{} is not a valid loglevel; try one of {}, or an integer'.format(
                         value, LogLevel.options.keys()))
 
     @staticmethod
-    def initialize(name):
+    def initialize(name, level):
         """initializes the logger with a name
         logger = LogLevel.initialize(name)
         
@@ -45,7 +45,7 @@ class LogLevel(mm.fields.Str):
         """
         logging.basicConfig()
         logger = logging.getLogger(name)
-        logger.setLevel(logging.WARN)
+        logger.setLevel(level)
         return logger
 
 

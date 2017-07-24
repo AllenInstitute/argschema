@@ -28,7 +28,7 @@ def test_simple_example(tmpdir):
         "log_level": "CRITICAL"}
     jm = ArgSchemaParser(input_data=example, args=[])
 
-    assert jm.args['log_level'] == 'CRITICAL'
+    assert jm.args['log_level'] == logging.CRITICAL
 
 
 def test_log_catch():
@@ -110,7 +110,7 @@ def test_simple_extension_write_pass(simple_extension_file):
     assert mod.args['test']['b'] == 1
     assert mod.args['test']['c'] == 10
     assert len(mod.args['test']['d']) == 3
-    assert mod.logger.getEffectiveLevel() == logging.ERROR
+    assert mod.logger.getEffectiveLevel() == logging.WARN
 
 
 def test_simple_extension_write_debug_level(simple_extension_file):
