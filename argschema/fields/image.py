@@ -8,6 +8,7 @@ class ImageBatch(mm.fields.Field):
     """
 
     def _validate(self, imagelist):
+        # imghdr.what() should never throw here, because that was checked in _deserialize()
         format_map = collections.Counter([imghdr.what(str(p)) for p in imagelist])
         if not format_map:
             raise mm.ValidationError('no supported images found')
@@ -20,5 +21,12 @@ class ImageBatch(mm.fields.Field):
         if not path.is_dir():
             raise mm.ValidationError('{} is not a valid directory'.format(path))
 
-        return sorted([file for file in path.iterdir() if imghdr.what(str(file))])
+        batch = []
+        for file in path.iterdir():
+            try:
+                if imghdr.what(str(file)):
+                    batch.append(file)
+            except IOError:
+                logging.warn('{} exists, but not readable'.format(file))
+        return sorted(batch)
  
