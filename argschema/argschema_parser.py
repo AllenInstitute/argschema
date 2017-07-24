@@ -6,6 +6,7 @@ import logging
 import copy
 from . import schemas
 from . import utils
+from .fields import LogLevel
 import marshmallow as mm
 
 
@@ -106,6 +107,7 @@ class ArgSchemaParser(object):
                  logger_name=__name__):
 
         schema = schema_type()
+        self.logger = LogLevel.initialize(logger_name)
 
         # convert schema to argparse object
         p = utils.schema_argparser(schema)
@@ -121,7 +123,6 @@ class ArgSchemaParser(object):
         else:
             jsonargs = input_data if input_data else {}
 
-        self.logger = self.initialize_logger(logger_name,'WARNING')
         # merge the command line dictionary into the input json
         args = utils.smart_merge(jsonargs, argsdict)
 
@@ -132,9 +133,6 @@ class ArgSchemaParser(object):
 
         self.schema_args = result
         self.args = result.data
-
-        self.logger = self.initialize_logger(
-            logger_name, self.args.get('log_level'))
 
     def load_schema_with_defaults(self  ,schema, args):
         """method for deserializing the arguments dictionary (args)
@@ -166,24 +164,6 @@ class ArgSchemaParser(object):
         result = schema.load(args)
 
         return result
-
-    @staticmethod
-    def initialize_logger(name, log_level):
-        """initializes the logger to a level with a name
-        logger = initialize_logger(name, log_level)
-        
-        Args:
-           name (str):  name of the logger
-           log_level (str): string representation of the log level of the logger
-        Returns:
-            logging.Logger: a logger set with the name and level specified
-        """
-        level = logging.getLevelName(log_level)
-
-        logging.basicConfig()
-        logger = logging.getLogger(name)
-        logger.setLevel(level=level)
-        return logger
 
     def run(self):
         """standin run method to illustrate what the arguments are after

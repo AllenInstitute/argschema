@@ -2,7 +2,6 @@
 import logging
 import marshmallow as mm
 
-
 class LogLevel(mm.fields.Str):
     '''LogLevel is a field type that provides a setting for the loglevel of
     python.logging.  This class will both validate the input and also *set* the
@@ -10,21 +9,43 @@ class LogLevel(mm.fields.Str):
     manipulation of loglevel.
     '''
 
-    options = ['FATAL', 'CRITICAL', 'ERROR',
-               'WARN', 'WARNING', 'INFO', 'DEBUG']
+    options = { s: getattr(logging, s) for s in 
+                ['FATAL', 'CRITICAL', 'ERROR', 'WARN', 'WARNING', 'INFO', 'DEBUG'] }
 
     def __init__(self, **kwargs):
-        kwargs['metadata'] = kwargs.get(
-            'metadata', {'description': 'set log level'})
+        kwargs['metadata'] = kwargs.get('metadata', {
+            'description': 'set log level: {}'.format(LogLevel.options.keys())
+            })
         kwargs['default'] = kwargs.get('default', 'WARN')
         super(LogLevel, self).__init__(**kwargs)
 
-    def _validate(self, value):
-        if (not hasattr(logging, value) or
-                type(getattr(logging, value)) is not int):
+    def _deserialize(self, value, attr, obj):
+        if value in LogLevel.options:
+            level = LogLevel.options[value]
+            logging.getLogger().setLevel(level)
+            return level
+        try:
+            level = int(value)
+            logging.getLogger().setLevel(level)
+            return level
+        except SyntaxError:
             raise mm.ValidationError(
-                    '{} is not a valid loglevel; try one of {}'.format(
-                        value, LogLevel.options))
+                    '{} is not a valid loglevel; try one of {}, or an integer'.format(
+                        value, LogLevel.options.keys()))
 
-        # Would prefer this to be an argparse.Action subclass, but not yet sure how to implement this way
-        logging.getLogger().setLevel(value)
+    @staticmethod
+    def initialize(name):
+        """initializes the logger with a name
+        logger = LogLevel.initialize(name)
+        
+        Args:
+           name (str):  name of the logger
+        Returns:
+            logging.Logger: a logger set with the name specified
+        """
+        logging.basicConfig()
+        logger = logging.getLogger(name)
+        logger.setLevel(logging.WARN)
+        return logger
+
+

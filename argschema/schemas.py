@@ -1,7 +1,6 @@
 import marshmallow as mm
 from .fields import LogLevel, InputFile, OutputFile
 
-
 class DefaultSchema(mm.Schema):
     """mm.Schema class with support for making fields default to
     values defined by that field's arguments.
@@ -27,10 +26,12 @@ class ArgSchema(DefaultSchema):
     input_json and output_json files and the log_level
     """
 
+    class Meta:
+        ordered = True # Parse in declaration order, especially the LogLevel
+
+    log_level = LogLevel()
     input_json = InputFile(
         metadata={'description': "file path of input json file"})
     output_json = OutputFile(
         metadata={'description': "file path to output json file"})
-    log_level = LogLevel(
-        default='ERROR', metadata={
-            'description': "set the logging level of the module"})
+
