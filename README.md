@@ -3,6 +3,7 @@
 [![Documentation Status](https://readthedocs.org/projects/argschema/badge/)](http://argschema.readthedocs.io/en/master/)
 # argschema
 
+DO NOT ACCEPT, JUST SHOWING OFF CLA ASSISTANT
 
 This python module simplifies the development of modules that would like to define and check a particular set of input parameters, but be able to flexibly define those inputs in different ways in different contexts. 
 
