@@ -1,4 +1,4 @@
-'''utils.py) module that contains argschema functions for converting
+'''module that contains argschema functions for converting
 marshmallow schemas to argparse and merging dictionaries from both systems
 '''
 import logging
@@ -11,6 +11,13 @@ FIELD_TYPE_MAP = {v: k for k, v in mm.Schema.TYPE_MAPPING.items()}
 
 
 def args_to_dict(argsobj):
+    """function to convert namespace returned by argsparse into a nested dictionary
+
+    Args:
+        argsobj (namespace): namespace created by argparse, with '.' denoting nested keys
+    Returns:
+        dict: dictionary of namespace values nesting elements uses '.' to denote nesting of keys
+    """
     d = {}
     argsdict = vars(argsobj)
     for field in argsdict.keys():
@@ -27,8 +34,16 @@ def args_to_dict(argsobj):
 
 
 def merge_value(a, b, key, func=add):
-    '''attempt to merge these keys using function defined by
+    '''attempt to merge these dictionaries using function defined by
     func (default to add) raise an exception if this fails
+
+    Args:
+        a (dict): one dictionary
+        b (dict): second dictionary
+        key (key): key to merge dictionary values on
+        func (function(x,y)): function that merges two values of this key
+    Returns
+        func(a[key],b[key]): merged version of values
     '''
     try:
         return func(a[key], b[key])
@@ -39,9 +54,9 @@ def merge_value(a, b, key, func=add):
 
 
 def do_join(a, b, key, merge_keys=None):
-    '''determine if we should/can attempt to merge a[key],b[key]
+    """determine if we should/can attempt to merge a[key],b[key]
     if merge_keys is not specified, then no
-    '''
+    """
     if merge_keys is None:
         return False
     # only consider if key is in merge_keys
@@ -49,8 +64,17 @@ def do_join(a, b, key, merge_keys=None):
 
 
 def smart_merge(a, b, path=None, merge_keys=None, overwrite_with_none=False):
-    """merges dictionary b into dictionary a
-    being careful not to write things with None
+    """updates dictionary a with values in dictionary b
+    being careful not to write things with None, and performing a merge on merge_keys
+
+    Args:
+        a (dict): dictionary to perform update on
+        b (dict): dictionary to perform update with
+        path (list): list of nested keys traversed so far (used for recursion)
+        merge_keys (list): list of keys to do merging on (default None)
+        overwrite (bool): boolean whether to update a if b's value is None (default=False)
+    Returns:
+        dict: a dictionary that is a updated with b's values
     """
     a = {} if a is None else a
     b = {} if b is None else b
@@ -85,7 +109,15 @@ def smart_merge(a, b, path=None, merge_keys=None, overwrite_with_none=False):
 
 
 def build_schema_arguments(schema, arguments=None, path=None):
-    """given a jsonschema, create a dictionary of argparse arguments"""
+    """given a jsonschema, create a dictionary of argparse arguments (recursive function)
+    
+    Args:
+        schema (schemas.ArgSchema): marshmallow schema with metadata['description'] filled in with help values
+        arguments (collections.OrderedDict or None): OrderedDict of dictionaries with kwargs to build argparse arguments (used recursively)
+        path (list or None): list of key paths taken so far (used recursively)
+    Returns:
+        collections.OrderedDict: OrderedDict of dictionaries with kwargs to build argparse arguments
+    """
     path = [] if path is None else path
     arguments = collections.OrderedDict() if arguments is None else arguments
 
@@ -138,7 +170,14 @@ def build_schema_arguments(schema, arguments=None, path=None):
 
 
 def schema_argparser(schema):
-    """ given a jsonschema, build an argparse.ArgumentParser """
+    """ given a jsonschema, build an argparse.ArgumentParser 
+    
+    Args:
+        schema (schemas.ArgSchema): schema to build an argparse.ArgumentParser from
+    Returns:
+        argparse.ArgumentParser: the represents the schema
+    
+    """
 
     arguments = build_schema_arguments(schema)
 

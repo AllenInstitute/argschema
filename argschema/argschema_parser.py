@@ -10,7 +10,14 @@ import marshmallow as mm
 
 
 def contains_non_default_schemas(schema, schema_list=[]):
-    """returns true if this schema contains a schema which was not an instance of DefaultSchema"""
+    """returns True if this schema contains a schema which was not an instance of DefaultSchema
+    
+    Args:
+        schema (marshmallow.Schema): schema to check
+        schema_list (list): a list of schemas checked so far, used for recursive checking leave as []
+    Returns:
+        bool: does this schema only contain schemas which are subclassed from schemas.DefaultSchema
+    """
     if not isinstance(schema, schemas.DefaultSchema):
         return True
     for k, v in schema.declared_fields.items():
@@ -25,7 +32,14 @@ def contains_non_default_schemas(schema, schema_list=[]):
 
 
 def is_recursive_schema(schema, schema_list=[]):
-    """returns true if this schema contains recursive elements"""
+    """returns true if this schema contains recursive elements
+    
+    Args:
+        schema (marshmallow.Schema): schema to check
+        schema_list (list): a list of schemas checked so far, used for recursive checking leave as []
+    Returns:
+        bool: does this schema contain any recursively defined schemas
+    """
     for k, v in schema.declared_fields.items():
         if isinstance(v, mm.fields.Nested):
             if type(v.schema) in schema_list:
@@ -38,6 +52,16 @@ def is_recursive_schema(schema, schema_list=[]):
 
 
 def fill_defaults(schema, args):
+    """DEPRECATED, function to fill in default values from schema into args
+    bug: goes into an infinite loop when there is a recursively defined schema
+    
+    Args:
+        schema (marshmallow.Schema): schema to get defaults from 
+        args (dict): dictionary to fill in missing values with defaults specified in schema
+    Returns:
+        dict: dictionary with missing default values filled in
+    """
+
     defaults = []
 
     # find all of the schema entries with default values
@@ -62,16 +86,17 @@ def fill_defaults(schema, args):
 
 
 class ArgSchemaParser(object):
-    """ArgSchemaParser(input_data=None, schema_type = schemas.ArgSchema,
-    args = None, logger_name = 'argschema')
-    inputs)
-        input data = None, dictionary parameters as option
-            instead of --input_json
-        args = None, a list of command line arguments passed to the module,
-        otherwise argparse will fill this from the command line, set to
-            [] if you want to bypass command line parsing
-        logger_name = 'argschema', name of logger from the logging
-            module you want to instantiate
+    """
+    The main class you should sub-class to write your own argschema module.  
+    Takes input_data, reference to a input_json and the command line inputs and parses out the parameters
+    and validates them against the schema_type specified.
+
+    Args:
+        input_data (dict or None): dictionary parameters instead of --input_json
+        schema_type (schemas.ArgSchema):  the schema to use to validate the parameters
+        args (list or None): command line arguments passed to the module, if None use argparse to parse the command line, set to [] if you want to bypass command line parsing
+        logger_name (str): name of logger from the logging module you want to instantiate 'argschema'
+
     """
 
     def __init__(self,
@@ -112,17 +137,16 @@ class ArgSchemaParser(object):
             logger_name, self.args.get('log_level'))
 
     def load_schema_with_defaults(self  ,schema, args):
-        """load_schema_with_defaults(schema, args)
-        method for deserializing the arguments dictionary (args)
+        """method for deserializing the arguments dictionary (args)
         given the schema (schema) making sure that the default values have
         been filled in.
-        inputs)
-            args: a dictionary of input arguments
-            schema: a marshmallow.Schema schema specifiying the schema the
-                input should fit
-        outputs)
-            a deserialized dictionary of the parameters converted
-                through marshmallow
+
+        Args:
+            args (dict): a dictionary of input arguments
+            schema (marshmallow.Schema): schema specifiying the schema the input should fit
+        Returns:
+            dict: a deserialized dictionary of the parameters converted through marshmallow
+
         """
         is_recursive = is_recursive_schema(schema)
         is_non_default = contains_non_default_schemas(schema)
@@ -147,11 +171,12 @@ class ArgSchemaParser(object):
     def initialize_logger(name, log_level):
         """initializes the logger to a level with a name
         logger = initialize_logger(name, log_level)
-        inputs)
-            name) name of the logger
-            log_level) log level of the logger
-        outputs)
-            logger: a logging.Logger set with the name and level specified
+        
+        Args:
+           name (str):  name of the logger
+           log_level (str): string representation of the log level of the logger
+        Returns:
+            logging.Logger: a logger set with the name and level specified
         """
         level = logging.getLevelName(log_level)
 
@@ -163,7 +188,7 @@ class ArgSchemaParser(object):
     def run(self):
         """standin run method to illustrate what the arguments are after
         validation and parsing should overwrite in your subclass
-        run() prints the arguments using json.dumps
+        run() prints the arguments 
         """
         print("running! with args")
         print(self.args)

@@ -1,0 +1,8 @@
+  {
+      "inc": {
+            "name": "from_json",
+            "increment": 1,
+            "array": [3, 2, 1],
+            "write_output": true
+       }
+  }
