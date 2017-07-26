@@ -3,7 +3,7 @@ from marshmallow.fields import *
 from marshmallow.fields import __all__
 from .files import OutputFile, InputDir, InputFile
 from .numpyarrays import NumpyArray
-from .deprecate import OptionList
+from .deprecated import OptionList
 from .loglevel import LogLevel
 from .slice import Slice
 
