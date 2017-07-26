@@ -1,7 +1,6 @@
 '''marshmallow fields related to choosing amongst a set of options'''
 import marshmallow as mm
 
-
 class OptionList(mm.fields.Field):
     '''OptionList is a marshmallow field which enforces that this field
        is one of a finite set of options.
@@ -11,8 +10,11 @@ class OptionList(mm.fields.Field):
        :param options: A list of python objects of which this field must be one of 
        :param kwargs: the same as any :class:'Field' receives
     '''
+
     def __init__(self, options, **kwargs):
         self.options = options
+        logger.warning(
+            'DEPRECATED: use validate=mm.validate.OneOf([a,b,c...]) in field definition instead')
         super(OptionList, self).__init__(**kwargs)
 
     def _serialize(self, value, attr, obj):
