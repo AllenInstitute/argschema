@@ -6,13 +6,31 @@ import errno
 
 
 class OutputFile(mm.fields.Str):
-    '''OutputFile marshamallow.fields.Str subclass which is a path to a
+    """OutputFile marshamallow.fields.Str subclass which is a path to a
        file location that can be written to by the current user
        (presently tested by opening a temporary file to that
        location)
-    '''
+
+    Parameters
+    ----------
+
+    Returns
+    -------
+
+    """
 
     def _validate(self, value):
+        """
+
+        Parameters
+        ----------
+        value :
+            
+
+        Returns
+        -------
+
+        """
         try:
             path = os.path.dirname(value)
         except Exception as e:
@@ -37,10 +55,10 @@ class OutputFile(mm.fields.Str):
 
 
 class InputDir(mm.fields.Str):
-    '''InputDir is  marshmallow.fields.Str subclass which is a path to a
+    """InputDir is  marshmallow.fields.Str subclass which is a path to a
        a directory that exists and that the user can access
        (presently checked with os.access)
-    '''
+    """
 
     def _validate(self, value):
         if not os.path.isdir(value):
@@ -51,10 +69,10 @@ class InputDir(mm.fields.Str):
 
 
 class InputFile(mm.fields.Str):
-    '''InputDile is a marshmallow.fields.Str subclass which is a path to a
+    """InputDile is a marshmallow.fields.Str subclass which is a path to a
        file location which can be read by the user
        (presently passes os.path.isfile and os.access = R_OK)
-    '''
+    """
 
     def _validate(self, value):
         if not os.path.isfile(value):

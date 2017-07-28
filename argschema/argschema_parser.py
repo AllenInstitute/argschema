@@ -11,12 +11,19 @@ import marshmallow as mm
 
 def contains_non_default_schemas(schema, schema_list=[]):
     """returns True if this schema contains a schema which was not an instance of DefaultSchema
-    
-    Args:
-        schema (marshmallow.Schema): schema to check
-        schema_list (list): a list of schemas checked so far, used for recursive checking leave as []
-    Returns:
-        bool: does this schema only contain schemas which are subclassed from schemas.DefaultSchema
+
+    Parameters
+    ----------
+    schema : marshmallow.Schema
+        schema to check
+    schema_list :
+         (Default value = [])
+
+    Returns
+    -------
+    bool
+        does this schema only contain schemas which are subclassed from schemas.DefaultSchema
+
     """
     if not isinstance(schema, schemas.DefaultSchema):
         return True
@@ -33,12 +40,19 @@ def contains_non_default_schemas(schema, schema_list=[]):
 
 def is_recursive_schema(schema, schema_list=[]):
     """returns true if this schema contains recursive elements
-    
-    Args:
-        schema (marshmallow.Schema): schema to check
-        schema_list (list): a list of schemas checked so far, used for recursive checking leave as []
-    Returns:
-        bool: does this schema contain any recursively defined schemas
+
+    Parameters
+    ----------
+    schema : marshmallow.Schema
+        schema to check
+    schema_list :
+         (Default value = [])
+
+    Returns
+    -------
+    bool
+        does this schema contain any recursively defined schemas
+
     """
     for k, v in schema.declared_fields.items():
         if isinstance(v, mm.fields.Nested):
@@ -54,12 +68,19 @@ def is_recursive_schema(schema, schema_list=[]):
 def fill_defaults(schema, args):
     """DEPRECATED, function to fill in default values from schema into args
     bug: goes into an infinite loop when there is a recursively defined schema
-    
-    Args:
-        schema (marshmallow.Schema): schema to get defaults from 
-        args (dict): dictionary to fill in missing values with defaults specified in schema
-    Returns:
-        dict: dictionary with missing default values filled in
+
+    Parameters
+    ----------
+    schema : marshmallow.Schema
+        schema to get defaults from
+    args :
+        
+
+    Returns
+    -------
+    dict
+        dictionary with missing default values filled in
+
     """
 
     defaults = []
@@ -86,16 +107,23 @@ def fill_defaults(schema, args):
 
 
 class ArgSchemaParser(object):
-    """
-    The main class you should sub-class to write your own argschema module.  
+    """The main class you should sub-class to write your own argschema module.
     Takes input_data, reference to a input_json and the command line inputs and parses out the parameters
     and validates them against the schema_type specified.
 
-    Args:
-        input_data (dict or None): dictionary parameters instead of --input_json
-        schema_type (schemas.ArgSchema):  the schema to use to validate the parameters
-        args (list or None): command line arguments passed to the module, if None use argparse to parse the command line, set to [] if you want to bypass command line parsing
-        logger_name (str): name of logger from the logging module you want to instantiate 'argschema'
+    Parameters
+    ----------
+    input_data : dict or None
+        dictionary parameters instead of --input_json
+    schema_type : schemas.ArgSchema
+        the schema to use to validate the parameters
+    args : list or None
+        command line arguments passed to the module, if None use argparse to parse the command line, set to [] if you want to bypass command line parsing
+    logger_name : str
+        name of logger from the logging module you want to instantiate 'argschema'
+
+    Returns
+    -------
 
     """
 
@@ -141,11 +169,17 @@ class ArgSchemaParser(object):
         given the schema (schema) making sure that the default values have
         been filled in.
 
-        Args:
-            args (dict): a dictionary of input arguments
-            schema (marshmallow.Schema): schema specifiying the schema the input should fit
-        Returns:
-            dict: a deserialized dictionary of the parameters converted through marshmallow
+        Parameters
+        ----------
+        args : dict
+            a dictionary of input arguments
+        schema :
+            
+
+        Returns
+        -------
+        dict
+            a deserialized dictionary of the parameters converted through marshmallow
 
         """
         is_recursive = is_recursive_schema(schema)
@@ -171,12 +205,19 @@ class ArgSchemaParser(object):
     def initialize_logger(name, log_level):
         """initializes the logger to a level with a name
         logger = initialize_logger(name, log_level)
-        
-        Args:
-           name (str):  name of the logger
-           log_level (str): string representation of the log level of the logger
-        Returns:
-            logging.Logger: a logger set with the name and level specified
+
+        Parameters
+        ----------
+        name : str
+            name of the logger
+        log_level :
+            
+
+        Returns
+        -------
+        logging.Logger
+            a logger set with the name and level specified
+
         """
         level = logging.getLevelName(log_level)
 
@@ -188,7 +229,14 @@ class ArgSchemaParser(object):
     def run(self):
         """standin run method to illustrate what the arguments are after
         validation and parsing should overwrite in your subclass
-        run() prints the arguments 
+        run() prints the arguments
+
+        Parameters
+        ----------
+
+        Returns
+        -------
+
         """
         print("running! with args")
         print(self.args)

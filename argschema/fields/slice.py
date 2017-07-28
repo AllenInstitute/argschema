@@ -6,7 +6,12 @@ class Slice(mm.fields.Field):
     selecting some subset of a larger dataset.  The syntax is identical to
     numpy slicing. Examples: "10:20", "40", ":30", "10:2:40"
 
-    :param kwargs: the same as any :class:'Field' receives"""
+    Parameters
+    ----------
+    kwargs :
+        the same as any :class:'Field' receive
+
+    """
 
     def __init__(self, **kwargs):
         kwargs['metadata'] = kwargs.get(

@@ -4,15 +4,18 @@ import logging
 logger = logging.getLogger('argschema')
 
 class OptionList(mm.fields.Field):
-    '''OptionList is a marshmallow field which enforces that this field
+    """OptionList is a marshmallow field which enforces that this field
        is one of a finite set of options.
        OptionList(options,*args,**kwargs) where options is a list of
        json compatible options which this option will be enforced to belong
 
-       Args:
-            options (list): A list of python objects of which this field must be one of 
-            kwargs (dict): the same as any :class:`Field` receives
-    '''
+    Parameters
+    ----------
+    options : list
+        A list of python objects of which this field must be one of
+    kwargs : dict
+        the same as any :class:`Field` receives
+    """
 
     def __init__(self, options, **kwargs):
         self.options = options

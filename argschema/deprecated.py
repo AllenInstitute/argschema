@@ -3,10 +3,10 @@ from .schemas import ArgSchema
 
 
 class JsonModule(ArgSchemaParser):
-    '''deprecated name of ArgSchemaParser'''
+    """deprecated name of ArgSchemaParser"""
     pass
 
 
 class ModuleParameters(ArgSchema):
-    '''deprecated name of ArgSchema'''
+    """deprecated name of ArgSchema"""
     pass
