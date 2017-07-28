@@ -15,13 +15,14 @@ def args_to_dict(argsobj):
 
     Parameters
     ----------
-    argsobj :
+    argsobj : argparse.Namespace
+        Namespace object returned by standard argparse.parse function
         
 
     Returns
     -------
     dict
-        dictionary of namespace values nesting elements uses '.' to denote nesting of keys
+        dictionary of namespace values where nesting elements uses '.' to denote nesting of keys
 
     """
     d = {}
@@ -151,23 +152,20 @@ def smart_merge(a, b, path=None, merge_keys=None, overwrite_with_none=False):
 
 def build_schema_arguments(schema, arguments=None, path=None):
     """given a jsonschema, create a dictionary of argparse arguments (recursive function)
-    
-    Args:
-        schema (schemas.ArgSchema): marshmallow schema with metadata['description'] filled in with help values
 
     Parameters
     ----------
     path :
         list or None (Default value = None)
     schema :
-        
+        marshmallow schema with metadata['description'] filled in with help values
     arguments :
-         (Default value = None)
+        (Default value = None)
 
     Returns
     -------
-    type
-        collections.OrderedDict: OrderedDict of dictionaries with kwargs to build argparse arguments
+    collections.OrderedDict
+        OrderedDict of dictionaries with kwargs to build argparse arguments
 
     """
     path = [] if path is None else path
@@ -226,8 +224,8 @@ def schema_argparser(schema):
 
     Parameters
     ----------
-    schema :
-        
+    schema : argschema.schemas.ArgSchema
+        schema to build an argparser from
 
     Returns
     -------

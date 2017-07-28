@@ -8,13 +8,6 @@ class LogLevel(mm.fields.Str):
     python.logging.  This class will both validate the input and also *set* the
     input globally.  In simple scenarios, a module will not have to do any
     manipulation of loglevel.
-
-    Parameters
-    ----------
-
-    Returns
-    -------
-
     """
 
     options = ['FATAL', 'CRITICAL', 'ERROR',
@@ -33,10 +26,6 @@ class LogLevel(mm.fields.Str):
         ----------
         value : str
             value to validate
-            
-
-        Returns
-        -------
 
         """
         if (not hasattr(logging, value) or

@@ -14,9 +14,6 @@ class NumpyArray(mm.fields.List):
     dtype : numpy.Dtype
         dtype specifying the desired data type. if dtype is given the array will be converted to the type, otherwise numpy will decide what type it should be. (Default=None)
 
-    Returns
-    -------
-
     """
 
 
@@ -25,21 +22,6 @@ class NumpyArray(mm.fields.List):
         super(NumpyArray, self).__init__(mm.fields.Field, *args, **kwargs)
 
     def _deserialize(self, value, attr, obj):
-        """
-
-        Parameters
-        ----------
-        value :
-            
-        attr :
-            
-        obj :
-            
-
-        Returns
-        -------
-
-        """
         try:
             return np.array(value, dtype=self.dtype)
         except ValueError as e:
@@ -48,21 +30,6 @@ class NumpyArray(mm.fields.List):
                     self.dtype))
 
     def _serialize(self, value, attr, obj):
-        """
-
-        Parameters
-        ----------
-        value :
-            
-        attr :
-            
-        obj :
-            
-
-        Returns
-        -------
-
-        """
         if value is None:
             return None
         return mm.fields.List._serialize(self, value.tolist(), attr, obj)

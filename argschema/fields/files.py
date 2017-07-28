@@ -58,27 +58,9 @@ class InputDir(mm.fields.Str):
     """InputDir is  marshmallow.fields.Str subclass which is a path to a
        a directory that exists and that the user can access
        (presently checked with os.access)
-
-    Parameters
-    ----------
-
-    Returns
-    -------
-
     """
 
     def _validate(self, value):
-        """
-
-        Parameters
-        ----------
-        value :
-            
-
-        Returns
-        -------
-
-        """
         if not os.path.isdir(value):
             raise mm.ValidationError("%s is not a directory")
         elif not os.access(value, os.R_OK):
@@ -90,27 +72,9 @@ class InputFile(mm.fields.Str):
     """InputDile is a marshmallow.fields.Str subclass which is a path to a
        file location which can be read by the user
        (presently passes os.path.isfile and os.access = R_OK)
-
-    Parameters
-    ----------
-
-    Returns
-    -------
-
     """
 
     def _validate(self, value):
-        """
-
-        Parameters
-        ----------
-        value :
-            
-
-        Returns
-        -------
-
-        """
         if not os.path.isfile(value):
             raise mm.ValidationError("%s is not a file" % value)
         elif not os.access(value, os.R_OK):

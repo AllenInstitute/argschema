@@ -11,9 +11,6 @@ class Slice(mm.fields.Field):
     kwargs :
         the same as any :class:'Field' receive
 
-    Returns
-    -------
-
     """
 
     def __init__(self, **kwargs):
@@ -23,21 +20,6 @@ class Slice(mm.fields.Field):
         super(Slice, self).__init__( **kwargs)
 
     def _deserialize(self, value, attr, obj):
-        """
-
-        Parameters
-        ----------
-        value :
-            
-        attr :
-            
-        obj :
-            
-
-        Returns
-        -------
-
-        """
         try:
             args = tuple([int(c) if c else None for c in value.split(':')])
             return slice(*args)
