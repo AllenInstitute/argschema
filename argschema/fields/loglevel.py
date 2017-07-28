@@ -31,7 +31,8 @@ class LogLevel(mm.fields.Str):
 
         Parameters
         ----------
-        value :
+        value : str
+            value to validate
             
 
         Returns
