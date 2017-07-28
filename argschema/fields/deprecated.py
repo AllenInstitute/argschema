@@ -4,15 +4,22 @@ import logging
 logger = logging.getLogger('argschema')
 
 class OptionList(mm.fields.Field):
-    '''OptionList is a marshmallow field which enforces that this field
+    """OptionList is a marshmallow field which enforces that this field
        is one of a finite set of options.
        OptionList(options,*args,**kwargs) where options is a list of
        json compatible options which this option will be enforced to belong
 
-       Args:
-            options (list): A list of python objects of which this field must be one of 
-            kwargs (dict): the same as any :class:`Field` receives
-    '''
+    Parameters
+    ----------
+    options : list
+        A list of python objects of which this field must be one of
+    kwargs : dict
+        the same as any :class:`Field` receives
+
+    Returns
+    -------
+
+    """
 
     def __init__(self, options, **kwargs):
         self.options = options
@@ -21,9 +28,35 @@ class OptionList(mm.fields.Field):
         super(OptionList, self).__init__(**kwargs)
 
     def _serialize(self, value, attr, obj):
+        """
+
+        Parameters
+        ----------
+        value :
+            
+        attr :
+            
+        obj :
+            
+
+        Returns
+        -------
+
+        """
         return value
 
     def _validate(self, value):
+        """
+
+        Parameters
+        ----------
+        value :
+            
+
+        Returns
+        -------
+
+        """
         if value not in self.options:
             raise mm.ValidationError("%s is not a valid option" % value)
 

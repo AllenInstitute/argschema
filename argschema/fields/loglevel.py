@@ -4,11 +4,18 @@ import marshmallow as mm
 
 
 class LogLevel(mm.fields.Str):
-    '''LogLevel is a field type that provides a setting for the loglevel of
+    """LogLevel is a field type that provides a setting for the loglevel of
     python.logging.  This class will both validate the input and also *set* the
     input globally.  In simple scenarios, a module will not have to do any
     manipulation of loglevel.
-    '''
+
+    Parameters
+    ----------
+
+    Returns
+    -------
+
+    """
 
     options = ['FATAL', 'CRITICAL', 'ERROR',
                'WARN', 'WARNING', 'INFO', 'DEBUG']
@@ -20,6 +27,17 @@ class LogLevel(mm.fields.Str):
         super(LogLevel, self).__init__(**kwargs)
 
     def _validate(self, value):
+        """
+
+        Parameters
+        ----------
+        value :
+            
+
+        Returns
+        -------
+
+        """
         if (not hasattr(logging, value) or
                 type(getattr(logging, value)) is not int):
             raise mm.ValidationError(
