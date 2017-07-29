@@ -230,13 +230,6 @@ class ArgSchemaParser(object):
         """standin run method to illustrate what the arguments are after
         validation and parsing should overwrite in your subclass
         run() prints the arguments
-
-        Parameters
-        ----------
-
-        Returns
-        -------
-
         """
         print("running! with args")
         print(self.args)

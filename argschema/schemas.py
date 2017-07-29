@@ -5,13 +5,6 @@ from .fields import LogLevel, InputFile, OutputFile
 class DefaultSchema(mm.Schema):
     """mm.Schema class with support for making fields default to
     values defined by that field's arguments.
-
-    Parameters
-    ----------
-
-    Returns
-    -------
-
     """
 
     @mm.pre_load
@@ -39,13 +32,6 @@ class DefaultSchema(mm.Schema):
 class ArgSchema(DefaultSchema):
     """The base marshmallow schema used by ArgSchemaParser to identify
     input_json and output_json files and the log_level
-
-    Parameters
-    ----------
-
-    Returns
-    -------
-
     """
 
     input_json = InputFile(
