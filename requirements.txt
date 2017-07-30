@@ -1,4 +1,3 @@
 marshmallow
 numpy
 sphinxcontrib-napoleon
-tox
