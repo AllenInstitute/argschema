@@ -38,8 +38,8 @@ jobs:
 
       - save_cache:
           paths:
-            - .venv
-            - .tox
+            - ~/repo/venv
+            - ~/repo/tox
           key: v1-dependencies-{{ checksum "requirements.txt" }}-{{ checksum "test_requirements.txt"}}
         
       # run tests!
