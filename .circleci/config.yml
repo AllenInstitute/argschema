@@ -19,18 +19,17 @@ jobs:
 
     steps:
       - checkout
-
       # Download and cache dependencies
       - restore_cache:
           keys:
           - v1-dependencies-{{ checksum "requirements.txt" }}
           # fallback to using the latest cache if no exact match is found
           - v1-dependencies-
+      - run: pip install tox
 
       - run:
           name: install dependencies
           command: |
-            pip install tox
             tox --notest
             pip install -r requirements.txt
             pip install -r test_requirements.txt
