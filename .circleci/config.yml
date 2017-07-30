@@ -36,7 +36,7 @@ jobs:
 
     - save_cache:
         paths:
-          - ~/repo/.venv
+          - .venv
         key: python3-dependencies-{{ checksum "requirements.txt" }}-{{ checksum "test_requirements.txt"}}
       
     # run tests!
@@ -76,7 +76,7 @@ jobs:
 
     - save_cache:
         paths:
-          - ~/repo/.venv
+          - .venv
         key: python27-dependencies-{{ checksum "requirements.txt" }}-{{ checksum "test_requirements.txt"}}
       
     # run tests!
