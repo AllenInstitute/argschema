@@ -11,11 +11,11 @@ workflows:
       - "python-2.7"
       - "python-3.6.1"
 
-  
-
 jobs:
   "python-3.6.1":
     working_directory: ~/repo
+    docker:
+        - image: circleci/python:3.6.1
     steps:
       - checkout
       # Download and cache dependencies
@@ -52,11 +52,12 @@ jobs:
       - store_artifacts:
           path: test-reports
           destination: test-reports
-      docker:
-        - image: circleci/python:3.6.1
+      
 
   "python-2.7":
     working_directory: ~/repo
+    docker:
+      - image: circleci/python:2.7
     steps:
       - checkout
       # Download and cache dependencies
@@ -93,6 +94,5 @@ jobs:
       - store_artifacts:
           path: test-reports
           destination: test-reports
-      docker:
-        - image: circleci/python:2.7
+
 
