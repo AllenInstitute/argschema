@@ -6,8 +6,6 @@ import marshmallow as mm
 from argschema import ArgSchemaParser, ArgSchema
 import argschema
 
-def test_trivial():
-    print("testing trivial for cache")
 
 def test_bad_path():
     with pytest.raises(mm.ValidationError):
