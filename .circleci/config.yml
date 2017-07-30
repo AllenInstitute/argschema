@@ -5,6 +5,7 @@
 version: 2
 
 workflows:
+  version: 2
   build:
     jobs:
       - "python-2.7"
