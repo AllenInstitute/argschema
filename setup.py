@@ -3,7 +3,7 @@ from setuptools import setup, find_packages
 with open('requirements.txt', 'r') as f:
     required = f.read().splitlines()
 
-with open('test/test_requirements.txt','r') as f:
+with open('test_requirements.txt','r') as f:
     test_required = f.read().splitlines()
 
 setup(name='argschema',
