@@ -25,6 +25,7 @@ shared: &shared
     - run:
         name: install dependencies
         command: |
+          sudo pip install virtualenv
           python -m venv venv
           . venv/bin/activate
           pip install -r requirements.txt
