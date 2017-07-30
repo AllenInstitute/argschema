@@ -5,43 +5,43 @@
 version: 2
 shared:
   working_directory: ~/repo
+  build:
+    steps:
+      - checkout
+      # Download and cache dependencies
+      - restore_cache:
+          keys:
+          - v1-dependencies-{{ checksum "requirements.txt" }}-{{ checksum "test_requirements.txt"}}
+          # fallback to using the latest cache if no exact match is found
+          - v1-dependencies-
 
-  steps:
-    - checkout
-    # Download and cache dependencies
-    - restore_cache:
-        keys:
-        - v1-dependencies-{{ checksum "requirements.txt" }}-{{ checksum "test_requirements.txt"}}
-        # fallback to using the latest cache if no exact match is found
-        - v1-dependencies-
+      - run:
+          name: install dependencies
+          command: |
+            python3 -m venv venv
+            . venv/bin/activate
+            pip install -r requirements.txt
+            pip install -r test_requirements.txt
 
-    - run:
-        name: install dependencies
-        command: |
-          python3 -m venv venv
-          . venv/bin/activate
-          pip install -r requirements.txt
-          pip install -r test_requirements.txt
+      - save_cache:
+          paths:
+            - ~/repo/.venv
+          key: v1-dependencies-{{ checksum "requirements.txt" }}-{{ checksum "test_requirements.txt"}}
+        
+      # run tests!
+      - run:
+          name: run tests
+          command: |
+            . venv/bin/activate
+            python setup.py test
+            bash <(curl -s https://codecov.io/bash)
 
-    - save_cache:
-        paths:
-          - ~/repo/.venv
-        key: v1-dependencies-{{ checksum "requirements.txt" }}-{{ checksum "test_requirements.txt"}}
-      
-    # run tests!
-    - run:
-        name: run tests
-        command: |
-          . venv/bin/activate
-          python setup.py test
-          bash <(curl -s https://codecov.io/bash)
+      - store_test_results:
+          path: test-reports
 
-    - store_test_results:
-        path: test-reports
-
-    - store_artifacts:
-        path: test-reports
-        destination: test-reports
+      - store_artifacts:
+          path: test-reports
+          destination: test-reports
 
 jobs:
   "python-3.6.1":
