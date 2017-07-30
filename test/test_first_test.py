@@ -6,8 +6,6 @@ import marshmallow as mm
 from argschema import ArgSchemaParser, ArgSchema
 import argschema
 
-def test_fail_python3():
-    print 'bad python3'
 
 def test_bad_path():
     with pytest.raises(mm.ValidationError):
