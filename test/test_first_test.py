@@ -6,7 +6,9 @@ import marshmallow as mm
 from argschema import ArgSchemaParser, ArgSchema
 import argschema
 
-
+def test_check_cache():
+    pass
+    
 def test_bad_path():
     with pytest.raises(mm.ValidationError):
         example = {
