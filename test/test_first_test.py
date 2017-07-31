@@ -214,3 +214,42 @@ def bad_test_recursive_schema():
         mod = ArgSchemaParser(input_data=recursive_data,
                             schema_type=BadExampleRecursiveSchema, args=[])
 
+
+class ModelFit(argschema.schemas.DefaultSchema):
+    fit_type = argschema.fields.Str(description="")
+    hof_fit = argschema.fields.InputFile(description="")
+    hof = argschema.fields.InputFile(description="")
+
+
+class PopulationSelectionPaths(argschema.schemas.DefaultSchema):
+    fits = argschema.fields.Nested(ModelFit, description="", many=True)
+
+
+class PopulationSelectionParameters(argschema.ArgSchema):
+    paths = argschema.fields.Nested(PopulationSelectionPaths)
+
+
+david_data ={
+    'paths':{
+        'fits':[{
+            'fit_type':'test',
+            'hof_fit':'requirements.txt',
+            'hof':'requirements.txt'
+        },
+        {
+            'fit_type':'test2',
+            'hof_fit':'requirements.txt',
+            'hof':'requirements.txt'
+        }
+        ]
+    }
+}
+
+def test_david_example(tmpdir_factory):
+    file_ = tmpdir_factory.mktemp('test').join('testinput.json')
+    file_.write(json.dumps(david_data))
+    args = ['--input_json', str(file_)]
+    mod = argschema.ArgSchemaParser(schema_type=PopulationSelectionParameters,args=args)
+    print(mod.args)
+    assert(len(mod.args['paths']['fits'])==1)
+
