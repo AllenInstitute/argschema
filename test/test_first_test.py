@@ -251,5 +251,5 @@ def test_david_example(tmpdir_factory):
     args = ['--input_json', str(file_)]
     mod = argschema.ArgSchemaParser(schema_type=PopulationSelectionParameters,args=args)
     print(mod.args)
-    assert(len(mod.args['paths']['fits'])==1)
+    assert(len(mod.args['paths']['fits'])==2)
 
