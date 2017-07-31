@@ -11,9 +11,9 @@ workflows:
       - "python-2.7"
       - "python-3.6.1"
       - "increment_version"
-        requires:
-          - "python-2.7"
-          - "python-3.6.1"
+      requires:
+        - "python-2.7"
+        - "python-3.6.1"
 
 jobs:
   "increment_version":
