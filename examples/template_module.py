@@ -18,12 +18,6 @@ class MyNestedParameters(DefaultSchema):
 class MyParameters(ArgSchema):
     inc = Nested(MyNestedParameters)
 
-# here is my custom module that uses MyParameters by default
-class MyModule(ArgSchemaParser):
-    def __init__(self, *args, **kwargs):
-        super(MyModule, self).__init__(
-            schema_type=MyParameters, *args, **kwargs)
-
 #this is another schema we will use to validate and deserialize our output
 class MyOutputParams(DefaultSchema):
     name = Str(required=True, metadata={
@@ -46,7 +40,9 @@ if __name__ == '__main__':
     }
 
     # here is my ArgSchemaParser that processes my inputs
-    mod = MyModule(input_data=example_input)
+    mod = ArgSchemaParser(input_data=example_input,
+                          schema_type=MyParameters)
+                          
     # pull out the inc section of the parameters
     inc_params = mod.args['inc']
 

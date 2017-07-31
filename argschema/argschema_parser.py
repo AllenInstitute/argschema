@@ -225,18 +225,3 @@ class ArgSchemaParser(object):
         logger = logging.getLogger(name)
         logger.setLevel(level=level)
         return logger
-
-    def run(self):
-        """standin run method to illustrate what the arguments are after
-        validation and parsing should overwrite in your subclass
-        run() prints the arguments
-
-        Parameters
-        ----------
-
-        Returns
-        -------
-
-        """
-        print("running! with args")
-        print(self.args)
