@@ -24,7 +24,7 @@ class DefaultSchema(mm.Schema):
         """
         for name, field in self.fields.items():
             if name not in in_data:
-                if field.default is not None:
+                if field.default is not mm.missing:
                     in_data[name] = field.default
         return in_data
 

@@ -17,7 +17,7 @@ def args_to_dict(argsobj):
     ----------
     argsobj : argparse.Namespace
         Namespace object returned by standard argparse.parse function
-        
+
 
     Returns
     -------
@@ -77,11 +77,11 @@ def do_join(a, b, key, merge_keys=None):
     Parameters
     ----------
     a :
-        
+
     b :
-        
+
     key :
-        
+
     merge_keys :
          (Default value = None)
 
@@ -175,11 +175,10 @@ def build_schema_arguments(schema, arguments=None, path=None):
         if isinstance(field, mm.fields.Nested):
             if field.many:
                 logging.warning("many=True not supported from argparse")
-                return
-
-            build_schema_arguments(field.schema,
-                                   arguments,
-                                   path + [field_name])
+            else:
+                build_schema_arguments(field.schema,
+                                       arguments,
+                                       path + [field_name])
         else:
             # it's not an object, so build the argument
             arg = {}
