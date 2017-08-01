@@ -8,9 +8,9 @@ workflows:
   version: 2
   build:
     jobs:
-      - python-2.7
-      - python-3.6.1
-      - increment:
+      - "python-2.7"
+      - "python-3.6.1"
+      - "increment":
         requires:
           - python-2.7
           - python-3.6.1
@@ -19,7 +19,7 @@ workflows:
             only: auto_inc_circleci
 
 jobs:
-  increment:
+  "increment":
     working_directory: ~/repo
     docker:
       - image: circleci/python:3.6.1
@@ -38,7 +38,7 @@ jobs:
           python setup.py install
           python .circleci/increment_version.py
 
-  python-3.6.1:
+  "python-3.6.1":
     working_directory: ~/repo
     docker:
         - image: circleci/python:3.6.1
@@ -80,7 +80,7 @@ jobs:
           destination: test-reports
       
 
-  python-2.7:
+  "python-2.7":
     working_directory: ~/repo
     docker:
       - image: circleci/python:2.7
