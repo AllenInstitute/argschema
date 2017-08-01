@@ -10,7 +10,11 @@ workflows:
     jobs:
       - python-2.7
       - python-3.6.1
-      - increment
+      - increment:
+        - requires:
+          - python-2.7
+          - python-3.6.1
+
 jobs:
   increment:
     working_directory: ~/repo
