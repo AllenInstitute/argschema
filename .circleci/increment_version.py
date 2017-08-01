@@ -14,4 +14,7 @@ if __name__ == "__main__":
     os.system("git add -u")
     os.system("git commit -m '[ci skip] Increase version to {}'"
               .format(new_version))
+    os.system('git config --global user.email "forrest.collman@gmail.com"')
+    os.system('git config --global user.name "CircleCi"')
+    os.system('git config --global push.default matching')
     os.system("git push")
