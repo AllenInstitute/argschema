@@ -10,9 +10,9 @@ workflows:
     jobs:
       - python-2.7
       - python-3.6.1
-
+      - increment
 jobs:
-  "increment":
+  increment:
     working_directory: ~/repo
     docker:
       - image: circleci/python:3.6.1
