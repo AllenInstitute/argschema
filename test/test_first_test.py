@@ -260,5 +260,9 @@ class MyShorterExtension(ArgSchema):
     d = mm.fields.List(mm.fields.Int, description='a list of integers')
 
 def test_simple_description():
-    mod = argschema.ArgSchemaParser(schema_type=MyShorterExtension,args=['--help'])
-    
+    d =    {
+            'a': "hello",
+            'b': 1,
+            'd': [1, 5, 4]
+        }
+    mod = argschema.ArgSchemaParser(input_data = d, schema_type=MyShorterExtension)
