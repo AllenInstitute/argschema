@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-# build package and upload to private pypi index
+# build package and upload to pypi index
 echo "[pypi]" >> ~/.pypirc
 echo "username=$PYPI_USERNAME" >> ~/.pypirc
 echo "password=$PYPI_PASSWORD" >> ~/.pypirc
