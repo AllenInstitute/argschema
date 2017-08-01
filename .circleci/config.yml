@@ -17,7 +17,7 @@ workflows:
           filters:
             branches:
               only:
-                  - auto_inc_circleci
+                  - master
 
 jobs:
   increment:
