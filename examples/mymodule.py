@@ -5,5 +5,5 @@ class MySchema(argschema.ArgSchema):
                             
 if __name__ == '__main__':
     mod = argschema.ArgSchemaParser(schema_type=MySchema)
-    mod.run()
+    print(mod.args)
     
