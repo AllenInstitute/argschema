@@ -15,5 +15,5 @@ echo "[pypi-private]" >> ~/.pypirc
 echo "username=$PYPI_USERNAME" >> ~/.pypirc
 echo "password=$PYPI_PASSWORD" >> ~/.pypirc
 
-python setup.py bdist wheel
+python setup.py bdist_wheel
 twine upload dist/*
