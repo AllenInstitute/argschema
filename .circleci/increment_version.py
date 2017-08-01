@@ -18,4 +18,4 @@ if __name__ == "__main__":
     os.system("git commit -m '[ci skip] Increase version to {}'"
               .format(new_version))
 
-    os.system("git push origin master")
+    os.system("git push")
