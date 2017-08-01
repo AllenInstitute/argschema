@@ -14,7 +14,8 @@ workflows:
           requires:
               - python-2.7
               - python-3.6.1
-          branches:
+          filters:
+            branches:
               only:
                   - auto_inc_circleci
 
