@@ -189,7 +189,6 @@ def build_schema_arguments(schema, arguments=None, path=None):
                 arg['help'] = md['description']
             #also look to see if description was added a kwarg
             else:
-                print('falling back')
                 if 'description' in field.metadata:
                     arg['help'] = field.metadata.get('description')
 
