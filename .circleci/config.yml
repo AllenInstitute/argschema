@@ -23,7 +23,7 @@ workflows:
               - test-python-3.6.1
           filters:
             branches:
-              only: develop
+              only: dev
 
 jobs:
   merge:
