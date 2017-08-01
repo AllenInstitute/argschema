@@ -33,9 +33,9 @@ jobs:
     steps:
       - checkout
       - run:
-        name: merge with master
-        command: |
-          .circleci/circle_master_merge.sh
+          name: merge with master
+          command: |
+            .circleci/circle_master_merge.sh
 
   package:
     working_directory: ~/repo
