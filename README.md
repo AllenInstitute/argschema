@@ -18,22 +18,26 @@ AND/OR pass parameters via the command line, in a way that will override the inp
 We are planning on occasional updating this tool with no fixed schedule. Community involvement is encouraged through both issues and pull requests.  Please make pull requests against the dev branch, as we will test changes there before merging into master.
 
 ## What does it do
-argschema defines two basic classes which every module should subclass, ArgSchemaParser and ArgSchema. ArgSchemaParser takes ArgSchema as an input which is simply an extension of the marshmallow Schema class (http://marshmallow.readthedocs.io/en/latest/).
+argschema defines two basic classes, ArgSchemaParser and ArgSchema. ArgSchemaParser takes ArgSchema as an input which is simply an extension of the marshmallow Schema class (http://marshmallow.readthedocs.io/en/latest/).
 
-ArgSchemaParser then takes that schema, and builds a argparse parser from the schema using a standard pattern to convert the schema.
-Nested elements of the schema are specified with a "." 
+ArgSchemaParser then takes that schema, and builds a argparse parser from the schema using a standard pattern to convert the schema. Nested elements of the schema are specified with a "." 
 
 so the json 
-{
-    "nested":{
-        "a":5
-    },
-    "b":"a"
-}
-would map to the command line arguments
---nested.a 5 --b a
+::
 
-ArgSchemaParser then parses the command line arguments into a  dictionary using argparse, and then reformatting the dictionary to have the proper nested structure to match the schema it was provided.
+    {
+        "nested":{
+            "a":5
+        },
+        "b":"a"
+    }
+
+would map to the command line arguments
+::
+
+    $ python mymodule.py --nested.a 5 --b a
+
+ArgSchemaParser then parses the command line arguments into a dictionary using argparse, and then reformatting the dictionary to have the proper nested structure to match the schema it was provided.
 
 Next, ArgSchemaParser reads either the input_data if it was passed, or takes the path of the input_json and reads that in as a dictionary.  
 
@@ -46,7 +50,7 @@ The resulting dictionary is then stored in self.args available for use.
 After that the module does some standard things, such as parsing the parameter args['log_level'] to configure a logging module at self.logger.
 
 ## How should I use it
-subclass ArgSchemaParser and schemas.ArgSchema using the pattern found in template_module.py to define your module parameters, defining default values if you want and help statements that will be displayed by argparse as help statements, and maybe provide some example parameters for someone who is trying to figure out how to user your module (which is also a good way to rapidly test your module as you are developing it)
+subclass schemas.ArgSchema using the pattern found in examples\\template_module.py to define your module parameters, defining default values if you want and help statements that will be displayed by argparse as help statements, and maybe provide some example parameters for someone who is trying to figure out how to user your module (which is also a good way to rapidly test your module as you are developing it)
 
 Look at the set of fields to understand how to build custom fields, or use the default Marshmallow fields to construct your json Schema.  Note the use of InputDir and InputFile, two example custom marshmallow validators that are included in argschema.fields. They will insure that these directory exist, or files exist before trying to run your module and provide errors to the user. Also of note, fields.NumpyArray, which will convert Lists of Lists directly into numpy arrays.  More useful Fields can be found in argschema.fields.
 
