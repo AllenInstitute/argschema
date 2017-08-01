@@ -41,6 +41,7 @@ jobs:
       - run:
           name: package for pypi
           command: |
+            pip install twine
             .circleci/circle_dist.sh
 
 
