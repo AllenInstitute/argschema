@@ -8,18 +8,40 @@ workflows:
   version: 2
   build:
     jobs:
-      - python-2.7
-      - python-3.6.1
+      - test-python-2.7
+      - test-python-3.6.1
       - package:
           requires:
-              - python-2.7
-              - python-3.6.1
+              - test-python-2.7
+              - test-python-3.6.1
           filters:
             branches:
-              only:
-                  - master
+              only: master
+      - merge:
+          requires:
+              - test-python-2.7
+              - test-python-3.6.1
+          filters:
+            branches:
+              only: develop
 
 jobs:
+  merge:
+    working_directory: ~/repo
+    docker:
+      - image: circleci/pythong:3.6.1
+    steps:
+      - checkout
+      - restore_cache:
+          keys:
+          - python3-dependencies-{{ checksum "requirements.txt" }}-{{ checksum "test_requirements.txt"}}
+          # fallback to using the latest cache if no exact match is found
+          - python3-dependencies-
+      - run:
+        name: merge with master
+        command: |
+          .circleci/circle_master_merge.sh
+
   package:
     working_directory: ~/repo
     docker:
@@ -49,7 +71,7 @@ jobs:
 
 
 
-  python-3.6.1:
+  test-python-3.6.1:
     working_directory: ~/repo
     docker:
         - image: circleci/python:3.6.1
@@ -91,7 +113,7 @@ jobs:
           destination: test-reports
       
 
-  python-2.7:
+  test-python-2.7:
     working_directory: ~/repo
     docker:
       - image: circleci/python:2.7
