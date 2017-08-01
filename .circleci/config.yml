@@ -24,12 +24,12 @@ jobs:
           # fallback to using the latest cache if no exact match is found
           - python3-dependencies-
       - run:
-        name: increment version
-        command: |
-          python3 -m venv venv
-          . venv/bin/activate
-          python setup.py install
-          python .circleci/increment_version.py
+          name: increment version
+          command: |
+            python3 -m venv venv
+            . venv/bin/activate
+            python setup.py install
+            python .circleci/increment_version.py
 
   python-3.6.1:
     working_directory: ~/repo
