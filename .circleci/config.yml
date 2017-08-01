@@ -17,7 +17,7 @@ workflows:
           filters:
             branches:
               only:
-                  - master
+                  - auto_deploy
 
 jobs:
   package:
