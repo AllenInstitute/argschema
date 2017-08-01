@@ -12,8 +12,11 @@ workflows:
       - python-3.6.1
       - increment:
           requires:
-            - python-2.7
-            - python-3.6.1
+              - python-2.7
+              - python-3.6.1
+          branches:
+              only:
+                  - auto_inc_circleci
 
 jobs:
   increment:
