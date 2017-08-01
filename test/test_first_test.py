@@ -253,3 +253,12 @@ def test_david_example(tmpdir_factory):
     print(mod.args)
     assert(len(mod.args['paths']['fits'])==2)
 
+class MyShorterExtension(ArgSchema):
+    a = mm.fields.Str(description='a string')
+    b = mm.fields.Int(description='an integer')
+    c = mm.fields.Int(description='an integer', default=10)
+    d = mm.fields.List(mm.fields.Int, description='a list of integers')
+
+def test_simple_description():
+    mod = argschema.ArgSchemaParser(schema_type=MyShorterExtension,args=['--help'])
+    
