@@ -6,12 +6,9 @@ import json
 
 # these are the core parameters for my module
 class MyNestedParameters(DefaultSchema):
-    name = Str(required=True, metadata={
-        'description': 'name of vector'})
-    increment = Int(required=True, metadata={
-        'description': 'value to increment'})
-    array = NumpyArray(dtype=np.float, required=True, metadata={
-                       'description': 'array to increment'})
+    name = Str(required=True, description='name of vector')
+    increment = Int(required=True, description='value to increment')
+    array = NumpyArray(dtype=np.float, required=True, description='array to increment')
     write_output = Boolean(required=False, default=True)
 
 # but i'm going to nest them inside a subsection called inc
@@ -22,8 +19,7 @@ class MyParameters(ArgSchema):
 class MyOutputParams(DefaultSchema):
     name = Str(required=True, metadata={
         'description': 'name of vector'})
-    inc_array = NumpyArray(dtype=np.float, required=True, metadata={
-                           'description': 'incremented array'})
+    inc_array = NumpyArray(dtype=np.float, required=True, description='incremented array')
 
 if __name__ == '__main__':
     
