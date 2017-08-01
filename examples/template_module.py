@@ -64,7 +64,7 @@ if __name__ == '__main__':
         assert not errors
         
         # print the results to the terminal
-        print out_json
+        print(out_json)
         
         #write the result to a json file where specified by output_json
         with open(mod.args['output_json'], 'w') as fp:
