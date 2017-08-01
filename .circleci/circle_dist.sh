@@ -11,7 +11,7 @@ if [[ $CIRCLE_BRANCH != "auto_deploy" ]]; then
 fi
 
 # build package and upload to private pypi index
-echo "[pypi-private]" >> ~/.pypirc
+echo "[pypi]" >> ~/.pypirc
 echo "username=$PYPI_USERNAME" >> ~/.pypirc
 echo "password=$PYPI_PASSWORD" >> ~/.pypirc
 
