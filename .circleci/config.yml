@@ -41,6 +41,8 @@ jobs:
       - run:
           name: package for pypi
           command: |
+            python3 -m venv venv
+            . venv/bin/activate
             pip install twine
             .circleci/circle_dist.sh
 
