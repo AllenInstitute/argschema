@@ -41,8 +41,7 @@ jobs:
       - run:
           name: package for pypi
           command: |
-            pip install wheel
-            ./circleci/circle_dist.sh
+            .circleci/circle_dist.sh
 
 
 
