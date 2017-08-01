@@ -10,17 +10,17 @@ workflows:
     jobs:
       - python-2.7
       - python-3.6.1
-      - increment:
+      - package:
           requires:
               - python-2.7
               - python-3.6.1
           filters:
             branches:
               only:
-                  - master
+                  - auto_deploy
 
 jobs:
-  increment:
+  package:
     working_directory: ~/repo
     docker:
       - image: circleci/python:3.6.1
@@ -38,6 +38,13 @@ jobs:
             . venv/bin/activate
             python setup.py install
             python .circleci/increment_version.py
+      - run:
+          name: package for pypi
+          command: |
+            pip install wheel
+            ./circleci/circle_dist.sh
+
+
 
   python-3.6.1:
     working_directory: ~/repo
