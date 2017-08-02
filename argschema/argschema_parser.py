@@ -129,19 +129,26 @@ class ArgSchemaParser(object):
 
     def __init__(self,
                  input_data=None,  # dictionary input as option instead of --input_json
-                 schema_type=schemas.ArgSchema,  # schema for parsing arguments
+                 schema = schemas.ArgSchema,
                  args=None,
-                 logger_name=__name__):
+                 logger_name=__name__,
+                 **kwargs):
 
-        schema = schema_type()
+        self.logger = self.initialize_logger(logger_name,'WARNING')
+        schema_type = kwargs.get('schema_type',None)
+        if schema_type is not None:
+            self.logger.warning('DEPRECATED: schema_type keyword, use schema instead')
+            schema = schema_type
+
+        sch = schema()
 
         # convert schema to argparse object
-        p = utils.schema_argparser(schema)
+        p = utils.schema_argparser(sch)
         argsobj = p.parse_args(args)
         argsdict = utils.args_to_dict(argsobj)
 
         if argsobj.input_json is not None:
-            result = schema.load(argsdict)
+            result = sch.load(argsdict)
             if 'input_json' in result.errors:
                 raise mm.ValidationError(result.errors['input_json'])
             with open(result.data['input_json'], 'r') as j:
@@ -149,12 +156,12 @@ class ArgSchemaParser(object):
         else:
             jsonargs = input_data if input_data else {}
 
-        self.logger = self.initialize_logger(logger_name,'WARNING')
+        
         # merge the command line dictionary into the input json
         args = utils.smart_merge(jsonargs, argsdict)
 
         # validate with load!
-        result = self.load_schema_with_defaults(schema, args)
+        result = self.load_schema_with_defaults(sch, args)
         if len(result.errors) > 0:
             raise mm.ValidationError(json.dumps(result.errors, indent=2))
 
