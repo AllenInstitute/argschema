@@ -42,7 +42,7 @@ But there is more.. you can also give your module a dictionary in an interactive
     >>> from mymodule import MySchema
     >>> d = {'a':5}
     >>> mod = ArgSchemaParser(input_data=d,schema_type=MySchema)
-    >>> print mod.args
+    >>> print(mod.args)
     {'a': 5, 'log_level': u'ERROR'}
 
 
