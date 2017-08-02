@@ -23,6 +23,7 @@ argschema defines two basic classes, ArgSchemaParser and ArgSchema. ArgSchemaPar
 ArgSchemaParser then takes that schema, and builds a argparse parser from the schema using a standard pattern to convert the schema. Nested elements of the schema are specified with a "." 
 
 so the json 
+::
 
     {
         "nested":{
@@ -32,6 +33,7 @@ so the json
     }
 
 would map to the command line arguments
+::
 
     $ python mymodule.py --nested.a 5 --b a
 
