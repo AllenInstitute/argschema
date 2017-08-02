@@ -54,7 +54,7 @@ def test_simple_extension_required():
     with pytest.raises(mm.ValidationError):
         example1 = {}
         mod = ArgSchemaParser(
-            input_data=example1, schema_type=SimpleExtension, args=[])
+            input_data=example1, schema=SimpleExtension, args=[])
 
 
 SimpleExtension_example_invalid = {
@@ -87,13 +87,13 @@ def test_simple_extension_fail():
     with pytest.raises(mm.ValidationError):
         mod = ArgSchemaParser(
             input_data=SimpleExtension_example_invalid,
-            schema_type=SimpleExtension, args=[])
+            schema=SimpleExtension, args=[])
 
 
 def test_simple_extension_pass():
     mod = ArgSchemaParser(
         input_data=SimpleExtension_example_valid,
-        schema_type=SimpleExtension, args=[])
+        schema=SimpleExtension, args=[])
     assert mod.args['test']['a'] == 'hello'
     assert mod.args['test']['b'] == 1
     assert mod.args['test']['c'] == 10
@@ -103,7 +103,7 @@ def test_simple_extension_pass():
 def test_simple_extension_write_pass(simple_extension_file):
     args = ['--input_json', str(simple_extension_file)]
     mod = ArgSchemaParser(
-        input_data=SimpleExtension_example_valid, schema_type=SimpleExtension,
+        input_data=SimpleExtension_example_valid, schema=SimpleExtension,
         args=args)
     assert mod.args['test']['a'] == 'hello'
     assert mod.args['test']['b'] == 1
@@ -114,26 +114,26 @@ def test_simple_extension_write_pass(simple_extension_file):
 
 def test_simple_extension_write_debug_level(simple_extension_file):
     args = ['--input_json', str(simple_extension_file), '--log_level', 'DEBUG']
-    mod = ArgSchemaParser(schema_type=SimpleExtension, args=args)
+    mod = ArgSchemaParser(schema=SimpleExtension, args=args)
     assert mod.logger.getEffectiveLevel() == logging.DEBUG
 
 
 def test_simple_extension_write_overwrite(simple_extension_file):
     args = ['--input_json', str(simple_extension_file), '--test.b', '5']
-    mod = ArgSchemaParser(schema_type=SimpleExtension, args=args)
+    mod = ArgSchemaParser(schema=SimpleExtension, args=args)
     assert mod.args['test']['b'] == 5
 
 
 def test_simple_extension_write_overwrite_list(simple_extension_file):
     args = ['--input_json', str(simple_extension_file),
             '--test.d', '6', '7', '8', '9']
-    mod = ArgSchemaParser(schema_type=SimpleExtension, args=args)
+    mod = ArgSchemaParser(schema=SimpleExtension, args=args)
     assert len(mod.args['test']['d']) == 4
 
 def test_bad_input_json_argparse():
     args = ['--input_json', 'not_a_file.json']
     with pytest.raises(mm.ValidationError):
-        mod = ArgSchemaParser(schema_type=SimpleExtension, args=args)
+        mod = ArgSchemaParser(schema=SimpleExtension, args=args)
 
 #TESTS DEMONSTRATING BAD BEHAVIOR OF DEFAULT LOADING
 class MyExtensionOld(mm.Schema):
@@ -150,7 +150,7 @@ class SimpleExtensionOld(ArgSchema):
 def test_simple_extension_old_pass():
     mod = ArgSchemaParser(
         input_data=SimpleExtension_example_valid,
-        schema_type=SimpleExtensionOld, args=[])
+        schema=SimpleExtensionOld, args=[])
     assert mod.args['test']['a'] == 'hello'
     assert mod.args['test']['b'] == 1
     assert mod.args['test']['c'] == 10
@@ -192,7 +192,7 @@ recursive_data = {
 def test_recursive_schema():
     mod = ArgSchemaParser(
         input_data=recursive_data,
-        schema_type=ExampleRecursiveSchema, args=[])
+        schema=ExampleRecursiveSchema, args=[])
     assert mod.args['tree']['name'] == 'root'
     assert len(mod.args['tree']['children']) == 2
     assert mod.args['tree']['children'][0]['name'] == 'child1'
@@ -212,7 +212,7 @@ class BadExampleRecursiveSchema(ArgSchema):
 def bad_test_recursive_schema():
     with pytest.raises(mm.ValidationError):
         mod = ArgSchemaParser(input_data=recursive_data,
-                            schema_type=BadExampleRecursiveSchema, args=[])
+                            schema=BadExampleRecursiveSchema, args=[])
 
 
 class ModelFit(argschema.schemas.DefaultSchema):
@@ -249,7 +249,7 @@ def test_david_example(tmpdir_factory):
     file_ = tmpdir_factory.mktemp('test').join('testinput.json')
     file_.write(json.dumps(david_data))
     args = ['--input_json', str(file_)]
-    mod = argschema.ArgSchemaParser(schema_type=PopulationSelectionParameters,args=args)
+    mod = argschema.ArgSchemaParser(schema=PopulationSelectionParameters,args=args)
     print(mod.args)
     assert(len(mod.args['paths']['fits'])==2)
 
@@ -265,4 +265,4 @@ def test_simple_description():
             'b': 1,
             'd': [1, 5, 4]
         }
-    mod = argschema.ArgSchemaParser(input_data = d, schema_type=MyShorterExtension)
+    mod = argschema.ArgSchemaParser(input_data = d, schema=MyShorterExtension)
