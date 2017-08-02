@@ -41,7 +41,7 @@ But there is more.. you can also give your module a dictionary in an interactive
     >>> from argschema import ArgSchemaParser
     >>> from mymodule import MySchema
     >>> d = {'a':5}
-    >>> mod = ArgSchemaParser(input_data=d,schema_type=MySchema)
+    >>> mod = ArgSchemaParser(input_data=d,schema=MySchema)
     >>> print(mod.args)
     {'a': 5, 'log_level': u'ERROR'}
 
@@ -81,7 +81,7 @@ or from a dictionary
     >>> from argschema import ArgSchemaParser
     >>> from mymodule import MySchema
     >>> d={'a':'hello'}
-    >>> mod = ArgSchemaParser(input_data=d,schema_type=MySchema)
+    >>> mod = ArgSchemaParser(input_data=d,schema=MySchema)
         Traceback (most recent call last):
         File "<stdin>", line 1, in <module>
         File "/Users/forrestcollman/argschema/argschema/argschema_parser.py", line 159, in __init__

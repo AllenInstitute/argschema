@@ -15,7 +15,7 @@ def test_slice():
         'a': '5:7'
     }
     mod = ArgSchemaParser(
-        input_data=input_data, schema_type=SliceSchema, args=[])
+        input_data=input_data, schema=SliceSchema, args=[])
     assert type(mod.args['a']) == slice
     test = np.array([0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10])
     assert(test[mod.args['a']].shape == (2,))
@@ -27,4 +27,4 @@ def test_bad_slice():
     }
     with pytest.raises(mm.ValidationError):
         mod = ArgSchemaParser(
-            input_data=input_data, schema_type=SliceSchema, args=[])
+            input_data=input_data, schema=SliceSchema, args=[])

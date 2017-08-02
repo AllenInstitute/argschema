@@ -109,13 +109,13 @@ def fill_defaults(schema, args):
 class ArgSchemaParser(object):
     """The main class you should sub-class to write your own argschema module.
     Takes input_data, reference to a input_json and the command line inputs and parses out the parameters
-    and validates them against the schema_type specified.
+    and validates them against the schema specified.
 
     Parameters
     ----------
     input_data : dict or None
         dictionary parameters instead of --input_json
-    schema_type : schemas.ArgSchema
+    schema : schemas.ArgSchema
         the schema to use to validate the parameters
     args : list or None
         command line arguments passed to the module, if None use argparse to parse the command line, set to [] if you want to bypass command line parsing

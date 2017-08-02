@@ -37,7 +37,7 @@ if __name__ == '__main__':
 
     # here is my ArgSchemaParser that processes my inputs
     mod = ArgSchemaParser(input_data=example_input,
-                          schema_type=MyParameters)
+                          schema=MyParameters)
                           
     # pull out the inc section of the parameters
     inc_params = mod.args['inc']
