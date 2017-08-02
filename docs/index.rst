@@ -20,7 +20,7 @@ In all cases, it will merge these different parameters into a single dictionary 
 The User Guide
 --------------
 
-This is where you should start to understand how to user argschema
+This is where you should start to understand how to use argschema
 
 .. toctree::
    :maxdepth: 2
@@ -29,6 +29,8 @@ This is where you should start to understand how to user argschema
 
 API
 ---
+
+This contains the complete documentation of the api
 
 .. toctree::
    :maxdepth: 2
