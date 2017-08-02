@@ -102,5 +102,6 @@ ENV/
 .mypy_cache/
 
 test-reports/
-
+*DS_Store
 argschema/bin
+examples/output*.json

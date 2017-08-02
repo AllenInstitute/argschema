@@ -18,22 +18,24 @@ AND/OR pass parameters via the command line, in a way that will override the inp
 We are planning on occasional updating this tool with no fixed schedule. Community involvement is encouraged through both issues and pull requests.  Please make pull requests against the dev branch, as we will test changes there before merging into master.
 
 ## What does it do
-argschema defines two basic classes which every module should subclass, ArgSchemaParser and ArgSchema. ArgSchemaParser takes ArgSchema as an input which is simply an extension of the marshmallow Schema class (http://marshmallow.readthedocs.io/en/latest/).
+argschema defines two basic classes, ArgSchemaParser and ArgSchema. ArgSchemaParser takes ArgSchema as an input which is simply an extension of the marshmallow Schema class (http://marshmallow.readthedocs.io/en/latest/).
 
-ArgSchemaParser then takes that schema, and builds a argparse parser from the schema using a standard pattern to convert the schema.
-Nested elements of the schema are specified with a "." 
+ArgSchemaParser then takes that schema, and builds a argparse parser from the schema using a standard pattern to convert the schema. Nested elements of the schema are specified with a "." 
 
 so the json 
-{
-    "nested":{
-        "a":5
-    },
-    "b":"a"
-}
-would map to the command line arguments
---nested.a 5 --b a
 
-ArgSchemaParser then parses the command line arguments into a  dictionary using argparse, and then reformatting the dictionary to have the proper nested structure to match the schema it was provided.
+    {
+        "nested":{
+            "a":5
+        },
+        "b":"a"
+    }
+
+would map to the command line arguments
+
+    $ python mymodule.py --nested.a 5 --b a
+
+ArgSchemaParser then parses the command line arguments into a dictionary using argparse, and then reformatting the dictionary to have the proper nested structure to match the schema it was provided.
 
 Next, ArgSchemaParser reads either the input_data if it was passed, or takes the path of the input_json and reads that in as a dictionary.  
 
@@ -46,7 +48,7 @@ The resulting dictionary is then stored in self.args available for use.
 After that the module does some standard things, such as parsing the parameter args['log_level'] to configure a logging module at self.logger.
 
 ## How should I use it
-subclass ArgSchemaParser and schemas.ArgSchema using the pattern found in template_module.py to define your module parameters, defining default values if you want and help statements that will be displayed by argparse as help statements, and maybe provide some example parameters for someone who is trying to figure out how to user your module (which is also a good way to rapidly test your module as you are developing it)
+subclass schemas.ArgSchema using the pattern found in [template_module.py](examples/template_module.py) to define your module parameters, defining default values if you want and help statements that will be displayed by argparse as help statements, and maybe provide some example parameters for someone who is trying to figure out how to user your module (which is also a good way to rapidly test your module as you are developing it)
 
 Look at the set of fields to understand how to build custom fields, or use the default Marshmallow fields to construct your json Schema.  Note the use of InputDir and InputFile, two example custom marshmallow validators that are included in argschema.fields. They will insure that these directory exist, or files exist before trying to run your module and provide errors to the user. Also of note, fields.NumpyArray, which will convert Lists of Lists directly into numpy arrays.  More useful Fields can be found in argschema.fields.
 
@@ -62,11 +64,11 @@ You start building some code in an ipython notebook to play around with a new id
 
 It's a mess, and you know you should migrate your code over to a module that you can call from other programs or notebooks.  You start collecting your input variables to the top of the notebook and make yourself a wrapper function that you can call.  However, now your mistake in filename typing is a disaster because the file doesn't exist, and your code doesn't check for the existence of the file until quite late. You start implementing some input validation checks to avoid this problem.
 
-Now you start wanting to integrate this code with other things, including elements that aren't in python and so you want to have a command line module that executes the code, so you can use some other tool to stitch together a process that includes this code, like maybe some shell scripts.  You implement an argparse set of inputs and default values that make your python program a self-contained program, with some help documentation.  Along the way, you have to refactor the parsed argparse variables into your function
+Now you start wanting to integrate this code with other things, including elements that aren't in python.  You decide that you need to have a command line module that executes the code, because then you can use other tools to stitch together your processing, like maybe some shell scripts or docker run commands.  You implement an argparse set of inputs and default values that make your python program a self-contained program, with some help documentation.  Along the way, you have to refactor the parsed argparse variables into your function and strip out your old hacky validation code to avoid maintaining two versions of validation in the future.
 
-Now this module starts becoming useful enough that you want to integrate it into more complex modules.  You end up copying and pasting various argparse lines over to other modules, and then 5 other modules.  Later you decide to change your original module a little bit, and you have a nightmare of code replace to fix up the other modules to mirror this phenomenon.. you kick yourself for not having thought this through more clearly.
+This module starts becoming useful enough that you want to integrate it into more complex modules.  You end up copying and pasting various argparse lines over to other modules, and then 5 other modules.  Later you decide to change your original module a little bit, and you have a nightmare of code replace to fix up the other modules to mirror this phenomenon.. you kick yourself for not having thought this through more clearly.
 
-Your code is now pretty useful, but its so useful you start running it on larger and larger jobs, and you want to deploy it on a cluster in your groups pipeline workflow.  Your pipeline framework needs to dynamically define and control the parameters, and so it would like to simply write all the inputs to a file and pass your program that file, rather than having to parse out the inputs into your argparse format.  Now you have to refactor your inputs again to deal with this new pattern, so you have to make a new version that works in this way. Now you have to redo validation to work in a different way, since you were using argparse to do it before, and now you've lost the ability to run this code on the command line.  So you decide to maintain two wrapper programs that call the same underlying function and basically do the same thing, just one does it with argparse and the other one for json inputs and it feels pretty silly. 
+Your code is now really useful, but its so useful you start running it on larger and larger jobs, and you want to deploy it on a cluster in your groups pipeline workflow.  Your pipeline framework needs to dynamically define and control the parameters, and so it would like to simply write all the inputs to a file and pass your program that file, rather than having to parse out the inputs into your argparse format.  You have to refactor your inputs again to deal with this new pattern, by setting up a validation framework to work on json.  Now what do you do with your argparse validators? Throw them away so you don't have to maintain them? If you do that you've lost the ability to run this code on the command line and run test cases easily when things inevitably break.  To avoid this, you decide to maintain two wrapper programs that call the same underlying function and they basically do the same thing, just one does it with argparse and the other one for json inputs.  You are now stuck maintaining both versions of validation and it feels pretty silly. 
 
 If you had only designed things from the beginning to allow for each of these use cases over the lifetime of your module.
 
