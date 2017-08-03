@@ -28,14 +28,6 @@ argschema\.fields\.numpyarrays module
     :undoc-members:
     :show-inheritance:
 
-argschema\.fields\.options module
----------------------------------
-
-.. automodule:: argschema.fields.options
-    :members:
-    :undoc-members:
-    :show-inheritance:
-
 argschema\.fields\.slice module
 -------------------------------
 
