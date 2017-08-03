@@ -38,10 +38,11 @@ But there is more.. you can also give your module a dictionary in an interactive
 
 ::
 
-    >>> from mymodule import MyModule
+    >>> from argschema import ArgSchemaParser
+    >>> from mymodule import MySchema
     >>> d = {'a':5}
-    >>> mod = MyModule(input_data=d)
-    >>> mod.run()
+    >>> mod = ArgSchemaParser(input_data=d,schema_type=MySchema)
+    >>> print(mod.args)
     {'a': 5, 'log_level': u'ERROR'}
 
 
@@ -75,23 +76,22 @@ Whether from the command line
     mymodule.py: error: argument --a: invalid int value: '5!'
 
 or from a dictionary
-
 ::
 
-    >>> from mymodule import MyModule
+    >>> from argschema import ArgSchemaParser
+    >>> from mymodule import MySchema
     >>> d={'a':'hello'}
-    >>> mod = MyModule(input_data = d)
-        Traceback (most recent call last)
+    >>> mod = ArgSchemaParser(input_data=d,schema_type=MySchema)
+        Traceback (most recent call last):
         File "<stdin>", line 1, in <module>
-        File "mymodule.py", line 10, in __init__
-            schema_type=MySchema, *args, **kwargs)
-        File "/Users/forrestcollman/argschema/argschema/argschema_parser.py", line 106, in __init__
+        File "/Users/forrestcollman/argschema/argschema/argschema_parser.py", line 159, in __init__
             raise mm.ValidationError(json.dumps(result.errors, indent=2))
         marshmallow.exceptions.ValidationError: {
         "a": [
             "Not a valid integer."
         ]
         }
+
 
 Fields
 ------
