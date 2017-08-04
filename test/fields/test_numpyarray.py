@@ -12,8 +12,8 @@ numpy_array_test = {
 
 class NumpyFileuint16(ArgSchema):
     a = NumpyArray(
-        dtype='uint16', required=True, metadata={
-            'decription': 'list of lists representing numpy array'})
+        dtype='uint16', required=True,
+        decription='list of lists representing numpy array')
 
 
 def test_numpy():

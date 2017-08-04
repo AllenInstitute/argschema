@@ -38,11 +38,11 @@ def test_log_catch():
 
 
 class MyExtension(argschema.schemas.DefaultSchema):
-    a = mm.fields.Str(metadata={'description': 'a string'})
-    b = mm.fields.Int(metadata={'description': 'an integer'})
-    c = mm.fields.Int(metadata={'description': 'an integer'}, default=10)
+    a = mm.fields.Str(description= 'a string')
+    b = mm.fields.Int(description= 'an integer')
+    c = mm.fields.Int(description= 'an integer', default=10)
     d = mm.fields.List(mm.fields.Int,
-                       metadata={'description': 'a list of integers'})
+                       description= 'a list of integers')
 
 
 class SimpleExtension(ArgSchema):
@@ -137,11 +137,11 @@ def test_bad_input_json_argparse():
 
 #TESTS DEMONSTRATING BAD BEHAVIOR OF DEFAULT LOADING
 class MyExtensionOld(mm.Schema):
-    a = mm.fields.Str(metadata={'description': 'a string'})
-    b = mm.fields.Int(metadata={'description': 'an integer'})
-    c = mm.fields.Int(metadata={'description': 'an integer'}, default=10)
+    a = mm.fields.Str(description= 'a string')
+    b = mm.fields.Int(description= 'an integer')
+    c = mm.fields.Int(description= 'an integer', default=10)
     d = mm.fields.List(mm.fields.Int,
-                       metadata={'description': 'a list of integers'})
+                       description= 'a list of integers')
 
 
 class SimpleExtensionOld(ArgSchema):
@@ -158,9 +158,9 @@ def test_simple_extension_old_pass():
 
 class RecursiveSchema(argschema.schemas.DefaultSchema):
     children = mm.fields.Nested("self",many=True,
-                                metadata={'description': 'children of this node'})
+                                description= 'children of this node')
     name = mm.fields.Str(default = "anonymous",
-                           metadata={'description': 'name of this node'})
+                           description= 'name of this node')
 
 class ExampleRecursiveSchema(ArgSchema):
     tree = mm.fields.Nested(RecursiveSchema, required=True)
@@ -202,9 +202,9 @@ def test_recursive_schema():
 
 class BadRecursiveSchema(mm.Schema):
     children = mm.fields.Nested("self",many=True,
-                                metadata={'description': 'children of this node'})
+                                description= 'children of this node')
     name = mm.fields.Str(default = "anonymous",
-                           metadata={'description': 'name of this node'})
+                           description= 'name of this node')
 
 class BadExampleRecursiveSchema(ArgSchema):
     tree = mm.fields.Nested(BadRecursiveSchema, required=True)
