@@ -17,8 +17,7 @@ class MyParameters(ArgSchema):
 
 #this is another schema we will use to validate and deserialize our output
 class MyOutputParams(DefaultSchema):
-    name = Str(required=True, metadata={
-        'description': 'name of vector'})
+    name = Str(required=True, description='name of vector')
     inc_array = NumpyArray(dtype=np.float, required=True, description='incremented array')
 
 if __name__ == '__main__':

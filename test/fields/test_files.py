@@ -8,7 +8,7 @@ import os
 # OUTPUT FILE TESTS
 class BasicOutputFile(ArgSchema):
     output_file = OutputFile(required=True,
-                             metadata={'decription': 'a simple output file'})
+                             description= 'a simple output file')
 
 
 output_file_example = {
@@ -70,7 +70,7 @@ def test_output_path_noapath():
 # INPUT FILE TESTS
 class BasicInputFile(ArgSchema):
     input_file = InputFile(required=True,
-                           metadata={'description': 'a simple file'})
+                           description= 'a simple file')
 
 
 input_file_example = {
@@ -105,7 +105,7 @@ def test_access_inputfile_failed():
 # INPUTDIR TESTS
 class BasicInputDir(ArgSchema):
     input_dir = InputDir(required=True,
-                         metadata={'description': 'a simple file'})
+                         description= 'a simple file')
 
 
 def test_basic_inputdir(tmpdir):

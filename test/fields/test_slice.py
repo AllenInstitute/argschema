@@ -6,8 +6,7 @@ import marshmallow as mm
 
 
 class SliceSchema(ArgSchema):
-    a = Slice(required=True, metadata={
-        'decription': 'a slice object'})
+    a = Slice(required=True, decription='a slice object')
 
 
 def test_slice():
