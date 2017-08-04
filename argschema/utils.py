@@ -184,13 +184,15 @@ def build_schema_arguments(schema, arguments=None, path=None):
             arg = {}
             arg_name = '--' + '.'.join(path + [field_name])
 
-            md = field.metadata.get('metadata', {})
-            if 'description' in md:
-                arg['help'] = md['description']
-            #also look to see if description was added a kwarg
-            else:
-                if 'description' in field.metadata:
+            #look for description
+            if 'description' in field.metadata:
                     arg['help'] = field.metadata.get('description')
+            #also look to see if description was added in metadata
+            else:
+                md = field.metadata.get('metadata', {})
+                if 'description' in md:
+                    arg['help'] = md['description']
+        
 
             field_type = type(field)
             if isinstance(field, mm.fields.List):
