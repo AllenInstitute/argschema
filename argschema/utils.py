@@ -196,7 +196,7 @@ def build_schema_arguments(schema, arguments=None, path=None, description =None)
     arguments = [] if arguments is None else arguments
     arggroup = {}
     if len(path)==0:
-        arggroup['title']='root'
+        arggroup['title']=schema.__class__.__name__
     else:
         arggroup['title']='.'.join(path)
     arggroup['args']=collections.OrderedDict()
@@ -276,7 +276,7 @@ def schema_argparser(schema):
 
     """
 
-    arguments = build_schema_arguments(schema)
+    arguments = build_schema_arguments(schema,description=schema.__doc__)
 
     parser = argparse.ArgumentParser()
 
