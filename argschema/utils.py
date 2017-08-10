@@ -220,6 +220,8 @@ def build_schema_arguments(schema, arguments=None, path=None, description =None)
             arg_name = '--' + '.'.join(path + [field_name])
             if desc is not None:
                 arg['help']=desc
+            else:
+                arg['help']=''
             if field.default is not mm.missing:
                 arg['help']+= " (default={})".format(field.default)
             if field.required:
