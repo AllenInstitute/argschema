@@ -227,9 +227,11 @@ def build_schema_arguments(schema, arguments=None, path=None, description =None)
             if field.required:
                 arg['help']+= " (REQUIRED)"
             for validator in field.validators:
+                if isinstance(validator,mm.validate.ContainsOnly):
+                    arg['help']+= " (constrained list)"
                 if isinstance(validator,mm.validate.OneOf):
                     arg['help']+= " (valid options are {})".format(validator.choices)
-        
+
             field_type = type(field)
             if isinstance(field, mm.fields.List):
                 arg['nargs'] = '*'
