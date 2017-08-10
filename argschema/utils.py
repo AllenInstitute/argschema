@@ -149,8 +149,32 @@ def smart_merge(a, b, path=None, merge_keys=None, overwrite_with_none=False):
                 a[key] = b[key]
     return a
 
+def get_description_from_field(field):
+    """get the description for this marshmallow field
 
-def build_schema_arguments(schema, arguments=None, path=None):
+    Parameters
+    ----------
+    field : marshmallow.fields.field
+        field to get description
+    
+    Returns
+    -------
+    str
+        description string (or None)
+    """
+    #look for description
+    if 'description' in field.metadata:
+            desc = field.metadata.get('description')
+    #also look to see if description was added in metadata
+    else:
+        md = field.metadata.get('metadata', {})
+        if 'description' in md:
+            desc = md['description']
+        else:
+            desc = None
+    return desc
+            
+def build_schema_arguments(schema, arguments=None, path=None, description =None):
     """given a jsonschema, create a dictionary of argparse arguments (recursive function)
 
     Parameters
@@ -169,31 +193,41 @@ def build_schema_arguments(schema, arguments=None, path=None):
 
     """
     path = [] if path is None else path
-    arguments = collections.OrderedDict() if arguments is None else arguments
+    arguments = [] if arguments is None else arguments
+    arggroup = {}
+    if len(path)==0:
+        arggroup['title']='root'
+    else:
+        arggroup['title']='.'.join(path)
+    arggroup['args']=collections.OrderedDict()
+    arggroup['description']=description
 
-    for field_name, field in schema.declared_fields.items():
+    for field_name, field in sorted(schema.declared_fields.items(),
+                                    key= lambda x: 2*x[1].required+1*(x[1].default==mm.missing),
+                                    reverse=True):
+        desc = get_description_from_field(field)
         if isinstance(field, mm.fields.Nested):
             if field.many:
                 logging.warning("many=True not supported from argparse")
             else:
                 build_schema_arguments(field.schema,
                                        arguments,
-                                       path + [field_name])
+                                       path + [field_name],
+                                       description = desc)
         else:
             # it's not an object, so build the argument
             arg = {}
             arg_name = '--' + '.'.join(path + [field_name])
-
-            #look for description
-            if 'description' in field.metadata:
-                    arg['help'] = field.metadata.get('description')
-            #also look to see if description was added in metadata
-            else:
-                md = field.metadata.get('metadata', {})
-                if 'description' in md:
-                    arg['help'] = md['description']
+            if desc is not None:
+                arg['help']=desc
+            if field.default is not mm.missing:
+                arg['help']+= " (default={})".format(field.default)
+            if field.required:
+                arg['help']+= " (REQUIRED)"
+            for validator in field.validators:
+                if isinstance(validator,mm.validate.OneOf):
+                    arg['help']+= " (valid options are {})".format(validator.choices)
         
-
             field_type = type(field)
             if isinstance(field, mm.fields.List):
                 arg['nargs'] = '*'
@@ -218,9 +252,8 @@ def build_schema_arguments(schema, arguments=None, path=None):
 
             # if field.default != mm.missing:
             #    arg['default'] = field.default
-
-            arguments[arg_name] = arg
-
+            arggroup['args'][arg_name] = arg
+    arguments.append(arggroup)
     return arguments
 
 
@@ -243,6 +276,8 @@ def schema_argparser(schema):
 
     parser = argparse.ArgumentParser()
 
-    for arg_name, arg in arguments.items():
-        parser.add_argument(arg_name, **arg)
+    for arg_group in arguments:
+        group=parser.add_argument_group(arg_group['title'],arg_group['description'])
+        for arg_name,arg in arg_group['args'].items():
+            group.add_argument(arg_name, **arg)
     return parser
