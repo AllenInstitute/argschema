@@ -149,51 +149,103 @@ def smart_merge(a, b, path=None, merge_keys=None, overwrite_with_none=False):
                 a[key] = b[key]
     return a
 
-
-def build_schema_arguments(schema, arguments=None, path=None):
-    """given a jsonschema, create a dictionary of argparse arguments (recursive function)
+def get_description_from_field(field):
+    """get the description for this marshmallow field
 
     Parameters
     ----------
-    path :
-        list or None (Default value = None)
-    schema :
-        marshmallow schema with metadata['description'] filled in with help values
-    arguments :
-        (Default value = None)
+    field : marshmallow.fields.field
+        field to get description
+    
+    Returns
+    -------
+    str
+        description string (or None)
+    """
+    #look for description
+    if 'description' in field.metadata:
+            desc = field.metadata.get('description')
+    #also look to see if description was added in metadata
+    else:
+        md = field.metadata.get('metadata', {})
+        if 'description' in md:
+            desc = md['description']
+        else:
+            desc = None
+    return desc
+            
+def build_schema_arguments(schema, arguments=None, path=None, description =None):
+    """given a jsonschema, create a dictionary of argparse arguments,
+    by navigating down the Nested schema tree. (recursive function) 
+
+    Parameters
+    ----------
+    schema : marshamallow.schema.Schema
+        schema with field.description filled in with help values
+    arguments : list or None
+        list of argument group dictionaries to add to (see Returns) (Default value = None)
+    path : list or None
+        list of strings denoted where you are in the tree (Default value = None)
+    description: str or None
+        description for the argument group at this level of the tree
 
     Returns
     -------
-    collections.OrderedDict
-        OrderedDict of dictionaries with kwargs to build argparse arguments
+    list
+        List of argument group dictionaries, with keys ['title','description','args'] 
+        which contain the arguments for argparse.  'args' is an OrderedDict of dictionaries
+        with keys of the argument names with kwargs to build an argparse argument
 
     """
     path = [] if path is None else path
-    arguments = collections.OrderedDict() if arguments is None else arguments
+    arguments = [] if arguments is None else arguments
+    arggroup = {}
+    #name this argument group by the path, or the schema class name if it's the root
+    if len(path)==0:
+        arggroup['title']=schema.__class__.__name__
+    else:
+        arggroup['title']='.'.join(path)
+    arggroup['args']=collections.OrderedDict()
+    #assume the description has been handed down
+    arggroup['description']=description
 
-    for field_name, field in schema.declared_fields.items():
+    #sort the fields first by required, then by default values present or not
+    for field_name, field in sorted(schema.declared_fields.items(),
+                                    key= lambda x: 2*x[1].required+1*(x[1].default==mm.missing),
+                                    reverse=True):
+        #get this field's description
+        desc = get_description_from_field(field)
+
+        #if its nested, then we want to recusively follow this link
         if isinstance(field, mm.fields.Nested):
             if field.many:
                 logging.warning("many=True not supported from argparse")
             else:
                 build_schema_arguments(field.schema,
                                        arguments,
-                                       path + [field_name])
+                                       path + [field_name],
+                                       description = desc)
         else:
-            # it's not an object, so build the argument
+            # it's not nested then let's build the argument
             arg = {}
             arg_name = '--' + '.'.join(path + [field_name])
-
-            #look for description
-            if 'description' in field.metadata:
-                    arg['help'] = field.metadata.get('description')
-            #also look to see if description was added in metadata
+            if desc is not None:
+                arg['help']=desc
             else:
-                md = field.metadata.get('metadata', {})
-                if 'description' in md:
-                    arg['help'] = md['description']
-        
+                arg['help']=''
 
+            #programatically add helpful notes to help string
+            if field.default is not mm.missing:
+                arg['help']+= " (default={})".format(field.default)
+            if field.required:
+                arg['help']+= " (REQUIRED)"
+            for validator in field.validators:
+                if isinstance(validator,mm.validate.ContainsOnly):
+                    arg['help']+= " (constrained list)"
+                if isinstance(validator,mm.validate.OneOf):
+                    arg['help']+= " (valid options are {})".format(validator.choices)
+
+            #catch lists to figure out desired type
             field_type = type(field)
             if isinstance(field, mm.fields.List):
                 arg['nargs'] = '*'
@@ -212,15 +264,20 @@ def build_schema_arguments(schema, arguments=None, path=None):
                 else:
                     logging.warning("List contains unsupported type: %s" % str(
                         type(field.container)))
+            #otherwise look up the desired type in FIELD_TYPE_MAP
             elif type(field) in FIELD_TYPE_MAP:
                 # it's a simple type, apply the mapping
                 arg['type'] = FIELD_TYPE_MAP[field_type]
 
+            #DON'T WANT TO USE DEFAULT VALUES AS ARGPARSE OVERRULES JSON
             # if field.default != mm.missing:
             #    arg['default'] = field.default
 
-            arguments[arg_name] = arg
-
+            #add this argument to the arggroup
+            arggroup['args'][arg_name] = arg
+    
+    #tack on this arggroup to the list and return
+    arguments.append(arggroup)
     return arguments
 
 
@@ -239,10 +296,17 @@ def schema_argparser(schema):
 
     """
 
-    arguments = build_schema_arguments(schema)
+    #build up a list of argument groups using recursive function
+    #to traverse the tree, root node gets the description given by doc string
+    #of the schema
+    arguments = build_schema_arguments(schema,description=schema.__doc__)
+    #make the root schema appeear first rather than last
+    arguments = [arguments[-1]]+arguments[0:-1]
 
     parser = argparse.ArgumentParser()
 
-    for arg_name, arg in arguments.items():
-        parser.add_argument(arg_name, **arg)
+    for arg_group in arguments:
+        group=parser.add_argument_group(arg_group['title'],arg_group['description'])
+        for arg_name,arg in arg_group['args'].items():
+            group.add_argument(arg_name, **arg)
     return parser
