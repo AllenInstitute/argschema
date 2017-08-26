@@ -67,10 +67,6 @@ def test_bad_output(tmpdir):
         "b":"not a number",
         "M":Mnp  
     }
-    expected_output = {
-        "a":"example",
-        "b":5,
-        "M":M
-    }
+
     with pytest.raises(mm.ValidationError):
         mod.output(output)
