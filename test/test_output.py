@@ -1,0 +1,36 @@
+from argschema import ArgSchemaParser, ArgSchema
+from argschema.schemas import DefaultSchema
+from argschema.fields import Str,Int,NumpyArray
+import json
+import numpy as np
+
+class MyOutputSchema(DefaultSchema):
+    a = Str(required=True, description="a simple string")
+    b = Int(default = 5 , description ="a default integer")
+    M = NumpyArray(required=True, description="a numpy array of answers")
+
+def test_output(tmpdir):
+    file_out = tmpdir.join('test_output.json')
+    input_parameters = {
+        'output_json':str(file_out)
+    }
+    mod = ArgSchemaParser(input_data = input_parameters,
+                          output_schema_type = MyOutputSchema,
+                          args=[])
+    M=[[5,5],[7,2]]
+    Mnp = np.array(M)
+    output = {
+        "a":"example",
+        "M":Mnp  
+    }
+    expected_output = {
+        "a":"example",
+        "b":5,
+        "M":M
+    }
+    mod.output(output)
+    with open(str(file_out),'r') as fp:
+        actual_output = json.load(fp)
+    assert actual_output == expected_output
+    
+
