@@ -252,13 +252,3 @@ class ArgSchemaParser(object):
         logger = logging.getLogger(name)
         logger.setLevel(level=level)
         return logger
-
-
-class ArgSchemaOutputParser(ArgSchemaParser):
-
-    def __init__(self,output_schema_type = None, *args, **kwargs):
-        self.output_schema_type = output_schema_type
-        super(ArgSchemaOutputParser,self).__init__(*args,**kwargs)
-    
-
-
