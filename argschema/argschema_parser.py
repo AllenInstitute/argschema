@@ -131,7 +131,7 @@ class ArgSchemaParser(object):
     def __init__(self,
                  input_data=None,  # dictionary input as option instead of --input_json
                  schema_type=schemas.ArgSchema,  # schema for parsing arguments
-                 output_schema_type = mm.Schema, # schema for parsing output_json
+                 output_schema_type = None, # schema for parsing output_json
                  args=None,
                  logger_name=__name__):
 
