@@ -3,6 +3,8 @@ from argschema.schemas import DefaultSchema
 from argschema.fields import Str,Int,NumpyArray
 import json
 import numpy as np
+import pytest
+import marshmallow as mm
 
 class MyOutputSchema(DefaultSchema):
     a = Str(required=True, description="a simple string")
@@ -49,3 +51,26 @@ def test_output_unvalidated(tmpdir):
     with open(str(file_out),'r') as fp:
         actual_output = json.load(fp)
     assert actual_output == output
+
+def test_bad_output(tmpdir):
+    file_out = tmpdir.join('test_output_bad.json')
+    input_parameters = {
+        'output_json':str(file_out)
+    }
+    mod = ArgSchemaParser(input_data = input_parameters,
+                          output_schema_type = MyOutputSchema,
+                          args=[])
+    M=[[5,5],[7,2]]
+    Mnp = np.array(M)
+    output = {
+        "a":"example",
+        "b":"not a number",
+        "M":Mnp  
+    }
+    expected_output = {
+        "a":"example",
+        "b":5,
+        "M":M
+    }
+    with pytest.raises(mm.ValidationError):
+        mod.output(output)
