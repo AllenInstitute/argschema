@@ -117,7 +117,8 @@ class ArgSchemaParser(object):
         dictionary parameters instead of --input_json
     schema_type : schemas.ArgSchema
         the schema to use to validate the parameters
-    schema_type : schemas.DefaultSchema
+    output_schema_type : mm.Schema
+        the schema to use to validate the output_json, used by self.output
     args : list or None
         command line arguments passed to the module, if None use argparse to parse the command line, set to [] if you want to bypass command line parsing
     logger_name : str
