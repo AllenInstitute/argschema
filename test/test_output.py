@@ -34,3 +34,18 @@ def test_output(tmpdir):
     assert actual_output == expected_output
     
 
+def test_output_unvalidated(tmpdir):
+    file_out = tmpdir.join('test_output_unvalidated.json')
+    input_parameters = {
+        'output_json':str(file_out)
+    }
+    mod = ArgSchemaParser(input_data = input_parameters,
+                          args=[])
+
+    output = {
+        "a":"example",
+    }
+    mod.output(output)
+    with open(str(file_out),'r') as fp:
+        actual_output = json.load(fp)
+    assert actual_output == output
