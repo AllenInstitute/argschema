@@ -117,6 +117,8 @@ class ArgSchemaParser(object):
         dictionary parameters instead of --input_json
     schema_type : schemas.ArgSchema
         the schema to use to validate the parameters
+    output_schema_type : mm.Schema
+        the schema to use to validate the output_json, used by self.output
     args : list or None
         command line arguments passed to the module, if None use argparse to parse the command line, set to [] if you want to bypass command line parsing
     logger_name : str
@@ -130,6 +132,7 @@ class ArgSchemaParser(object):
     def __init__(self,
                  input_data=None,  # dictionary input as option instead of --input_json
                  schema_type=schemas.ArgSchema,  # schema for parsing arguments
+                 output_schema_type = None, # schema for parsing output_json
                  args=None,
                  logger_name=__name__):
 
@@ -160,9 +163,34 @@ class ArgSchemaParser(object):
 
         self.schema_args = result
         self.args = result.data
-
+        self.output_schema_type = output_schema_type
         self.logger = self.initialize_logger(
             logger_name, self.args.get('log_level'))
+
+    def output(self,d):
+        """method for outputing dictionary to the output_json file path after
+        validating it through the output_schema_type
+
+        Parameters
+        ----------
+        d:dict
+            output dictionary to output to self.mod['output_json'] location
+        
+        Raises:
+        mm.ValidationError
+        """
+        if self.output_schema_type is not None:
+            schema = self.output_schema_type()
+            (output_json,errors)=schema.dump(d)
+            if len(errors)>0:
+                raise mm.ValidationError(json.dumps(errors))
+        else:
+            self.logger.warning("output_schema_type is not defined,\
+                                 the output won't be validated")
+            output_json = d
+
+        with open(self.args['output_json'],'w') as fp:
+            json.dump(output_json,fp)
 
     def load_schema_with_defaults(self  ,schema, args):
         """method for deserializing the arguments dictionary (args)
