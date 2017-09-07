@@ -19,8 +19,11 @@ def process_schemas(app, what, name, obj, options, lines):
             def_schema = defaults[schema_index-1]
             if def_schema is None:
                 def_schema = obj.default_schema
-            def_schema_name = def_schema.__module__+'.'+def_schema.__name__
-            
+            if def_schema is not None:
+                def_schema_name = def_schema.__module__+'.'+def_schema.__name__
+            else:
+                def_schema_name = 'None'
+                
             #append to the documentation
             lines.append(".. note::")
             lines.append("  This class takes a ArgSchema as an input to parse inputs")
