@@ -18,8 +18,9 @@ def process_schemas(app, what, name, obj, options, lines):
             #use its default value to construct the string version of the classpath to the module
             def_schema = defaults[schema_index-1].__module__+'.'+defaults[schema_index-1].__name__
             #append to the documentation
-            lines.append("   This class takes a ArgSchema as an input to parse inputs")
-            lines.append(", with a default schema of type :class:`{}`".format(def_schema))
+            lines.append(".. note::")
+            lines.append("  This class takes a ArgSchema as an input to parse inputs")
+            lines.append("  , with a default schema of type :class:`{}`".format(def_schema))
             lines.append("")
         if issubclass(obj,ArgSchema):
             #add a special note to ArgSchema's
@@ -28,13 +29,15 @@ def process_schemas(app, what, name, obj, options, lines):
         if issubclass(obj,mm.Schema):
             #but document all mm.Schema's
             schema = obj()
-            lines.append("Schema:")
+            lines.append(".. note::")
+            lines.append("")
+            lines.append("  keys:")
 
             #loop over the declared fields for this schema
             for field_name, field in schema.declared_fields.items():
                 #we will build up the documentation line for each field
                 #start declaring the key as field_name like a parameter
-                field_line = "  :%s: "%field_name
+                field_line = "    :%s: "%field_name
                 try:
                     #get the set of types this field was derived from
                     if isinstance(field, mm.fields.List):
@@ -47,7 +50,10 @@ def process_schemas(app, what, name, obj, options, lines):
                     if isinstance(field,mm.fields.Nested):
                         #if it's a nested field we should specify it as a dict, and link to the documentation 
                         #for that nested schema
-                        raw_type = 'dict(:class:`~{}`)'.format(type(field.schema).__name__)
+                        if field.many == True:
+                           raw_type = 'list[:class:`~{}`]'.format(type(field.schema).__name__)
+                        else:
+                           raw_type = 'dict(:class:`~{}`)'.format(type(field.schema).__name__)
                     else:
                         #otherwise we should be able to look it up in the FIELD_TYPE_MAP
                         try:
