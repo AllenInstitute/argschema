@@ -23,11 +23,11 @@ def process_schemas(app, what, name, obj, options, lines):
                 def_schema_name = def_schema.__module__+'.'+def_schema.__name__
             else:
                 def_schema_name = 'None'
-                
+
             #append to the documentation
             lines.append(".. note::")
             lines.append("  This class takes a ArgSchema as an input to parse inputs")
-            lines.append("  , with a default schema of type :class:`{}`".format(def_schema_name))
+            lines.append("  , with a default schema of type :class:`~{}`".format(def_schema_name))
             lines.append("")
         if issubclass(obj,ArgSchema):
             #add a special note to ArgSchema's

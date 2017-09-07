@@ -47,4 +47,4 @@ def test_autodoc_myparser():
     process_schemas(None, 'class', 'MyParser', MyParser, None, lines)
     assert('  This class takes a ArgSchema as an input to parse inputs' in lines)
     default_line = next(line for line in lines if 'default schema of type' in line)
-    assert ':class:`test_argschema_parser.MySchema`' in default_line
+    assert ':class:`~test_argschema_parser.MySchema`' in default_line
