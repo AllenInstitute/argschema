@@ -6,7 +6,7 @@ import marshmallow as mm
 
 
 class OptionSchema(ArgSchema):
-    a = OptionList([1, 2, 3], required=True, description='a slice object')
+    a = OptionList([1, 2, 3], required=True, description='one of 1,2,3')
 
 
 def test_option_list():
