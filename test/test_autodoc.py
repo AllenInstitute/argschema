@@ -2,6 +2,7 @@ from argschema.autodoc import process_schemas
 import pytest
 from test_first_test import SimpleExtension,ExampleRecursiveSchema,RecursiveSchema,MyShorterExtension
 from fields.test_slice import SliceSchema
+from argschema.argschema_parser import ArgSchemaParser
 
 def test_autodoc():
     lines = []
@@ -34,3 +35,8 @@ def test_autodoc_list():
     list_field=next(line for line in lines if 'List' in line)
     assert('d' in list_field)
     assert('List` : int' in list_field)
+
+def test_autodoc_argschemaparser():
+    lines = []
+    process_schemas(None, 'class', 'ArgSchemaParser', ArgSchemaParser, None, lines)
+    assert('  This class takes a ArgSchema as an input to parse inputs' in lines)
