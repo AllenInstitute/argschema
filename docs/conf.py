@@ -287,3 +287,11 @@ texinfo_documents = [
 
 # If true, do not generate a @detailmenu in the "Top" node's menu.
 #texinfo_no_detailmenu = False
+
+import sys
+sys.path.insert(0, os.path.abspath("../"))   
+sys.path.insert(0, os.path.abspath("../test"))
+from argschema.autodoc import process_schemas
+
+def setup(app):
+    app.connect('autodoc-process-docstring',process_schemas)
