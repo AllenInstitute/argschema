@@ -31,7 +31,7 @@ def process_schemas(app, what, name, obj, options, lines):
             schema = obj()
             lines.append(".. note::")
             lines.append("")
-            lines.append("  keys:")
+            lines.append("  keys: (field_type \: raw_type) description")
 
             #loop over the declared fields for this schema
             for field_name, field in schema.declared_fields.items():
