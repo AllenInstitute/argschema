@@ -139,6 +139,21 @@ so now if run the example commands found in run_template.sh
     $ python template_module.py
     {u'name': u'from_dictionary', u'inc_array': [5.0, 7.0, 10.0]}    
 
+Sphinx Documentation
+--------------------
+argschema comes with a autodocumentation feature for Sphnix which will help you automatically
+add documentation of your Schemas and ArgSchemaParser classes in your project. This is how the 
+documentation of the :doc:`../tests/modules` suite included here was generated.
+
+To configure sphnix to use this function, you must be using the sphnix autodoc module and add the following to your conf.py file
+
+.. code-block:: python
+
+    from argschema.autodoc import process_schemas
+
+    def setup(app):
+        app.connect('autodoc-process-docstring',process_schemas)
+
 Installation
 ------------
 install via source code
