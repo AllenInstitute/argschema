@@ -57,10 +57,12 @@ def process_schemas(app, what, name, obj, options, lines):
                     if isinstance(field,mm.fields.Nested):
                         #if it's a nested field we should specify it as a dict, and link to the documentation 
                         #for that nested schema
+                        schema_type = type(field.schema)
+                        schema_class_name = schema_type.__module__ + "." + schema_type.__name__
                         if field.many == True:
-                           raw_type = 'list[:class:`~{}`]'.format(type(field.schema).__name__)
+                           raw_type = 'list[:class:`~{}`]'.format(schema_class_name)
                         else:
-                           raw_type = 'dict(:class:`~{}`)'.format(type(field.schema).__name__)
+                           raw_type = 'dict(:class:`~{}`)'.format(schema_class_name)
                     else:
                         #otherwise we should be able to look it up in the FIELD_TYPE_MAP
                         try:

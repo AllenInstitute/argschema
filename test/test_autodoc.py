@@ -14,7 +14,7 @@ def test_autodoc_nested():
     lines = []
     process_schemas(None, 'class', 'ExampleRecursiveSchema', ExampleRecursiveSchema, None, lines)
     nested_field=next(line for line in lines if 'Nested' in line)
-    assert('~RecursiveSchema' in nested_field)
+    assert('RecursiveSchema' in nested_field)
     assert('dict' in nested_field)
 
 def test_autodoc_slice():
@@ -27,7 +27,7 @@ def test_autodoc_recursive_nested():
     lines = []
     process_schemas(None, 'class', 'RecursiveSchema', RecursiveSchema, None, lines)
     nested_field=next(line for line in lines if 'Nested' in line)
-    assert('~RecursiveSchema' in nested_field)
+    assert('RecursiveSchema' in nested_field)
     assert('list' in nested_field)
     
 def test_autodoc_list():
