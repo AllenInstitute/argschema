@@ -17,3 +17,4 @@ setup(name='argschema',
       install_requires=required,
       setup_requires=['pytest-runner'],
       tests_require=test_required)
+
