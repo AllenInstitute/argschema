@@ -1,8 +1,7 @@
-from schemas import ArgSchema
-import fields
+from argschema.schemas import ArgSchema
 import marshmallow as mm
-from utils import get_description_from_field
-from argschema_parser import ArgSchemaParser
+from argschema.utils import get_description_from_field
+from argschema.argschema_parser import ArgSchemaParser
 import inspect
 
 FIELD_TYPE_MAP = {v: k for k, v in mm.Schema.TYPE_MAPPING.items()}
