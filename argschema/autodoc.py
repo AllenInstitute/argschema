@@ -10,10 +10,12 @@ def process_schemas(app, what, name, obj, options, lines):
 
     if what == "class":
         if issubclass(obj,ArgSchemaParser):
-            lines.append("   This class takes a ArgSchema as an input to parse inputs")
+            
             (args,vargs,varkw,defaults)=inspect.getargspec(obj.__init__)
-            def_schema = defaults[1].__module__+'.'+defaults[1].__name__
-            lines.append("   This class's default ArgSchema is of type :class:`{}`".format(def_schema))
+            schema_index = next(i for i,arg in enumerate(args) if arg=='schema_type')
+            def_schema = defaults[schema_index-1].__module__+'.'+defaults[schema_index-1].__name__
+            lines.append("   This class takes a ArgSchema as an input to parse inputs")
+            lines.append(", with a default schema of type :class:`{}`".format(def_schema))
             lines.append("")
         if issubclass(obj,ArgSchema):
             lines.append("   This schema is designed to be a schema_type for an ArgSchemaParser object")
