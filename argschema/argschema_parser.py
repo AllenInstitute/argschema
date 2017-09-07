@@ -128,16 +128,16 @@ class ArgSchemaParser(object):
     -------
 
     """
-
+    
     def __init__(self,
                  input_data=None,  # dictionary input as option instead of --input_json
                  schema_type=schemas.ArgSchema,  # schema for parsing arguments
                  output_schema_type = None, # schema for parsing output_json
                  args=None,
                  logger_name=__name__):
-
+        
         schema = schema_type()
-
+        self.schema = schema
         # convert schema to argparse object
         p = utils.schema_argparser(schema)
         argsobj = p.parse_args(args)
