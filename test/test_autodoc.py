@@ -42,7 +42,7 @@ def test_autodoc_argschemaparser():
     process_schemas(None, 'class', 'ArgSchemaParser', ArgSchemaParser, None, lines)
     assert('  This class takes a ArgSchema as an input to parse inputs' in lines)
 
-def test_autodoc_argschemaparser():
+def test_autodoc_myparser():
     lines = []
     process_schemas(None, 'class', 'MyParser', MyParser, None, lines)
     assert('  This class takes a ArgSchema as an input to parse inputs' in lines)
