@@ -111,9 +111,9 @@ class ArgSchemaParser(object):
     Takes input_data, reference to a input_json and the command line inputs and parses out the parameters
     and validates them against the schema_type specified.
 
-    To subclass this and make a new schema be default, simply override the schema_type and output_schema_type
+    To subclass this and make a new schema be default, simply override the default_schema and default_output_schema
     attributes of this class.
-    
+
     Parameters
     ----------
     input_data : dict or None
@@ -131,8 +131,8 @@ class ArgSchemaParser(object):
     -------
 
     """
-    schema_type = schemas.ArgSchema
-    output_schema_type = None
+    default_schema = schemas.ArgSchema
+    default_output_schema = None
 
     def __init__(self,
                  input_data=None,  # dictionary input as option instead of --input_json
@@ -141,18 +141,20 @@ class ArgSchemaParser(object):
                  args=None,
                  logger_name=__name__):
         
-        if schema_type is not None:
-            self.schema_type = schema_type
-        schema = self.schema_type()
-        self.schema = schema
+        if schema_type is None:
+            schema_type = self.default_schema
+        if output_schema_type is None:
+            output_schema_type = self.default_output_schema
+
+        self.schema = schema_type()
 
         # convert schema to argparse object
-        p = utils.schema_argparser(schema)
+        p = utils.schema_argparser(self.schema)
         argsobj = p.parse_args(args)
         argsdict = utils.args_to_dict(argsobj)
 
         if argsobj.input_json is not None:
-            result = schema.load(argsdict)
+            result = self.schema.load(argsdict)
             if 'input_json' in result.errors:
                 raise mm.ValidationError(result.errors['input_json'])
             with open(result.data['input_json'], 'r') as j:
@@ -165,7 +167,7 @@ class ArgSchemaParser(object):
         args = utils.smart_merge(jsonargs, argsdict)
 
         # validate with load!
-        result = self.load_schema_with_defaults(schema, args)
+        result = self.load_schema_with_defaults(self.schema, args)
         if len(result.errors) > 0:
             raise mm.ValidationError(json.dumps(result.errors, indent=2))
 
