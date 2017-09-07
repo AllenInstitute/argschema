@@ -111,6 +111,9 @@ class ArgSchemaParser(object):
     Takes input_data, reference to a input_json and the command line inputs and parses out the parameters
     and validates them against the schema_type specified.
 
+    To subclass this and make a new schema be default, simply override the schema_type and output_schema_type
+    attributes of this class.
+    
     Parameters
     ----------
     input_data : dict or None
@@ -128,16 +131,21 @@ class ArgSchemaParser(object):
     -------
 
     """
-    
+    schema_type = schemas.ArgSchema
+    output_schema_type = None
+
     def __init__(self,
                  input_data=None,  # dictionary input as option instead of --input_json
-                 schema_type=schemas.ArgSchema,  # schema for parsing arguments
+                 schema_type=None,  # schema for parsing arguments
                  output_schema_type = None, # schema for parsing output_json
                  args=None,
                  logger_name=__name__):
         
-        schema = schema_type()
+        if schema_type is not None:
+            self.schema_type = schema_type
+        schema = self.schema_type()
         self.schema = schema
+
         # convert schema to argparse object
         p = utils.schema_argparser(schema)
         argsobj = p.parse_args(args)

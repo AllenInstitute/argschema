@@ -16,15 +16,15 @@ def process_schemas(app, what, name, obj, options, lines):
             #find where the schema_type is as a keyword argument
             schema_index = next(i for i,arg in enumerate(args) if arg=='schema_type')
             #use its default value to construct the string version of the classpath to the module
-            if defaults[schema_index-1] is not None:
-                def_schema = defaults[schema_index-1].__module__+'.'+defaults[schema_index-1].__name__
-            else:
-                def_schema = 'None'
-
+            def_schema = defaults[schema_index-1]
+            if def_schema is None:
+                def_schema = obj.schema_type
+            def_schema_name = def_schema.__module__+'.'+def_schema.__name__
+            
             #append to the documentation
             lines.append(".. note::")
             lines.append("  This class takes a ArgSchema as an input to parse inputs")
-            lines.append("  , with a default schema of type :class:`{}`".format(def_schema))
+            lines.append("  , with a default schema of type :class:`{}`".format(def_schema_name))
             lines.append("")
         if issubclass(obj,ArgSchema):
             #add a special note to ArgSchema's
