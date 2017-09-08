@@ -1,6 +1,9 @@
 from argschema import utils
 import pytest
 import operator
+from argschema.schemas import ArgSchema, DefaultSchema
+from argschema import fields, ArgSchemaParser
+import marshmallow as mm
 
 def test_merge_value_add():
     a = {'key':['a']}
@@ -61,3 +64,55 @@ def test_smart_merge_nested():
     assert(c['a']==1)
     assert(c['b']['c']==5)
     assert(c['b']['d']==9)
+
+
+class Player(DefaultSchema):
+    """player information"""
+    name = fields.Str(required=True,description="players name")
+    number = fields.Int(required=True,validators = (lambda x: x>=0), description="player's number (must be >0)")
+
+class BaseballSituation(ArgSchema):
+    """A description of a baseball situation"""
+    inning = fields.Int(required=True,description="inning (1-9)",validate = mm.validate.OneOf(range(1,10)))
+    bottom = fields.Bool(required=True,description="is it the bottom of the inning")
+    score_home = fields.Int(required=True,description="home team score (non-negative)",validate=(lambda x:x>=0))
+    score_away = fields.Int(required=True,description="away team score (non-negative)",validate=(lambda x:x>=0))
+    outs = fields.Int(required=True, description="number of outs (0-2)",validate=mm.validate.OneOf([0,1,2]))
+    balls = fields.Int(required=False,default=0,description="number of balls (0-4)",validate = mm.validate.OneOf([0,1,2,3]))
+    strikes = fields.Int(required=True,description="how many strikes (0-2)",validate = mm.validate.OneOf([0,1,2]))
+    bases_occupied = fields.List(fields.Int,description="which bases are occupied",validate = mm.validate.ContainsOnly([1,2,3]))
+    batter = fields.Nested(Player,required=True,description="who is batting")
+    pitcher = fields.Nested(Player,required=True,description="who is pitching")
+    
+def test_schema_argparser_with_baseball():
+    example_situation = {
+        'batter':{
+            'name':'Barry Bonds',
+            'number':25
+        },
+        'pitcher':{
+            'name':'Roger Clemens',
+            'number':21
+        },
+        'based_occupied':[1,2,3],
+        'outs':2,
+        'strikes':2,
+        'balls':3,
+        'inning':9,
+        'bottom':True,
+        'score_home':2,
+        'score_away':3
+    }
+    schema = BaseballSituation()
+    mod = ArgSchemaParser(input_data = example_situation, schema_type=BaseballSituation,args=[])
+    parser = utils.schema_argparser(schema)
+    help = parser.format_help()
+    help = help.replace('\n','').replace(' ','')
+    assert('--strikesSTRIKEShowmanystrikes(0-2)(REQUIRED)(validoptionsare[0,1,2])' in help)
+    assert('--bases_occupied[BASES_OCCUPIED[BASES_OCCUPIED...]]whichbasesareoccupied(constrainedlist)(validoptionsare[1,2,3])' in help)
+    assert('--ballsBALLSnumberofballs(0-4)(default=0)(validoptionsare[0,1,2,3])' in help)
+    assert("--pitcher.numberPITCHER.NUMBERplayer'snumber(mustbe>0)(REQUIRED)" in help)
+
+
+
+
