@@ -12,8 +12,7 @@ class MySchema(argschema.ArgSchema):
     nest = argschema.fields.Nested(MyNestedSchema,description="a nested schema")
 
 class MyParser(argschema.ArgSchemaParser):
-    def __init__(self,schema_type=MySchema,*args,**kwargs):
-        super(MyParser,self).__init__(schema_type=schema_type, *args, **kwargs)
+    default_schema = MySchema
 
 def test_my_parser():
     input_data = {
