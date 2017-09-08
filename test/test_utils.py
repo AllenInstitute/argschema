@@ -50,9 +50,9 @@ def test_smart_merge_not_none():
 
 def test_smart_merge_none():
     a = {'a':1,'b':8}
-    b = {'a':None}
+    b = {'c':None}
     c = utils.smart_merge(a,b,merge_keys=['a'],overwrite_with_none=True)
-    assert(c['a'] is None)
+    assert(c['c'] is None)
 
 def test_smart_merge_nested():
     a = {'a':1,'b':{'c':4}}
@@ -61,4 +61,3 @@ def test_smart_merge_nested():
     assert(c['a']==1)
     assert(c['b']['c']==5)
     assert(c['b']['d']==9)
-    
