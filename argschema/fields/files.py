@@ -24,17 +24,23 @@ class OutputFile(mm.fields.Str):
 
         Parameters
         ----------
-        value :
-            
+        value : str
+            filepath to validate you can write to that location
 
         Returns
         -------
-
+        None
+        
+        Raises
+        ------
+        marshmallow.ValidationError
+            If os.path.dirname cannot be applied, or if directory does not exist, or if you cannot write to that directory,
+            or writing a temporary file there produces any crazy exception
         """
         try:
             path = os.path.dirname(value)
-        except Exception as e:
-            raise mm.ValidationError("%s cannot be os.path.dirname-ed" % value)
+        except Exception as e: # pragma: no cover 
+            raise mm.ValidationError("%s cannot be os.path.dirname-ed" % value) # pragma: no cover 
         try:
             with tempfile.TemporaryFile(mode='w', dir=path) as tfile:
                 tfile.write('0')
