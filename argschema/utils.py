@@ -69,32 +69,6 @@ def merge_value(a, b, key, func=add):
          for values {} and {} of types {} and {}".format
                         (key, a[key], b[key], type(a[key]), type(b[key])))
 
-
-def do_join(a, b, key, merge_keys=None):
-    """determine if we should/can attempt to merge a[key],b[key]
-    if merge_keys is not specified, then no
-
-    Parameters
-    ----------
-    a :
-
-    b :
-
-    key :
-
-    merge_keys :
-         (Default value = None)
-
-    Returns
-    -------
-
-    """
-    if merge_keys is None:
-        return False
-    # only consider if key is in merge_keys
-    return key in merge_keys
-
-
 def smart_merge(a, b, path=None, merge_keys=None, overwrite_with_none=False):
     """updates dictionary a with values in dictionary b
     being careful not to write things with None, and performing a merge on merge_keys
@@ -121,6 +95,11 @@ def smart_merge(a, b, path=None, merge_keys=None, overwrite_with_none=False):
     a = {} if a is None else a
     b = {} if b is None else b
     path = [] if path is None else path
+    
+    #simplifies code to have empty list rather than None
+    #might allow some crazy dynamic merging in future
+    if merge_keys is None:
+        merge_keys = []
 
     for key in b:
         if key in a:
@@ -135,7 +114,7 @@ def smart_merge(a, b, path=None, merge_keys=None, overwrite_with_none=False):
             else:
                 # in this case we are potentially overwriting a's value with b's
                 # determine if we should try to merge
-                if do_join(a, b, key, merge_keys):
+                if key in merge_keys:
                     # attempt to merge leafs
                     a[key] = merge_value(a, b, key)
                 else:  # otherwise replace leafs
