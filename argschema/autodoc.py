@@ -40,8 +40,8 @@ def process_schemas(app, what, name, obj, options, lines):
             #lines.append("")
             #lines.append("  keys: (field_type \: raw_type) description")
             lines.append(".. csv-table:: %s"%obj.__name__)
-            lines.append('   :header: "key", "description", "default","type"')
-            lines.append('   :widths: 30, 80, 30, 30')
+            lines.append('   :header: "key", "description", "default","field_type","raw_type"')
+            lines.append('   :widths: 30, 80, 30, 30, 30')
             lines.append('')
             
 
@@ -81,17 +81,19 @@ def process_schemas(app, what, name, obj, options, lines):
                     else:
                         base_types = inspect.getmro(type(field))
             
-                
+                    field_type = type(field)
                     #use these base_types to figure out the raw_json type for this field
                     if isinstance(field,mm.fields.Nested):
                         #if it's a nested field we should specify it as a dict, and link to the documentation 
                         #for that nested schema
-                        schema_type = type(field.schema)
-                        schema_class_name = schema_type.__module__ + "." + schema_type.__name__
+                        # = type
+                        #schema_type = type(field.schema)
+                        field_type = type(field.schema)
+                        #schema_class_name = schema_type.__module__ + "." + schema_type.__name__
                         if field.many == True:
-                           raw_type = 'list[:class:`~{}`]'.format(schema_class_name)
+                           raw_type = 'list'
                         else:
-                           raw_type = 'dict(:class:`~{}`)'.format(schema_class_name)
+                           raw_type = 'dict'
                     else:
                         #otherwise we should be able to look it up in the FIELD_TYPE_MAP
                         try:
@@ -101,10 +103,10 @@ def process_schemas(app, what, name, obj, options, lines):
                             #if its not in the FIELD_TYPE_MAP, we aren't sure what type it is
                             #TODO handle this more elegantly/and/or patch up more use cases
                             raw_type = '?'
-                    field_line += ":class:`{}.{}` : {}".format(type(field).__module__,type(field).__name__,raw_type)
+                    field_line += ":class:`~{}.{}`,{}".format(field_type.__module__,field_type.__name__,raw_type)
                 except:
                     #in case this fails for some reason, note it as unknown
                     #TODO handle this more elegantly, identify and patch up such cases
-                    field_line += "unknown"
+                    field_line += "unknown,unknown"
                 lines.append(field_line)
             #lines.append(table_line)
