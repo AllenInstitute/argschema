@@ -36,7 +36,8 @@ if __name__ == '__main__':
 
     # here is my ArgSchemaParser that processes my inputs
     mod = ArgSchemaParser(input_data=example_input,
-                          schema_type=MyParameters)
+                          schema_type=MyParameters,
+                          output_schema_type=MyOutputParams)
                           
     # pull out the inc section of the parameters
     inc_params = mod.args['inc']
@@ -52,19 +53,4 @@ if __name__ == '__main__':
 
     # if the parameters are set as such write the output
     if inc_params['write_output']:
-        
-        # initiliaze the output schema
-        out_schema = MyOutputParams()
-        
-        # serialize the output dictionary to a json compatible dictionary of basic types
-        out_json, errors = out_schema.dump(output)
-        
-        # assert there are no problems
-        assert not errors
-        
-        # print the results to the terminal
-        print(out_json)
-        
-        #write the result to a json file where specified by output_json
-        with open(mod.args['output_json'], 'w') as fp:
-            json.dump(out_json, fp)
+        mod.output(output)
