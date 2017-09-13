@@ -1,3 +1,4 @@
 sphinxcontrib-napoleon
 numpy
 marshmallow
+pytest

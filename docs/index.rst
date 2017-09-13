@@ -37,6 +37,17 @@ This contains the complete documentation of the api
 
    api/argschema
 
+TESTS
+-----
+
+This contains the tests
+
+.. toctree::
+   :maxdepth: 4
+
+   tests/modules
+   tests/fields
+
 
 Indices and tables
 ==================
