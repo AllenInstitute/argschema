@@ -20,7 +20,7 @@ def test_autodoc_slice():
     lines = []
     process_schemas(None, 'class', 'SliceSchema', SliceSchema, None, lines)
     slice_field=next(line for line in lines if 'argschema.fields.slice.Slice' in line)
-    assert('?' in slice_field)
+    assert('str' in slice_field)
 
 def test_autodoc_recursive_nested():
     lines = []
