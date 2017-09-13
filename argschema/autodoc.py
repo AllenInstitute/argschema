@@ -99,6 +99,9 @@ def process_schemas(app, what, name, obj, options, lines):
                         try:
                             base_type=next(bt for bt in base_types if bt in FIELD_TYPE_MAP)
                             raw_type=FIELD_TYPE_MAP[base_type].__name__
+                            #hack in marshmallow for py3 which things Str is type 'bytes'
+                            if raw_type == 'bytes':
+                                raw_type = 'str'
                         except:
                             #if its not in the FIELD_TYPE_MAP, we aren't sure what type it is
                             #TODO handle this more elegantly/and/or patch up more use cases
