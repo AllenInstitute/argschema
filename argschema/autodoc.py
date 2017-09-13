@@ -40,7 +40,7 @@ def process_schemas(app, what, name, obj, options, lines):
             #lines.append("")
             #lines.append("  keys: (field_type \: raw_type) description")
             lines.append(".. csv-table:: %s"%obj.__name__)
-            lines.append('   :header: "key", "description", "default","field_type","raw_type"')
+            lines.append('   :header: "key", "description", "default","field_type","json_type"')
             lines.append('   :widths: 30, 80, 30, 30, 30')
             lines.append('')
             
