@@ -51,5 +51,8 @@ class SchemaWithQuotedDescriptions(argschema.ArgSchema):
     a = argschema.fields.Int(required=True, description='something that is "quoted" is problematic')
 
 def test_autodoc_quotes():
-    mod = argschema.ArgSchemaParser(schema_type=SchemaWithQuotedDescriptions)
-    
+    input_data = {
+        'a':5
+    }
+    mod = argschema.ArgSchemaParser(input_data = input_data,
+                                    schema_type=SchemaWithQuotedDescriptions)
