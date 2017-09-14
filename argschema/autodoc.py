@@ -39,77 +39,80 @@ def process_schemas(app, what, name, obj, options, lines):
             #lines.append(".. note::")
             #lines.append("")
             #lines.append("  keys: (field_type \: raw_type) description")
-            lines.append(".. csv-table:: %s"%obj.__name__)
-            lines.append('   :header: "key", "description", "default","field_type","json_type"')
-            lines.append('   :widths: 30, 80, 30, 30, 30')
-            lines.append('')
-            
 
-            # #loop over the declared fields for this schema
-            for field_name, field in schema.declared_fields.items():
-                #we will build up the documentation line for each field
-                #start declaring the key as field_name like a parameter
-                field_line = "    %s,"%field_name
-               
-                #get the description of this field and add it to documentation
-                description = get_description_from_field(field)
+            if len(schema.declared_fields)>0:
+                lines.append(".. csv-table:: %s"%obj.__name__)
+                lines.append('   :header: "key", "description", "default","field_type","json_type"')
+                lines.append('   :widths: 30, 80, 30, 30, 30')
+                lines.append('')
                 
-                if description is None:
-                    description="no description"         
-                field_line+='"%s",'%description
-    
 
-                #if field.required:
-                #    #add a REQUIRED stamp to required fields
-                #    field_line += " REQUIRED "
-                if field.default is not mm.missing:
-                    #add in the default value if there is one
-                    default = '"{}",'.format(field.default)
-                    field_line += default
-                else:
-                    field_line += "NA,"
+                # #loop over the declared fields for this schema
+                for field_name, field in schema.declared_fields.items():
+                    #we will build up the documentation line for each field
+                    #start declaring the key as field_name like a parameter
+                    field_line = "    %s,"%field_name
+                
+                    #get the description of this field and add it to documentation
+                    description = get_description_from_field(field)
                     
-             
-               
+                    if description is None:
+                        description="no description" 
+                    description=description.replace('\"',"'")        
+                    field_line+='"%s",'%description
+        
+
+                    #if field.required:
+                    #    #add a REQUIRED stamp to required fields
+                    #    field_line += " REQUIRED "
+                    if field.default is not mm.missing:
+                        #add in the default value if there is one
+                        default = '"{}",'.format(field.default)
+                        field_line += default
+                    else:
+                        field_line += "NA,"
+                        
                 
-                #add this field line to the documentation
-                try:
-                    #get the set of types this field was derived from
-                    if isinstance(field, mm.fields.List):
-                        #if it's a list we want to do this for its container
-                        base_types = inspect.getmro(type(field.container))
-                    else:
-                        base_types = inspect.getmro(type(field))
-            
-                    field_type = type(field)
-                    #use these base_types to figure out the raw_json type for this field
-                    if isinstance(field,mm.fields.Nested):
-                        #if it's a nested field we should specify it as a dict, and link to the documentation 
-                        #for that nested schema
-                        # = type
-                        #schema_type = type(field.schema)
-                        field_type = type(field.schema)
-                        #schema_class_name = schema_type.__module__ + "." + schema_type.__name__
-                        if field.many == True:
-                           raw_type = 'list'
+                
+                    
+                    #add this field line to the documentation
+                    try:
+                        #get the set of types this field was derived from
+                        if isinstance(field, mm.fields.List):
+                            #if it's a list we want to do this for its container
+                            base_types = inspect.getmro(type(field.container))
                         else:
-                           raw_type = 'dict'
-                    else:
-                        #otherwise we should be able to look it up in the FIELD_TYPE_MAP
-                        try:
-                            base_type=next(bt for bt in base_types if bt in FIELD_TYPE_MAP)
-                            raw_type=FIELD_TYPE_MAP[base_type].__name__
-                            #hack in marshmallow for py3 which things Str is type 'bytes'
-                            if raw_type == 'bytes':
-                                raw_type = 'str'
-                        except:
-                            #if its not in the FIELD_TYPE_MAP, we aren't sure what type it is
-                            #TODO handle this more elegantly/and/or patch up more use cases
-                            raw_type = '?'
-                    field_line += ":class:`~{}.{}`,{}".format(field_type.__module__,field_type.__name__,raw_type)
-                except:
-                    #in case this fails for some reason, note it as unknown
-                    #TODO handle this more elegantly, identify and patch up such cases
-                    field_line += "unknown,unknown"
-                lines.append(field_line)
-            #lines.append(table_line)
+                            base_types = inspect.getmro(type(field))
+                
+                        field_type = type(field)
+                        #use these base_types to figure out the raw_json type for this field
+                        if isinstance(field,mm.fields.Nested):
+                            #if it's a nested field we should specify it as a dict, and link to the documentation 
+                            #for that nested schema
+                            # = type
+                            #schema_type = type(field.schema)
+                            field_type = type(field.schema)
+                            #schema_class_name = schema_type.__module__ + "." + schema_type.__name__
+                            if field.many == True:
+                                raw_type = 'list'
+                            else:
+                                raw_type = 'dict'
+                        else:
+                            #otherwise we should be able to look it up in the FIELD_TYPE_MAP
+                            try:
+                                base_type=next(bt for bt in base_types if bt in FIELD_TYPE_MAP)
+                                raw_type=FIELD_TYPE_MAP[base_type].__name__
+                                #hack in marshmallow for py3 which things Str is type 'bytes'
+                                if raw_type == 'bytes':
+                                    raw_type = 'str'
+                            except:
+                                #if its not in the FIELD_TYPE_MAP, we aren't sure what type it is
+                                #TODO handle this more elegantly/and/or patch up more use cases
+                                raw_type = '?'
+                        field_line += ":class:`~{}.{}`,{}".format(field_type.__module__,field_type.__name__,raw_type)
+                    except:
+                        #in case this fails for some reason, note it as unknown
+                        #TODO handle this more elegantly, identify and patch up such cases
+                        field_line += "unknown,unknown"
+                    lines.append(field_line)
+                #lines.append(table_line)

@@ -3,6 +3,7 @@ import pytest
 from test_first_test import SimpleExtension,ExampleRecursiveSchema,RecursiveSchema,MyShorterExtension
 from fields.test_slice import SliceSchema
 from argschema.argschema_parser import ArgSchemaParser
+import argschema
 from test_argschema_parser import MyParser
 
 def test_autodoc():
@@ -45,3 +46,10 @@ def test_autodoc_myparser():
     assert('  This class takes a ArgSchema as an input to parse inputs' in lines)
     default_line = next(line for line in lines if 'default schema of type' in line)
     assert ':class:`~test_argschema_parser.MySchema`' in default_line
+
+class SchemaWithQuotedDescriptions(argschema.ArgSchema):
+    a = argschema.fields.Int(required=True, description='something that is "quoted" is problematic')
+
+def test_autodoc_quotes():
+    mod = argschema.ArgSchemaParser(schema_type=SchemaWithQuotedDescriptions)
+    
