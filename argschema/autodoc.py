@@ -17,12 +17,11 @@ def process_schemas(app, what, name, obj, options, lines):
             schema_index = next(i for i,arg in enumerate(args) if arg=='schema_type')
             #use its default value to construct the string version of the classpath to the module
             def_schema = defaults[schema_index-1]
-            if def_schema is None:
-                def_schema = obj.default_schema
+            
+            def_schema = def_schema or obj.default_schema
             if def_schema is not None:
                 def_schema_name = def_schema.__module__+'.'+def_schema.__name__
-            else:
-                def_schema_name = 'None'
+            def_schema_name = def_schema_name or 'None'
 
             #append to the documentation
             lines.append(".. note::")
@@ -56,8 +55,7 @@ def process_schemas(app, what, name, obj, options, lines):
                     #get the description of this field and add it to documentation
                     description = get_description_from_field(field)
                     
-                    if description is None:
-                        description="no description" 
+                    description = description or "no description" 
                     description=description.replace('\"',"'")        
                     field_line+='"%s",'%description
         
