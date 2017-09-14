@@ -7,3 +7,5 @@ pytest-pep8>=1.0.6
 pytest-xdist>=1.14
 pylint>=1.5.4
 flake8>=3.0.4
+rstcheck
+sphinx
