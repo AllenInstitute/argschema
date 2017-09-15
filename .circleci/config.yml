@@ -32,8 +32,20 @@ jobs:
       - image: circleci/python:3.6.1
     steps:
       - checkout
+      - restore_cache:
+          keys:
+          - python3-dependencies-{{ checksum "requirements.txt" }}-{{ checksum "test_requirements.txt"}}
+          # fallback to using the latest cache if no exact match is found
+          - python3-dependencies-
       - run:
-          name: merge with master
+          name: increment version
+          command: |
+            python3 -m venv venv
+            . venv/bin/activate
+            python setup.py install
+            python .circleci/increment_version.py
+      - run:
+          name: merge develop into master
           command: |
             .circleci/circle_master_merge.sh
 
@@ -48,13 +60,6 @@ jobs:
           - python3-dependencies-{{ checksum "requirements.txt" }}-{{ checksum "test_requirements.txt"}}
           # fallback to using the latest cache if no exact match is found
           - python3-dependencies-
-      - run:
-          name: increment version
-          command: |
-            python3 -m venv venv
-            . venv/bin/activate
-            python setup.py install
-            python .circleci/increment_version.py
       - run:
           name: package for pypi
           command: |
