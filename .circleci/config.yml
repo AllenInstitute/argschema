@@ -45,7 +45,7 @@ jobs:
             python setup.py install
             python .circleci/increment_version.py
       - run:
-          name: merge with master
+          name: merge develop into master
           command: |
             .circleci/circle_master_merge.sh
 
