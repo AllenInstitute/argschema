@@ -1,6 +1,6 @@
 import pytest
 from argschema import ArgSchemaParser, ArgSchema
-from argschema.fields import InputFile, OutputFile, InputDir
+from argschema.fields import InputFile, OutputFile, InputDir, OutputDir
 import marshmallow as mm
 import os
 
@@ -65,6 +65,36 @@ def test_output_path_noapath():
         file_ = '@/afa\\//'
         args = ['--output_json', str(file_)]
         mod = ArgSchemaParser(args=args)
+
+
+class BasicOutputDir(ArgSchema):
+    output_dir = OutputDir(required=True,description="basic output dir")
+
+
+
+def test_output_dir_basic():
+    output_dir_example = {
+        'output_dir':'/tmp/mytmp'
+    }
+    mod = ArgSchemaParser(schema_type=BasicOutputDir,
+                            input_data=output_dir_example,
+                            args=[])
+def test_output_dir_bad_permission():
+    output_dir_example = {
+        'output_dir':'/'
+    }
+    with pytest.raises(mm.ValidationError):
+        mod = ArgSchemaParser(schema_type=BasicOutputDir,
+                              input_data=output_dir_example,
+                              args=[])
+def test_output_dir_bad_location():
+    output_dir_example = {
+        'output_dir':'///\\\//\/'
+    }
+    with pytest.raises(mm.ValidationError):
+        mod = ArgSchemaParser(schema_type=BasicOutputDir,
+                              input_data=output_dir_example,
+                              args=[])
 
 
 # INPUT FILE TESTS
