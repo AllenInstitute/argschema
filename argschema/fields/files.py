@@ -8,7 +8,7 @@ import errno
 def validate_outpath(path):
     try:
         with tempfile.TemporaryFile(mode='w', dir=path) as tfile:
-                tfile.write('0')
+            tfile.write('0')
     except Exception as e:
         if isinstance(e, OSError):
             if e.errno == errno.ENOENT:
@@ -23,6 +23,7 @@ def validate_outpath(path):
         else:
             raise mm.ValidationError(
                 "Unknown Exception: {}".format(e.message))
+
 
 class OutputFile(mm.fields.Str):
     """OutputFile marshamallow.fields.Str subclass which is a path to a
@@ -49,7 +50,7 @@ class OutputFile(mm.fields.Str):
         Returns
         -------
         None
-        
+
         Raises
         ------
         marshmallow.ValidationError
@@ -58,9 +59,11 @@ class OutputFile(mm.fields.Str):
         """
         try:
             path = os.path.dirname(value)
-        except Exception as e: # pragma: no cover 
-            raise mm.ValidationError("%s cannot be os.path.dirname-ed" % value) # pragma: no cover 
+        except Exception as e:  # pragma: no cover
+            raise mm.ValidationError(
+                "%s cannot be os.path.dirname-ed" % value)  # pragma: no cover
         validate_outpath(path)
+
 
 class OutputDir(mm.fields.Str):
     """OutputDir is a :class:`marshmallow.fields.Str` subclass which is a path to
@@ -77,26 +80,34 @@ class OutputDir(mm.fields.Str):
          smae as passed to marshmallow.fields.Str
        **kwargs:
          same as passed to marshmallow.fields.Str
-    """ 
-    def __init__(self, mode = None, *args,**kwargs):
-        self.mode = mode
-        super(OutputDir,self).__init__(*args,**kwargs)
+    """
 
-    def _validate(self,value):
+    def __init__(self, mode=None, *args, **kwargs):
+        self.mode = mode
+        super(OutputDir, self).__init__(*args, **kwargs)
+
+    def _validate(self, value):
         if not os.path.isdir(value):
             try:
-                if self.mode is not None:
-                    os.makedirs(value,self.mode)
-                else:
-                    os.makedirs(value)
+                os.makedirs(value)
+                os.chmod(value, self.mode)
             except OSError as e:
                 if e.errno == os.errno.EEXIST:
                     pass
                 else:
                     raise mm.ValidationError(
-                        "{} is not a directory and you cannot create it".format(value)
+                        "{} is not a directory and you cannot create it".format(
+                            value)
                     )
-        #use outputfile to test that a file in this location is a valid path
+        if self.mode is not None:
+            try:
+                assert((os.stat(value).st_mode & 0o777) == self.mode)
+            except:
+                raise mm.ValidationError(
+                    "{} does not have the mode  ({}) that was specified ".format(
+                        value, self.mode)
+                )
+        # use outputfile to test that a file in this location is a valid path
         validate_outpath(value)
 
 
