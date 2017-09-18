@@ -101,9 +101,10 @@ class ModeOutputDirSchema(ArgSchema):
                            description="775 output directory",
                            mode = 0o775 )
 
-def test_mode_output_dir():
+def test_mode_output_dir(tmpdir):
+    outdir = tmpdir.join('mytmp')
     output_dir_example = {
-        'output_dir':'/tmp/mytmp'
+        'output_dir':str(outdir)
     }
     mod = ArgSchemaParser(schema_type=ModeOutputDirSchema,
                           input_data = output_dir_example,
