@@ -5,6 +5,26 @@ import tempfile
 import errno
 
 
+def validate_outpath(path):
+    try:
+        with tempfile.TemporaryFile(mode='w', dir=path) as tfile:
+            tfile.write('0')
+    except Exception as e:
+        if isinstance(e, OSError):
+            if e.errno == errno.ENOENT:
+                raise mm.ValidationError(
+                    "%s is not in a directory that exists" % path)
+            elif e.errno == errno.EACCES:
+                raise mm.ValidationError(
+                    "%s does not appear you can write to path" % path)
+            else:
+                raise mm.ValidationError(
+                    "Unknown OSError: {}".format(e.message))
+        else:
+            raise mm.ValidationError(
+                "Unknown Exception: {}".format(e.message))
+
+
 class OutputFile(mm.fields.Str):
     """OutputFile marshamallow.fields.Str subclass which is a path to a
        file location that can be written to by the current user
@@ -30,7 +50,7 @@ class OutputFile(mm.fields.Str):
         Returns
         -------
         None
-        
+
         Raises
         ------
         marshmallow.ValidationError
@@ -39,25 +59,57 @@ class OutputFile(mm.fields.Str):
         """
         try:
             path = os.path.dirname(value)
-        except Exception as e: # pragma: no cover 
-            raise mm.ValidationError("%s cannot be os.path.dirname-ed" % value) # pragma: no cover 
-        try:
-            with tempfile.TemporaryFile(mode='w', dir=path) as tfile:
-                tfile.write('0')
-        except Exception as e:
-            if isinstance(e, OSError):
-                if e.errno == errno.ENOENT:
-                    raise mm.ValidationError(
-                        "%s is not in a directory that exists" % value)
-                elif e.errno == errno.EACCES:
-                    raise mm.ValidationError(
-                        "%s does not appear you can write to path" % value)
+        except Exception as e:  # pragma: no cover
+            raise mm.ValidationError(
+                "%s cannot be os.path.dirname-ed" % value)  # pragma: no cover
+        validate_outpath(path)
+
+
+class OutputDir(mm.fields.Str):
+    """OutputDir is a :class:`marshmallow.fields.Str` subclass which is a path to
+       a location where this module will write files.  Validation will check that 
+       the directory exists and create the directory if it is not present,
+       and will fail validation if the directory cannot be created or cannot be
+       written to.
+
+       Parameters
+       ==========
+       mode: str
+          mode to create directory
+       *args:
+         smae as passed to marshmallow.fields.Str
+       **kwargs:
+         same as passed to marshmallow.fields.Str
+    """
+
+    def __init__(self, mode=None, *args, **kwargs):
+        self.mode = mode
+        super(OutputDir, self).__init__(*args, **kwargs)
+
+    def _validate(self, value):
+        if not os.path.isdir(value):
+            try:
+                os.makedirs(value)
+                if self.mode is not None:
+                    os.chmod(value, self.mode)
+            except OSError as e:
+                if e.errno == os.errno.EEXIST:
+                    pass
                 else:
                     raise mm.ValidationError(
-                        "Unknown OSError: {}".format(e.message))
-            else:
+                        "{} is not a directory and you cannot create it".format(
+                            value)
+                    )
+        if self.mode is not None:
+            try:
+                assert((os.stat(value).st_mode & 0o777) == self.mode)
+            except:
                 raise mm.ValidationError(
-                    "Unknown Exception: {}".format(e.message))
+                    "{} does not have the mode  ({}) that was specified ".format(
+                        value, self.mode)
+                )
+        # use outputfile to test that a file in this location is a valid path
+        validate_outpath(value)
 
 
 class InputDir(mm.fields.Str):

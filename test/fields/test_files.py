@@ -1,6 +1,6 @@
 import pytest
 from argschema import ArgSchemaParser, ArgSchema
-from argschema.fields import InputFile, OutputFile, InputDir
+from argschema.fields import InputFile, OutputFile, InputDir, OutputDir
 import marshmallow as mm
 import os
 
@@ -8,7 +8,7 @@ import os
 # OUTPUT FILE TESTS
 class BasicOutputFile(ArgSchema):
     output_file = OutputFile(required=True,
-                             description= 'a simple output file')
+                             description='a simple output file')
 
 
 output_file_example = {
@@ -67,10 +67,74 @@ def test_output_path_noapath():
         mod = ArgSchemaParser(args=args)
 
 
+class BasicOutputDir(ArgSchema):
+    output_dir = OutputDir(required=True, description="basic output dir")
+
+
+def test_output_dir_basic():
+    output_dir_example = {
+        'output_dir': '/tmp/mytmp'
+    }
+    mod = ArgSchemaParser(schema_type=BasicOutputDir,
+                          input_data=output_dir_example,
+                          args=[])
+
+
+def test_output_dir_bad_permission():
+    output_dir_example = {
+        'output_dir': '/'
+    }
+    with pytest.raises(mm.ValidationError):
+        mod = ArgSchemaParser(schema_type=BasicOutputDir,
+                              input_data=output_dir_example,
+                              args=[])
+
+
+def test_output_dir_bad_location():
+    output_dir_example = {
+        'output_dir': '///\\\//\/'
+    }
+    with pytest.raises(mm.ValidationError):
+        mod = ArgSchemaParser(schema_type=BasicOutputDir,
+                              input_data=output_dir_example,
+                              args=[])
+
+
+class ModeOutputDirSchema(ArgSchema):
+    output_dir = OutputDir(required=True,
+                           description="775 output directory",
+                           mode=0o775)
+
+
+def test_mode_output_osdir(tmpdir):
+    outdir = tmpdir.join('mytmp')
+    output_dir_example = {
+        'output_dir': str(outdir)
+    }
+    mod = ArgSchemaParser(schema_type=ModeOutputDirSchema,
+                          input_data=output_dir_example,
+                          args=[])
+    assert((os.stat(mod.args['output_dir']).st_mode & 0o777) == 0o775)
+
+
+def test_failed_mode(tmpdir):
+    outdir = tmpdir.join('mytmp_failed')
+    os.makedirs(str(outdir))
+    os.chmod(str(outdir), 0o777)
+    output_dir_example = {
+        'output_dir': str(outdir)
+    }
+    with pytest.raises(mm.ValidationError):
+        mod = ArgSchemaParser(schema_type=ModeOutputDirSchema,
+                              input_data=output_dir_example,
+                              args=[])
+
 # INPUT FILE TESTS
+
+
 class BasicInputFile(ArgSchema):
     input_file = InputFile(required=True,
-                           description= 'a simple file')
+                           description='a simple file')
 
 
 input_file_example = {
@@ -105,7 +169,7 @@ def test_access_inputfile_failed():
 # INPUTDIR TESTS
 class BasicInputDir(ArgSchema):
     input_dir = InputDir(required=True,
-                         description= 'a simple file')
+                         description='a simple file')
 
 
 def test_basic_inputdir(tmpdir):
