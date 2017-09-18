@@ -68,16 +68,34 @@ class OutputDir(mm.fields.Str):
        the directory exists and create the directory if it is not present,
        and will fail validation if the directory cannot be created or cannot be
        written to.
+
+       Parameters
+       ==========
+       mode: str
+          mode to create directory
+       *args:
+         smae as passed to marshmallow.fields.Str
+       **kwargs:
+         same as passed to marshmallow.fields.Str
     """ 
+    def __init__(self, mode = None, *args,**kwargs):
+        self.mode = mode
+        super(OutputDir,self).__init__(*args,**kwargs)
 
     def _validate(self,value):
         if not os.path.isdir(value):
             try:
-                os.makedirs(value)
+                if self.mode is not None:
+                    os.makedirs(value,self.mode)
+                else:
+                    os.makedirs(value)
             except OSError as e:
-                raise mm.ValidationError(
-                    "{} is not a directory and you cannot create it".format(value)
-                )
+                if e.errno == os.errno.EEXIST:
+                    pass
+                else:
+                    raise mm.ValidationError(
+                        "{} is not a directory and you cannot create it".format(value)
+                    )
         #use outputfile to test that a file in this location is a valid path
         validate_outpath(value)
 

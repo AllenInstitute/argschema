@@ -96,6 +96,19 @@ def test_output_dir_bad_location():
                               input_data=output_dir_example,
                               args=[])
 
+class ModeOutputDirSchema(ArgSchema):
+    output_dir = OutputDir(required=True,
+                           description="775 output directory",
+                           mode = 0o775 )
+
+def test_mode_output_dir():
+    output_dir_example = {
+        'output_dir':'/tmp/mytmp'
+    }
+    mod = ArgSchemaParser(schema_type=ModeOutputDirSchema,
+                          input_data = output_dir_example,
+                          args=[])
+    assert(os.access(mod.args['output_dir'],0o775))
 
 # INPUT FILE TESTS
 class BasicInputFile(ArgSchema):
