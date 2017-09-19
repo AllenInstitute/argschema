@@ -10,13 +10,6 @@ workflows:
     jobs:
       - test-python-2.7
       - test-python-3.6.1
-      - package:
-          requires:
-              - test-python-2.7
-              - test-python-3.6.1
-          filters:
-            branches:
-              only: master
       - merge:
           requires:
               - test-python-2.7
@@ -24,7 +17,14 @@ workflows:
           filters:
             branches:
               only: dev
-
+      - package:
+          requires:
+              - test-python-2.7
+              - test-python-3.6.1
+              - merge
+          filters:
+            branches:
+              only: dev
 jobs:
   merge:
     working_directory: ~/repo
