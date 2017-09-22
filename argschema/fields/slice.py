@@ -9,7 +9,7 @@ class Slice(mm.fields.Str):
     Parameters
     ----------
     kwargs :
-        the same as any :class:'~masrshmallow.fields.Str' receive
+        the same as any :class:`~masrshmallow.fields.Str` receive
 
     """
 
