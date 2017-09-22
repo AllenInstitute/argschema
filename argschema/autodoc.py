@@ -8,6 +8,19 @@ FIELD_TYPE_MAP = {v: k for k, v in mm.Schema.TYPE_MAPPING.items()}
 
 
 def process_schemas(app, what, name, obj, options, lines):
+    """function designed to process a :mod:`sphinx.ext.autodoc`
+    event as autodoc hook to alter docstring lines of
+    argschema related classes, providing a table of parameters for schemas
+    and links to the default schemas for ArgSchemaParser derived elements
+
+    use in sphnix conf.py as follows
+
+    ::
+
+        from argschema.autodoc import process_schemas
+        def setup(app):
+            app.connect('autodoc-process-docstring',process_schemas)
+    """
 
     if what == "class":
         # pick out the ArgSchemaParser objects for documenting

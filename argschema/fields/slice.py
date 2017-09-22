@@ -2,7 +2,7 @@ import marshmallow as mm
 
 
 class Slice(mm.fields.Str):
-    """Slice is a :class:'~marshmallow.fields.Str' field that supports a range or slice argument for
+    """Slice is a :class:'marshmallow.fields.Str' field that supports a range or slice argument for
     selecting some subset of a larger dataset.  The syntax is identical to
     numpy slicing. Examples: "10:20", "40", ":30", "10:2:40"
 
