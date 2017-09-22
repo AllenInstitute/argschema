@@ -15,7 +15,7 @@ In particular it will allow you to
 2) OR pass a dictionary directly into the module with the parameters defined
 3) AND/OR pass individual parameters via the command line, in a way that will override the input_json or the dictionary given.
 
-In all cases, it will merge these different parameters into a single dictionary and then validate that the parameters against your schema.
+In all cases, it will merge these different parameters into a single dictionary and then validate the parameters against your schema.
 
 The User Guide
 --------------
