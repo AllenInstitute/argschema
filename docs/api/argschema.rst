@@ -43,6 +43,13 @@ argschema\.utils module
     :undoc-members:
     :show-inheritance:
 
+argschema\.autodoc module
+-------------------------
+
+.. automodule:: argschema.autodoc
+    :members:
+    :undoc-members:
+    :show-inheritance:
 
 Module contents
 ---------------

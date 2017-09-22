@@ -159,7 +159,7 @@ def build_schema_arguments(schema, arguments=None, path=None, description =None)
 
     Parameters
     ----------
-    schema : marshamallow.schema.Schema
+    schema : marshmallow.Schema
         schema with field.description filled in with help values
     arguments : list or None
         list of argument group dictionaries to add to (see Returns) (Default value = None)

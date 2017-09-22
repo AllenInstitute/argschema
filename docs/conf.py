@@ -289,7 +289,8 @@ texinfo_documents = [
 # If true, do not generate a @detailmenu in the "Top" node's menu.
 #texinfo_no_detailmenu = False
 
-intersphinx_mapping = {'marshmallow':('http://marshmallow.readthedocs.io/en/latest/', None)}
+intersphinx_mapping = {'marshmallow':('http://marshmallow.readthedocs.io/en/latest/', None),
+                       'sphinx':('http://www.sphinx-doc.org/en/stable/',None)}
 
 sys.path.insert(0, os.path.abspath("../"))   
 sys.path.insert(0, os.path.abspath("../test"))

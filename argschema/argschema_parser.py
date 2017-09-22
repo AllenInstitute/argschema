@@ -120,15 +120,18 @@ class ArgSchemaParser(object):
         dictionary parameters instead of --input_json
     schema_type : schemas.ArgSchema
         the schema to use to validate the parameters
-    output_schema_type : mm.Schema
+    output_schema_type : marshmallow.Schema
         the schema to use to validate the output_json, used by self.output
     args : list or None
         command line arguments passed to the module, if None use argparse to parse the command line, set to [] if you want to bypass command line parsing
     logger_name : str
         name of logger from the logging module you want to instantiate 'argschema'
 
-    Returns
+    Raises
     -------
+    marshmallow.ValidationError
+        If the combination of input_json, input_data and command line arguments do not pass
+        the validation of the schema
 
     """
     default_schema = schemas.ArgSchema
@@ -186,8 +189,10 @@ class ArgSchemaParser(object):
         d:dict
             output dictionary to output to self.mod['output_json'] location
         
-        Raises:
-        mm.ValidationError
+        Raises
+        ------
+        marshmallow.ValidationError
+            If any of the output dictionary doesn't meet the output schema
         """
         if self.output_schema_type is not None:
             schema = self.output_schema_type()
@@ -218,6 +223,12 @@ class ArgSchemaParser(object):
         -------
         dict
             a deserialized dictionary of the parameters converted through marshmallow
+        
+        Raises
+        ------
+        marshmallow.ValidationError
+            If this schema contains nested schemas that don't subclass argschema.DefaultSchema
+            because these won't work with loading defaults.
 
         """
         is_recursive = is_recursive_schema(schema)
