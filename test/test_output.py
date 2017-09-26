@@ -70,3 +70,28 @@ def test_bad_output(tmpdir):
 
     with pytest.raises(mm.ValidationError):
         mod.output(output)
+
+def test_alt_output(tmpdir):
+    file_out = tmpdir.join('test_output.json')
+    file_out_2 = tmpdir.join('test_output_2.json')
+    input_parameters = {
+        'output_json':str(file_out)
+    }
+    mod = ArgSchemaParser(input_data = input_parameters,
+                          output_schema_type = MyOutputSchema,
+                          args=[])
+    M=[[5,5],[7,2]]
+    Mnp = np.array(M)
+    output = {
+        "a":"example",
+        "M":Mnp  
+    }
+    expected_output = {
+        "a":"example",
+        "b":5,
+        "M":M
+    }
+    mod.output(output,str(file_out_2))
+    with open(str(file_out_2),'r') as fp:
+        actual_output = json.load(fp)
+    assert actual_output == expected_output
