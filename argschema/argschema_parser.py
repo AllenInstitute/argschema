@@ -180,20 +180,23 @@ class ArgSchemaParser(object):
         self.logger = self.initialize_logger(
             logger_name, self.args.get('log_level'))
 
-    def output(self,d):
+    def output(self,d,output_path=None):
         """method for outputing dictionary to the output_json file path after
         validating it through the output_schema_type
 
         Parameters
         ----------
         d:dict
-            output dictionary to output to self.mod['output_json'] location
-        
+            output dictionary to output 
+        output_path: str
+            path to save to output file, optional (with default to self.mod['output_json'] location)
         Raises
         ------
         marshmallow.ValidationError
             If any of the output dictionary doesn't meet the output schema
         """
+        if output_path is None:
+            output_path = self.args['output_json']
         if self.output_schema_type is not None:
             schema = self.output_schema_type()
             (output_json,errors)=schema.dump(d)
@@ -204,7 +207,7 @@ class ArgSchemaParser(object):
                                  the output won't be validated")
             output_json = d
 
-        with open(self.args['output_json'],'w') as fp:
+        with open(output_path,'w') as fp:
             json.dump(output_json,fp)
 
     def load_schema_with_defaults(self  ,schema, args):
