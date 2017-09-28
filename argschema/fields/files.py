@@ -7,8 +7,9 @@ import errno
 
 def validate_outpath(path):
     try:
-        with tempfile.TemporaryFile(mode='w', dir=path) as tfile:
+        with tempfile.NamedTemporaryFile(mode='w', dir=path) as tfile:
             tfile.write('0')
+            tfile.close()
     except Exception as e:
         if isinstance(e, OSError):
             if e.errno == errno.ENOENT:
