@@ -5,6 +5,7 @@ import json
 import numpy as np
 import pytest
 import marshmallow as mm
+import os
 
 class MyOutputSchema(DefaultSchema):
     a = Str(required=True, description="a simple string")
@@ -95,3 +96,14 @@ def test_alt_output(tmpdir):
     with open(str(file_out_2),'r') as fp:
         actual_output = json.load(fp)
     assert actual_output == expected_output
+
+def test_tmp_output_cleanput(tmpdir):
+    file_out = tmpdir.join('test_output.json')
+    input_parameters = {
+        'output_json':str(file_out)
+    }
+    mod = ArgSchemaParser(input_data = input_parameters,
+                          output_schema_type = MyOutputSchema,
+                          args=[])
+    files = os.listdir(str(tmpdir))
+    assert len(files)==0
