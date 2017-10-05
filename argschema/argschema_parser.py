@@ -180,6 +180,36 @@ class ArgSchemaParser(object):
         self.logger = self.initialize_logger(
             logger_name, self.args.get('log_level'))
 
+    def get_output_json(self,d):
+        """method for getting the output_json pushed through validation
+        if validation exists
+        Parameters
+        ----------
+        d:dict
+            output dictionary to output 
+
+        Returns
+        -------
+        dict
+            validated and serialized version of the dictionary
+        
+        Raises
+        ------
+        marshmallow.ValidationError
+            If any of the output dictionary doesn't meet the output schema
+        """
+        if self.output_schema_type is not None:
+            schema = self.output_schema_type()
+            (output_json,errors)=schema.dump(d)
+            if len(errors)>0:
+                raise mm.ValidationError(json.dumps(errors))
+        else:
+            self.logger.warning("output_schema_type is not defined,\
+                                 the output won't be validated")
+            output_json = d
+        
+        return output_json
+
     def output(self,d,output_path=None):
         """method for outputing dictionary to the output_json file path after
         validating it through the output_schema_type
@@ -197,16 +227,8 @@ class ArgSchemaParser(object):
         """
         if output_path is None:
             output_path = self.args['output_json']
-        if self.output_schema_type is not None:
-            schema = self.output_schema_type()
-            (output_json,errors)=schema.dump(d)
-            if len(errors)>0:
-                raise mm.ValidationError(json.dumps(errors))
-        else:
-            self.logger.warning("output_schema_type is not defined,\
-                                 the output won't be validated")
-            output_json = d
-
+        
+        output_json = self.get_output_json(d)
         with open(output_path,'w') as fp:
             json.dump(output_json,fp)
 
