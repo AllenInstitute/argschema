@@ -7,12 +7,19 @@ __all__ = ['Shape']
 
 
 class Shape(Validator):
-    """Validate that an array has the correct shape.
+    """Validator which succeeds if value.shape matches `shape`
     
     Parameters
     ----------
     shape : tuple
-        Tuple specifying the required array shape.
+        Tuple specifying the required shape
+
+    Raises
+    ------
+    ValueError
+        If the provided shape is not a valid tuple of integers
+    marshmallow.ValidationError
+        If the value being validated does not have a shape attribute
     """
 
     def __init__(self, shape=None):
