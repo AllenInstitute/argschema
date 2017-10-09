@@ -33,8 +33,13 @@ class Shape(Validator):
 
     def __call__(self, value):
         try:
-            shape = value.shape
+            valid = (value.shape == self.shape)
         except AttributeError:
             raise mm.ValidationError("{} is not a valid array, does not have "
                                      "attribute `shape`.".format(value))
-        return shape == self.shape
+        if not valid:
+            raise mm.ValidationError("Array shape {} does not match required "
+                                     "shape {}.".format(value.shape,
+                                     self.shape))
+        return valid
+
