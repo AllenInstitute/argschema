@@ -29,6 +29,7 @@ class Shape(Validator):
             raise ValueError("{} is not a valid shape".format(shape))
         if not all(isinstance(item, int) for item in self.shape):
             raise ValueError("{} is not a valid shape".format(shape))
+        self.error = "Array shape is not {}".format(self.shape)
 
     def __call__(self, value):
         try:
