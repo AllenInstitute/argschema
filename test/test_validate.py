@@ -1,7 +1,13 @@
-from argschema import validate
+from argschema import validate, ArgSchemaParser, ArgSchema
+from argschema.fields import NumpyArray
 import pytest
 import marshmallow as mm
 import numpy as np
+
+
+class MySchema(ArgSchema):
+    a = NumpyArray(dtype='float', description='Test input array schema',
+                   validate=validate.Shape((2,2)))
 
 
 @pytest.mark.parametrize("invalid_shape", [
@@ -28,6 +34,7 @@ def test_shape_init(input_shape, expected):
     ((2, 2), "notanarray"),
     ((5, 5, 3), 6),
     ((3, 3), [[1, 2, 3], [4, 5, 6], [7, 8, 9]]),
+    ((2, 2), np.empty((2,3)))
 ])
 def test_shape_call_invalid(validation_shape, input_array):
     validator = validate.Shape(validation_shape)
@@ -37,8 +44,15 @@ def test_shape_call_invalid(validation_shape, input_array):
 
 @pytest.mark.parametrize("validation_shape,input_array", [
     ((2, 2), np.empty((2,2))),
-    ((5, 5, 3), np.empty((100,))),
 ])
 def test_shape_call(validation_shape, input_array):
     validator = validate.Shape(validation_shape)
-    assert(validator(input_array) == (validation_shape == input_array.shape))
+    assert(validator(input_array))
+
+
+def test_parser_validation():
+    i1 = {"a": [[1, 2], [3, 4]]}
+    p1 = ArgSchemaParser(input_data=i1, schema_type=MySchema)
+    i2 = {"a": [[1, 2, 3], [4, 5, 6]]}
+    with pytest.raises(mm.ValidationError):
+        p2 = ArgSchemaParser(input_data=i2, schema_type=MySchema)
