@@ -43,6 +43,14 @@ argschema\.utils module
     :undoc-members:
     :show-inheritance:
 
+argschema\.validate module
+-----------------------
+
+.. automodule:: argschema.validate
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
 argschema\.autodoc module
 -------------------------
 
