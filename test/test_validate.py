@@ -1,5 +1,5 @@
 from argschema import validate, ArgSchemaParser, ArgSchema
-from argschema.fields import NumpyArray
+from argschema.fields import *
 import pytest
 import marshmallow as mm
 import numpy as np
