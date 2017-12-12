@@ -23,3 +23,24 @@ def test_my_parser():
         }
     }
     mod = MyParser(input_data = input_data, args=[])
+
+class MyNestedSchemaWithDefaults(argschema.schemas.DefaultSchema):
+    one = argschema.fields.Int(default=1,
+        description="nested integer")
+    two = argschema.fields.Boolean(default=True,
+        description="a nested boolean")
+
+class MySchema2(argschema.ArgSchema):
+    a = argschema.fields.Int(required=True,description="parameter a")
+    b = argschema.fields.Str(required=False,default="my value",description="optional b string parameter")
+    nest = argschema.fields.Nested(MyNestedSchemaWithDefaults,description="a nested schema")
+
+
+
+def test_my_default_nested_parser():
+    input_data = {
+        'a':5
+    }
+    mod = argschema.ArgSchemaParser(input_data = input_data, 
+                                    schema_type=MySchema2,
+                                    args=None)
