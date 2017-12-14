@@ -124,8 +124,12 @@ def smart_merge(a, b, path=None, merge_keys=None, overwrite_with_none=False):
                 if overwrite_with_none:
                     a[key] = b[key]
             else:
-                # otherwise replace entire leaf with b
-                a[key] = b[key]
+                if isinstance(b[key],dict):
+                    a[key]={}
+                    smart_merge(a[key], b[key], path + [str(key)], merge_keys)
+                else:
+                    # otherwise replace entire leaf with b
+                    a[key] = b[key]
     return a
 
 def get_description_from_field(field):

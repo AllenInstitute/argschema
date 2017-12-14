@@ -38,7 +38,7 @@ def test_log_catch():
 
 
 class MyExtension(argschema.schemas.DefaultSchema):
-    a = mm.fields.Str(description= 'a string')
+    a = mm.fields.Str(description= 'a string',required=True)
     b = mm.fields.Int(description= 'an integer')
     c = mm.fields.Int(description= 'an integer', default=10)
     d = mm.fields.List(mm.fields.Int,
@@ -46,7 +46,7 @@ class MyExtension(argschema.schemas.DefaultSchema):
 
 
 class SimpleExtension(ArgSchema):
-    test = mm.fields.Nested(MyExtension, default=None, required=True)
+    test = mm.fields.Nested(MyExtension, required=True)
 
 
 
