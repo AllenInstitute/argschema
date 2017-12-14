@@ -151,13 +151,13 @@ class ArgSchemaParser(object):
 
         self.schema = schema_type()
         self.logger = self.initialize_logger(logger_name,'WARNING')
-        self.logger.warning('input_data is {}'.format(input_data))
+        self.logger.debug('input_data is {}'.format(input_data))
 
         # convert schema to argparse object
         p = utils.schema_argparser(self.schema)
         argsobj = p.parse_args(args)
         argsdict = utils.args_to_dict(argsobj)
-        self.logger.warning('argsdict is {}'.format(argsdict))
+        self.logger.debug('argsdict is {}'.format(argsdict))
 
         if argsobj.input_json is not None:
             result = self.schema.load(argsdict)
@@ -171,7 +171,7 @@ class ArgSchemaParser(object):
         
         # merge the command line dictionary into the input json
         args = utils.smart_merge(jsonargs, argsdict)
-        self.logger.warning('args after merge {}'.format(args))
+        self.logger.debug('args after merge {}'.format(args))
 
         # validate with load!
         result = self.load_schema_with_defaults(self.schema, args)
