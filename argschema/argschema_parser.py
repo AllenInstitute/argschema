@@ -193,21 +193,12 @@ class ArgSchemaParser(object):
         if input_source is not None:
             input_data = input_source.get_dict()
         else: #see if the input_data itself contains an InputSource configuration use that
-            for InputSource in self.input_config_map:
-                try: 
-                    input_data = get_input(InputSource,input_data)
-                except NotConfiguredSourceError as e:
-                    pass
-
-        #loop over the set of input_configurations to see if the command line arguments
-        # include a valid configuration for an input_source
-        for InputSource in self.input_config_map:
-            try:
-                input_data = get_input(InputSource,argsdict)
-            #if the command line argument dictionary doesn't contain a valid configuration
-            #simply move on to the next one
-            except NotConfiguredSourceError as e:
-                pass
+            config_data = self.__get_input_data_from_config(input_data)
+            input_data = config_data if config_data is not None else input_data
+            
+        #check whether the command line arguments contain an input configuration and use that
+        config_data = self.__get_input_data_from_config(argsdict)
+        input_data = config_data if config_data is not None else input_data
 
         # merge the command line dictionary into the input json
         args = utils.smart_merge(input_data, argsdict)
@@ -233,6 +224,32 @@ class ArgSchemaParser(object):
         self.output_schema_type = output_schema_type
         self.logger = self.initialize_logger(
             logger_name, self.args.get('log_level'))
+
+    def __get_input_data_from_config(self,d):
+        """private function to check for ArgSource configurations in a dictionary
+        and return the data if it exists
+
+        Parameters
+        ----------
+        d : dict
+            dictionary to look for InputSource configuration parameters in
+        
+        Returns
+        -------
+        dict or None
+            dictionary of InputData if it found a valid configuration, None otherwise
+        """
+        input_set=False
+        input_data = None
+        for InputSource in self.input_config_map:
+            try: 
+                input_data = get_input(InputSource,d)
+                if input_set == True:
+                    raise MultipleConfiguredSourceError("more then one InputSource configuration present in {}".format(d))
+                input_set = True
+            except NotConfiguredSourceError as e:
+                pass
+        return input_data
 
     def get_output_json(self,d):
         """method for getting the output_json pushed through validation
