@@ -18,7 +18,7 @@ def test_bad_path():
 
 def test_simple_example(tmpdir):
     file_in = tmpdir.join('test_input_json.json')
-    file_in.write('nonesense')
+    file_in.write('{}')
 
     file_out = tmpdir.join('test_output.json')
 
