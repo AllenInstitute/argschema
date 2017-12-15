@@ -9,3 +9,6 @@ class MySchema(argschema.ArgSchema):
     b = argschema.fields.Str(required=False,default="my value",description="optional b string parameter")
     nest = argschema.fields.Nested(MyNestedSchema,description="a nested schema")
 
+class MyOutputSchema(argschema.schemas.DefaultSchema):
+    a = argschema.fields.Int(required=True,description="parameter a")
+    b = argschema.fields.Str(required=False,default="my value",description="optional b string parameter")
