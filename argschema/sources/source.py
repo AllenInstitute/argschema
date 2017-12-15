@@ -45,9 +45,6 @@ class ArgSink(ConfigurableSource):
 
 class FileSource(ArgSource):
 
-    def __init__(self,filepath):
-        self.filepath = filepath
-
     def get_dict(self):
         with open(self.filepath,'r') as fp:
             d = self.read_file(fp)
@@ -57,8 +54,6 @@ class FileSource(ArgSource):
         pass
 
 class FileSink(ArgSink):
-    def __init__(self,filepath):
-        self.filepath = filepath
 
     def write_file(self,fp,d):
         pass
