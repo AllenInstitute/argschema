@@ -7,7 +7,7 @@ import copy
 from . import schemas
 from . import utils
 import marshmallow as mm
-
+from .sources.json_source import JsonSource
 
 def contains_non_default_schemas(schema, schema_list=[]):
     """returns True if this schema contains a schema which was not an instance of DefaultSchema
@@ -117,11 +117,15 @@ class ArgSchemaParser(object):
     Parameters
     ----------
     input_data : dict or None
-        dictionary parameters instead of --input_json
+        dictionary parameters to fall back on if all source aren't present
     schema_type : schemas.ArgSchema
         the schema to use to validate the parameters
     output_schema_type : marshmallow.Schema
         the schema to use to validate the output_json, used by self.output
+    input_source : argschema.sources.source.Source
+        a generic source of a dictionary
+    output_source : argschema.sources.source.Source
+        a generic output to put output dictionary
     args : list or None
         command line arguments passed to the module, if None use argparse to parse the command line, set to [] if you want to bypass command line parsing
     logger_name : str
@@ -136,19 +140,23 @@ class ArgSchemaParser(object):
     """
     default_schema = schemas.ArgSchema
     default_output_schema = None
+    input_config_map = [ JsonSource ]
+    output_config_map = [ JsonSource ]
 
     def __init__(self,
                  input_data=None,  # dictionary input as option instead of --input_json
                  schema_type=None,  # schema for parsing arguments
                  output_schema_type = None, # schema for parsing output_json
                  args=None,
+                 input_source = None,
+                 output_source = None,
                  logger_name=__name__):
         
         if schema_type is None:
             schema_type = self.default_schema
         if output_schema_type is None:
             output_schema_type = self.default_output_schema
-
+        
         self.schema = schema_type()
         self.logger = self.initialize_logger(logger_name,'WARNING')
         self.logger.debug('input_data is {}'.format(input_data))
@@ -159,18 +167,24 @@ class ArgSchemaParser(object):
         argsdict = utils.args_to_dict(argsobj, self.schema)
         self.logger.debug('argsdict is {}'.format(argsdict))
 
-        if argsobj.input_json is not None:
-            result = self.schema.load(argsdict)
-            if 'input_json' in result.errors:
-                raise mm.ValidationError(result.errors['input_json'])
-            with open(result.data['input_json'], 'r') as j:
-                jsonargs = json.load(j)
-        else:
-            jsonargs = input_data if input_data else {}
+        #if you received an input_source, get the dictionary from there
+        if input_source is not None:
+            input_data = input_source.get_dict()
 
-        
+        #loop over the set of input_configurations to see if the command line arguments include a valid configuration
+        #for one of them
+        for InputSource in self.input_config_map:
+            try:
+                input_config_d = InputSource.get_config(InputSource.InputConfigSchema,argsdict)
+                input_source = InputSource(**input_config_d)
+                input_data = input_source.get_dict()
+            #if the command line argument dictionary doesn't contain a valid configuration
+            #simply move on to the next one
+            except mm.ValidationError as e:
+                pass
+  
         # merge the command line dictionary into the input json
-        args = utils.smart_merge(jsonargs, argsdict)
+        args = utils.smart_merge(input_data, argsdict)
         self.logger.debug('args after merge {}'.format(args))
 
         # validate with load!
