@@ -14,10 +14,6 @@ class NotConfiguredSourceError(ConfigurableSourceError):
     """Exception when the source configuration is simply completely missing"""
     pass
 
-class ImproperSourceConfigurationSchemaError(ConfigurableSourceError):
-    """Exception when the source configuration schema isn't valid"""
-    pass
-
 def d_contains_any_fields(schema,d):
     for field_name, field in schema.declared_fields.items():
         if field_name in d.keys():
