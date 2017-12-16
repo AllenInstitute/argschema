@@ -9,7 +9,7 @@ from . import fields
 import marshmallow as mm
 from .sources.json_source import JsonSource, JsonSink
 from .sources.yaml_source import YamlSource, YamlSink
-from .sources.source import NotConfiguredSourceError
+from .sources.source import NotConfiguredSourceError, MultipleConfiguredSourceError
 
 
 def contains_non_default_schemas(schema, schema_list=[]):
