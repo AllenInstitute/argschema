@@ -152,8 +152,8 @@ class ArgSchemaParser(object):
     """
     default_schema = schemas.ArgSchema
     default_output_schema = None
-    input_config_map = [ JsonSource ]
-    output_config_map = [ JsonSink ]
+    default_configurable_sources = [ JsonSource ]
+    default_configurable_sinks = [ JsonSink ]
 
     def __init__(self,
                  input_data=None,  # dictionary input as option instead of --input_json
@@ -178,9 +178,9 @@ class ArgSchemaParser(object):
         #consolidate a list of the input and output source
         #command line configuration schemas
         io_schemas = []
-        for in_cfg in self.input_config_map:
+        for in_cfg in self.default_configurable_sources:
             io_schemas.append(in_cfg.ConfigSchema())
-        for out_cfg in self.output_config_map:
+        for out_cfg in self.default_configurable_sinks:
             io_schemas.append(out_cfg.ConfigSchema())
 
         #build a command line parser from the input schemas and configurations
@@ -241,7 +241,7 @@ class ArgSchemaParser(object):
         """
         output_set = False
         output_sink = None
-        for OutputSink in self.output_config_map:
+        for OutputSink in self.default_configurable_sinks:
                 try: 
                     output_config_d = OutputSink.get_config(OutputSink.ConfigSchema,d)
                     if output_set:
@@ -273,7 +273,7 @@ class ArgSchemaParser(object):
         """
         input_set=False
         input_data = None
-        for InputSource in self.input_config_map:
+        for InputSource in self.default_configurable_sources:
             try: 
                 input_data = get_input(InputSource,d)
                 if input_set:

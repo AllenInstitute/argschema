@@ -11,10 +11,11 @@ import json
 class MyParser(ArgSchemaYamlParser):
     default_schema = MySchema
     default_output_schema = MyOutputSchema
+    default_configurable_sources = [YamlSource]
 
 class MyDualParser(MyParser):
-    input_config_map = [JsonSource, YamlSource]
-    output_config_map = [JsonSink, YamlSink]
+    default_configurable_sources = [JsonSource, YamlSource]
+    default_configurable_sinks = [JsonSink, YamlSink]
 
 input_data = {
     'a': 5,
