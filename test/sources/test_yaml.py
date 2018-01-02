@@ -76,3 +76,12 @@ def test_dual_parser(test_json_input_file,test_yaml_input_file):
 def test_dual_parser_fail(test_json_input_file,test_yaml_input_file):
     with pytest.raises(MultipleConfiguredSourceError):
         mod = MyDualParser(args=['--input_yaml', test_yaml_input_file, '--input_json', test_json_input_file])
+
+def test_dual_parser_output_fail(test_json_input_file,tmpdir):
+    test_json_output = str(tmpdir.join('output.yml'))
+    test_yaml_output = str(tmpdir.join('output.json'))
+    with pytest.raises(MultipleConfiguredSourceError):
+        mod = MyDualParser(args=['--input_json', test_json_input_file,
+            '--output_json',test_json_output,
+            '--output_yaml',test_yaml_output])
+            
