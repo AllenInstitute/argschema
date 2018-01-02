@@ -136,7 +136,7 @@ class ArgSchemaParser(object):
         the schema to use to validate the output_json, used by self.output
     input_source : argschema.sources.source.Source
         a generic source of a dictionary
-    output_source : argschema.sources.source.Source
+    output_sink : argschema.sources.source.Source
         a generic output to put output dictionary
     args : list or None
         command line arguments passed to the module, if None use argparse to parse the command line, set to [] if you want to bypass command line parsing
