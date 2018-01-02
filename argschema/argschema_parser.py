@@ -204,10 +204,10 @@ class ArgSchemaParser(object):
         args = utils.smart_merge(input_data, argsdict)
         self.logger.debug('args after merge {}'.format(args))
 
-        # if the output source was not passed in, see if there is a configuration in the combined args
+        # if the output sink was not passed in, see if there is a configuration in the combined args
         if output_sink is None: 
             output_sink = self.__get_output_sink_from_config(args)     
-        # save the output source for later
+        # save the output sink for later
         self.output_sink = output_sink
 
         # validate with load!
