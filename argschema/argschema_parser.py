@@ -155,16 +155,11 @@ class ArgSchemaParser(object):
         self.logger.debug('args after merge {}'.format(args))
 
         # if the output source was not passed in, see if there is a configuration in the combined args
-        if output_sink is None:
-            for OutputSink in self.output_config_map:
-                try:
-                    output_config_d = OutputSink.get_config(
-                        OutputSink.ConfigSchema, args)
-                    output_sink = OutputSink(**output_config_d)
-                except NotConfiguredSourceError:
-                    pass
+        if output_sink is None: 
+            output_sink = self.__get_output_sink_from_config(args)     
         # save the output source for later
         self.output_sink = output_sink
+        
         # validate with load!
         result = self.load_schema_with_defaults(self.schema, args)
 
@@ -173,7 +168,37 @@ class ArgSchemaParser(object):
         self.logger = self.initialize_logger(
             logger_name, self.args.get('log_level'))
 
-    def __get_input_data_from_config(self, d):
+    def __get_output_sink_from_config(self,d):
+        """private function to check for ArgSink configuration in a dictionary and return a configured ArgSink
+
+        Parameters
+        ----------
+        d : dict
+            dictionary to look for ArgSink Configuration parameters in
+        
+        Returns
+        -------
+        ArgSink
+            A configured argsink
+
+        Raises
+        ------
+        MultipleConfiguredSourceError
+            If more than one Sink is configured
+        """
+        output_set = False
+        output_sink = None
+        for OutputSink in self.output_config_map:
+                try: 
+                    output_config_d = OutputSink.get_config(OutputSink.ConfigSchema,d)
+                    if output_set:
+                        raise MultipleConfiguredSourceError("more then one OutputSink configuration present in {}".format(d))
+                    output_sink = OutputSink(**output_config_d)
+                    output_set=True
+                except NotConfiguredSourceError:
+                    pass
+
+    def __get_input_data_from_config(self,d):
         """private function to check for ArgSource configurations in a dictionary
         and return the data if it exists
 
@@ -186,15 +211,19 @@ class ArgSchemaParser(object):
         -------
         dict or None
             dictionary of InputData if it found a valid configuration, None otherwise
+        
+        Raises
+        ------
+        MultipleConfiguredSourceError
+            if more than one InputSource is configured
         """
         input_set = False
         input_data = None
         for InputSource in self.input_config_map:
             try:
                 input_data = get_input(InputSource, d)
-                if input_set == True:
-                    raise MultipleConfiguredSourceError(
-                        "more then one InputSource configuration present in {}".format(d))
+                if input_set:
+                    raise MultipleConfiguredSourceError("more then one InputSource configuration present in {}".format(d))
                 input_set = True
             except NotConfiguredSourceError as e:
                 pass
