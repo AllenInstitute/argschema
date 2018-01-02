@@ -11,7 +11,6 @@ import json
 class MyParser(ArgSchemaYamlParser):
     default_schema = MySchema
     default_output_schema = MyOutputSchema
-    default_configurable_sources = [YamlSource]
 
 class MyDualParser(MyParser):
     default_configurable_sources = [JsonSource, YamlSource]
