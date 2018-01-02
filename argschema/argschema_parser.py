@@ -159,7 +159,7 @@ class ArgSchemaParser(object):
             output_sink = self.__get_output_sink_from_config(args)     
         # save the output source for later
         self.output_sink = output_sink
-        
+
         # validate with load!
         result = self.load_schema_with_defaults(self.schema, args)
 
@@ -197,7 +197,8 @@ class ArgSchemaParser(object):
                     output_set=True
                 except NotConfiguredSourceError:
                     pass
-
+        return output_sink
+    
     def __get_input_data_from_config(self,d):
         """private function to check for ArgSource configurations in a dictionary
         and return the data if it exists
