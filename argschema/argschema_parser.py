@@ -417,5 +417,5 @@ class ArgSchemaParser(object):
 
 
 class ArgSchemaYamlParser(ArgSchemaParser):
-    input_config_map = [YamlSource]
-    output_config_map = [YamlSink]
+    default_configurable_sources = [YamlSource]
+    default_configurable_sinks = [YamlSink]
