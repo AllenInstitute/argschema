@@ -1,5 +1,5 @@
 import yaml
-from .source import FileSource,FileSink
+from .source import ArgSource,ArgSink
 import argschema
 import marshmallow as mm
 
@@ -11,20 +11,17 @@ class YamlOutputConfigSchema(mm.Schema):
     output_yaml = argschema.fields.OutputFile(required=True, 
         description = 'filepath to save output yaml')
 
-class YamlSource(FileSource):
+class YamlSource(ArgSource):
     ConfigSchema = YamlInputConfigSchema
     
-    def __init__(self,input_yaml=None):
-        self.filepath = input_yaml
+    def get_dict(self):
+        with open(self.input_yaml,'r') as fp:
+            return yaml.load(fp)
 
-    def read_file(self,fp):
-        return yaml.load(fp)
-
-class YamlSink(FileSink):
+class YamlSink(ArgSink):
     ConfigSchema = YamlOutputConfigSchema
 
-    def __init__(self,output_yaml=None):
-        self.filepath = output_yaml
+    def put_dict(self,d):
+        with open(self.output_yaml,'w') as fp:
+            yaml.dump(d,fp,default_flow_style=False)
 
-    def write_file(self,fp,d):
-        yaml.dump(d,fp,default_flow_style=False)

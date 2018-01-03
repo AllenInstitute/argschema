@@ -42,7 +42,8 @@ def test_json_input_file(tmpdir_factory):
 
 
 def test_yaml_source(test_yaml_input_file):
-    mod = MyParser(input_source=YamlSource(test_yaml_input_file), args=[])
+    source = YamlSource(input_yaml=test_yaml_input_file)
+    mod = MyParser(input_source=source, args=[])
 
 
 def test_yaml_source_command(test_yaml_input_file):
@@ -54,8 +55,10 @@ def test_yaml_sink(test_yaml_input_file, tmpdir):
     output_data = {
         'a': 3
     }
-    mod = MyParser(input_source=YamlSource(test_yaml_input_file),
-                   output_sink=YamlSink(str(outfile)))
+    source = YamlSource(input_yaml=test_yaml_input_file)
+    sink = YamlSink(output_yaml = str(outfile))
+    mod = MyParser(input_source=source,
+                   output_sink=sink)
     mod.output(output_data)
 
     with open(str(outfile), 'r') as fp:
