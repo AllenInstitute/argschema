@@ -286,7 +286,7 @@ however we have generalized the concept to allow :class:`argschema.ArgSchemaPars
 "sources" and "sinks" of parameters.  
 
 For example, yaml is another perfectly reasonable choice for storing nested key values stores. 
-`argschema.argschema_parser.ArgSchemaYamlParser` demonstrates just that functionality.  So now 
+:class:`argschema.argschema_parser.ArgSchemaYamlParser` demonstrates just that functionality.  So now 
 input_yaml and output_yaml can be specified instead.
 
 Furthermore, you can pass an ArgSchemaParser an :class:`argschema.sources.ArgSource` object which
