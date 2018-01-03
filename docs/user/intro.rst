@@ -216,7 +216,7 @@ or  `~argschema.sources.ArgSink`.
 So for example, if you wanted to define a `~argschema.sources.ArgSource` which loaded a dictionary from a particular host, port and url,
 and a module which had a command line interface for setting that host port and url you could do so like this.
 
-.. literalinclude:: ../../test/url_source.py
+.. literalinclude:: ../../test/sources/url_source.py
 
 so now a UrlArgSchemaParser would expect command line flags of --input_host, --input_port, --input_url, and will look to download the json
 from an http location via requests, or an existing ArgSchemaParser module could be simply passed an UrlSource, even though the original module 
