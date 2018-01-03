@@ -107,6 +107,7 @@ class ConfigurableSource(object):
 
 class ArgSource(ConfigurableSource):
     def get_dict(self):
+    """method that must be implemented to enable an ArgSource to return a dictionary"""
         pass
 
 
@@ -143,4 +144,11 @@ def get_input_from_config(ArgSource, config_d):
 
 class ArgSink(ConfigurableSource):
     def put_dict(self, d):
+        """method that must be implemented to enable an ArgSink to write a dictionary
+        
+        Parameters
+        ----------
+        d: dict
+            the dictionary to write
+        """
         pass
