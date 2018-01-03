@@ -7,7 +7,7 @@ import requests
 try:
     from urllib.parse import urlunparse 
 except:
-    from urllib import urlunparse
+    from urlparse import urlunparse
 
 class UrlSourceConfig(DefaultSchema):
     input_host = Str(required=True, description="host of url")
