@@ -1,7 +1,7 @@
 import requests 
 import mock
-from url_source import UrlArgSchemaParser, UrlSource
-
+from url_source import UrlArgSchemaParser, UrlSource, MySchema
+from argschema import ArgSchemaParser
 # This method will be used by the mock to replace requests.get
 def mocked_requests_get(*args, **kwargs):
     class MockResponse:
@@ -27,7 +27,7 @@ def mocked_requests_get(*args, **kwargs):
 @mock.patch('requests.get', side_effect=mocked_requests_get)
 def test_url_parser(mock_get):
     input_source=UrlSource(input_host='localhost',input_port=88,input_url='test.json')
-    mod = UrlArgSchemaParser(input_source=input_source,args = [])
+    mod = ArgSchemaParser(schema_type=MySchema, input_source=input_source,args = [])
     assert(mod.args['a']==7)
 
 @mock.patch('requests.get', side_effect=mocked_requests_get)
