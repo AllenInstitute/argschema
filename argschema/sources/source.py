@@ -25,11 +25,27 @@ def d_contains_any_fields(schema,d):
                 return True        
     return False
 
+class ConfigSourceSchema(mm.Schema):
+    pass
+
 class ConfigurableSource(object):
-    ConfigSchema = None
+    ConfigSchema = ConfigSourceSchema
     def __init__(self,**kwargs):
-        for key,value in kwargs.items():
-            self.__dict__[key]=value
+        """Configurable source 
+
+        Parameters
+        ----------
+        **kwargs: dict
+            a set of keyword arguments which will be validated by this classes ConfigSchema
+            which will define the set of fields that are allowed (and their defaults)
+        """
+        schema = self.ConfigSchema()
+        result,errors = schema.load(kwargs)
+        if len(errors)>0:
+            raise MisconfiguredSourceError('invalid keyword arguments passed {}'.format(kwargs))
+        self.__dict__=result
+        for field_name, field in schema.declared_fields.items():
+            self.__dict__[field_name]=result[field_name]
             
     @staticmethod
     def get_config(Schema,d):
