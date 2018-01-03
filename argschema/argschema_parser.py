@@ -9,7 +9,7 @@ from . import fields
 import marshmallow as mm
 from .sources.json_source import JsonSource, JsonSink
 from .sources.yaml_source import YamlSource, YamlSink
-from .sources.source import NotConfiguredSourceError, MultipleConfiguredSourceError
+from .sources.source import NotConfiguredSourceError, MultipleConfiguredSourceError, get_input_from_config
 
 def contains_non_default_schemas(schema, schema_list=[]):
     """returns True if this schema contains a schema which was not an instance of DefaultSchema
@@ -222,8 +222,8 @@ class ArgSchemaParser(object):
         input_set = False
         input_data = None
         for InputSource in self.default_configurable_sources:
-            try: 
-                input_data = get_input(InputSource, d)
+            try:
+                input_data = get_input_from_config(InputSource, d)
                 if input_set:
                     raise MultipleConfiguredSourceError(
                         "more then one InputSource configuration present in {}".format(d))
