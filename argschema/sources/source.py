@@ -107,7 +107,7 @@ class ConfigurableSource(object):
 
 class ArgSource(ConfigurableSource):
     def get_dict(self):
-    """method that must be implemented to enable an ArgSource to return a dictionary"""
+        """method that must be implemented to enable an ArgSource to return a dictionary"""
         pass
 
 
