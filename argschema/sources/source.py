@@ -27,6 +27,10 @@ def d_contains_any_fields(schema,d):
 
 class ConfigurableSource(object):
     ConfigSchema = None
+    def __init__(self,**kwargs):
+        for key,value in kwargs.items():
+            self.__dict__[key]=value
+            
     @staticmethod
     def get_config(Schema,d):
         schema = Schema()
