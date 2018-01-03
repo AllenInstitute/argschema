@@ -78,19 +78,20 @@ class ArgSchemaParser(object):
     Parameters
     ----------
     input_data : dict or None
-        dictionary parameters to fall back on if all source aren't present
+        dictionary parameters to fall back on if not source is given or configured via command line
     schema_type : schemas.ArgSchema
         the schema to use to validate the parameters
     output_schema_type : marshmallow.Schema
-        the schema to use to validate the output_json, used by self.output
+        the schema to use to validate the output, used by self.output
     input_source : argschema.sources.source.Source
         a generic source of a dictionary
     output_sink : argschema.sources.source.Source
-        a generic output to put output dictionary
+        a generic sink to write output dictionary to
     args : list or None
-        command line arguments passed to the module, if None use argparse to parse the command line, set to [] if you want to bypass command line parsing
+        command line arguments passed to the module, if None use argparse to parse the command line, 
+        set to [] if you want to bypass command line parsing
     logger_name : str
-        name of logger from the logging module you want to instantiate 'argschema'
+        name of logger from the logging module you want to instantiate default ('argschema')
 
     Raises
     -------
@@ -287,7 +288,7 @@ class ArgSchemaParser(object):
 
         output_d = self.get_output_json(d)
         if output_path is not None:
-            self.logger.warning('DEPRECATED, pass sink instead')
+            self.logger.warning('DEPRECATED, pass output_sink instead')
             sink = JsonSink(output_json=output_path)
         if sink is not None:
             sink.put_dict(output_d)
