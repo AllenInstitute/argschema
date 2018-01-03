@@ -1,4 +1,4 @@
-from .source import FileSource, FileSink
+from .source import ArgSource, ArgSink
 import json
 import marshmallow as mm
 import argschema
@@ -11,19 +11,17 @@ class JsonOutputConfigSchema(mm.Schema):
     output_json = argschema.fields.OutputFile(required=True,
         description = 'filepath to save output_json')
 
-class JsonSource(FileSource):
+class JsonSource(ArgSource):
     ConfigSchema = JsonInputConfigSchema
+    
+    def get_dict(self):
+        with open(self.input_json,'r') as fp:
+            return json.load(fp)
 
-    def __init__(self,input_json=None):
-        self.filepath = input_json
-    def read_file(self,fp):
-        return json.load(fp)
-
-class JsonSink(FileSink):
+class JsonSink(ArgSink):
     ConfigSchema = JsonOutputConfigSchema
 
-    def __init__(self,output_json=None):
-        self.filepath = output_json
-    
-    def write_file(self,fp,d):
-        json.dump(d,fp)
+    def put_dict(self,d):
+        with open(self.output_json,'w') as fp:
+            json.dump(d,fp)
+

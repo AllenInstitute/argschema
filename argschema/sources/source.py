@@ -19,6 +19,8 @@ class MultipleConfiguredSourceError(ConfigurableSourceError):
     pass
 
 def d_contains_any_fields(schema,d):
+    if len(schema.declared_fields)==0:
+        return True
     for field_name, field in schema.declared_fields.items():
         if field_name in d.keys():
             if d[field_name] is not None:
@@ -40,12 +42,8 @@ class ConfigurableSource(object):
             which will define the set of fields that are allowed (and their defaults)
         """
         schema = self.ConfigSchema()
-        result,errors = schema.load(kwargs)
-        if len(errors)>0:
-            raise MisconfiguredSourceError('invalid keyword arguments passed {}'.format(kwargs))
-        self.__dict__=result
-        for field_name, field in schema.declared_fields.items():
-            self.__dict__[field_name]=result[field_name]
+        result = self.get_config(self.ConfigSchema,kwargs)
+        self.__dict__.update(result)
             
     @staticmethod
     def get_config(Schema,d):
@@ -58,30 +56,21 @@ class ConfigurableSource(object):
                 raise MisconfiguredSourceError("Source incorrectly configured\n" + json.dumps(errors, indent=2))
             else:
                 return result
+    
 
 class ArgSource(ConfigurableSource):
     def get_dict(self):
         pass
 
+def get_input_from_config(ArgSource, config_d):
+    if config_d is not None:
+        input_config_d = ArgSource.get_config(ArgSource.ConfigSchema, config_d)
+        input_source = ArgSource(**input_config_d)
+        input_data = input_source.get_dict()
+        return input_data
+    else:
+        raise NotConfiguredSourceError('No dictionary provided')
+
 class ArgSink(ConfigurableSource):
     def put_dict(self,d):
         pass
-
-class FileSource(ArgSource):
-
-    def get_dict(self):
-        with open(self.filepath,'r') as fp:
-            d = self.read_file(fp)
-        return d
-
-    def read_file(self,fp):
-        pass
-
-class FileSink(ArgSink):
-
-    def write_file(self,fp,d):
-        pass
-
-    def put_dict(self,d):
-        with open(self.filepath,'w') as fp:
-            self.write_file(fp,d)
