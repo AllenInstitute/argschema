@@ -197,7 +197,7 @@ class ArgSchemaParser(object):
             input_data = config_data if config_data is not None else input_data
 
         # check whether the command line arguments contain an input configuration and use that
-        config_data = self.__get_input_data_from_config(argsdict)
+        config_data = self.__get_input_data_from_config(utils.smart_merge({},argsdict))
         input_data = config_data if config_data is not None else input_data
 
         # merge the command line dictionary into the input json
