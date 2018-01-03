@@ -9,7 +9,7 @@ from . import utils
 import marshmallow as mm
 from .sources.json_source import JsonSource, JsonSink
 from .sources.yaml_source import YamlSource, YamlSink
-from .sources.source import NotConfiguredSourceError, MultipleConfiguredSourceError
+from .sources.source import NotConfiguredSourceError, MultipleConfiguredSourceError, get_input_from_config
 
 def contains_non_default_schemas(schema, schema_list=[]):
     """returns True if this schema contains a schema which was not an instance of DefaultSchema
@@ -106,17 +106,6 @@ def fill_defaults(schema, args):
         if path[-1] not in d:
             d[path[-1]] = val
     return args
-
-
-def get_input(Source, config_d):
-    if config_d is not None:
-        input_config_d = Source.get_config(Source.ConfigSchema, config_d)
-        input_source = Source(**input_config_d)
-        input_data = input_source.get_dict()
-        return input_data
-    else:
-        raise NotConfiguredSourceError('No dictionary provided')
-
 
 class ArgSchemaParser(object):
     """The main class you should sub-class to write your own argschema module.
@@ -277,7 +266,7 @@ class ArgSchemaParser(object):
         input_data = None
         for InputSource in self.default_configurable_sources:
             try:
-                input_data = get_input(InputSource, d)
+                input_data = get_input_from_config(InputSource, d)
                 if input_set:
                     raise MultipleConfiguredSourceError(
                         "more then one InputSource configuration present in {}".format(d))
