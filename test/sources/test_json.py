@@ -22,7 +22,8 @@ def test_input_file(tmpdir_factory):
     return str(file_in)
 
 def test_json_source(test_input_file):
-    mod = MyParser(input_source= JsonSource(test_input_file), args=[])
+    source = JsonSource(input_json=test_input_file)
+    mod = MyParser(input_source= source, args=[])
 
 def test_json_source_command(test_input_file):
     mod = MyParser(args = ['--input_json',test_input_file])
