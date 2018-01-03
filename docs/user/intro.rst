@@ -1,5 +1,18 @@
 User Guide
 =====================================
+Installation
+------------
+install via source code
+
+::
+
+    $ python setup.py install
+
+or pip
+
+::
+
+    $ pip install argschema
 
 Your First Module
 ------------------
@@ -265,6 +278,35 @@ example, having an invalid literal) we will see a casting validation error:
 argschema does not support setting :class:`~marshmallow.fields.Dict` at the
 command line.
 
+Alternate Sources/Sinks
+-----------------------
+A json files are just one way that you might decide to store module parameter dictionaries or outputs. 
+For example, yaml is another perfectly reasonable choice for storing nested key values stores. Argschema by default provides
+json support because that is what we use most frequently at the Allen Institute, however we have generalized the concept
+to allow ArgSchemaParser to plugin alternative "sources" and "sinks" of parameters.  
+
+You can pass an ArgSchemaParser an `~argschema.sources.ArgSource` object which implements a get_dict method,
+and `~argschema.ArgSchemaParser` will get its input parameters from that dictionary.
+
+Similarly you can pass an `~argschema.sources.ArgSink` object which implements a put_dict method,
+and `~argschema.ArgSchemaParser.output` will output the dictionary however that ArgSink specifies it should.
+
+Finally, both `~argschema.sources.ArgSource` and `~argschema.sources.ArgSink` have a property called ConfigSchema,
+which is a :class:`marshmallow.Schema` for how to deserialize the kwargs to it's init class.  
+For example, the default `~argschema.sources.json_source.JsonSource.ConfigSchema` has one string field of 'input_json'. 
+This is how `~argschema.ArgSchemaParser` is told what keys and values should be read to initialize the `~argschema.sources.ArgSource` 
+or  `~argschema.sources.ArgSink`.  
+
+So for example, if you wanted to define a `~argschema.sources.ArgSource` which loaded a dictionary from a particular host, port and url,
+and a module which had a command line interface for setting that host port and url you could do so like this.
+
+.. literalinclude:: ../../test/url_source.py
+
+so now a UrlArgSchemaParser would expect command line flags of --input_host, --input_port, --input_url, and will look to download the json
+from an http location via requests, or an existing ArgSchemaParser module could be simply passed an UrlSource, even though the original module 
+author didn't explicitly support passing parameters by http location, and the parameters will still be deserialized and validated all the same. 
+
+
 Sphinx Documentation
 --------------------
 argschema comes with a autodocumentation feature for Sphnix which will help you automatically
@@ -280,19 +322,7 @@ To configure sphinx to use this function, you must be using the sphnix autodoc m
     def setup(app):
         app.connect('autodoc-process-docstring',process_schemas)
 
-Installation
-------------
-install via source code
 
-::
-
-    $ python setup.py install
-
-or pip
-
-::
-
-    $ pip install argschema
 
 
 .. toctree::
