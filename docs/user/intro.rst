@@ -289,7 +289,7 @@ You can pass an ArgSchemaParser an :class:`argschema.sources.ArgSource` object w
 and :class:`argschema.ArgSchemaParser` will get its input parameters from that dictionary.
 
 Similarly you can pass an :class:`argschema.sources.ArgSink` object which implements a put_dict method,
-and :method:`argschema.ArgSchemaParser.output` will output the dictionary however that :class:`argschema.sources.ArgSink` specifies it should.
+and :class:`argschema.ArgSchemaParser.output` will output the dictionary however that :class:`argschema.sources.ArgSink` specifies it should.
 
 Finally, both :class:`argschema.sources.ArgSource` and :class:`argschema.sources.ArgSink` have a property called ConfigSchema,
 which is a :class:`marshmallow.Schema` for how to deserialize the kwargs to it's init class.  
