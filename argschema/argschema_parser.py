@@ -142,6 +142,7 @@ class ArgSchemaParser(object):
                  schema_type=None,  # schema for parsing arguments
                  output_schema_type = None, # schema for parsing output_json
                  args=None,
+                 parser=None,
                  logger_name=__name__):
         
         if schema_type is None:
@@ -154,7 +155,7 @@ class ArgSchemaParser(object):
         self.logger.debug('input_data is {}'.format(input_data))
 
         # convert schema to argparse object
-        p = utils.schema_argparser(self.schema)
+        p = utils.schema_argparser(self.schema, parser=parser)
         argsobj = p.parse_args(args)
         argsdict = utils.args_to_dict(argsobj)
         self.logger.debug('argsdict is {}'.format(argsdict))
