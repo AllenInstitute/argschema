@@ -264,7 +264,7 @@ def build_schema_arguments(schema, arguments=None, path=None, description =None)
     return arguments
 
 
-def schema_argparser(schema):
+def schema_argparser(schema, parser=None):
     """given a jsonschema, build an argparse.ArgumentParser
 
     Parameters
@@ -286,7 +286,8 @@ def schema_argparser(schema):
     #make the root schema appeear first rather than last
     arguments = [arguments[-1]]+arguments[0:-1]
 
-    parser = argparse.ArgumentParser()
+    if parser == None:
+        parser = argparse.ArgumentParser()
 
     for arg_group in arguments:
         group=parser.add_argument_group(arg_group['title'],arg_group['description'])
