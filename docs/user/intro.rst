@@ -280,12 +280,12 @@ command line.
 
 Alternate Sources/Sinks
 -----------------------
-A json files are just one way that you might decide to store module parameter dictionaries or outputs. 
+Json files are just one way that you might decide to serialize module parameters or outputs. 
 Argschema by default provides json support because that is what we use most frequently at the Allen Institute, 
 however we have generalized the concept to allow :class:`argschema.ArgSchemaParser` to plugin alternative 
-"sources" and "sinks" of parameters.  
+"sources" and "sinks" of dictionary inputs and outputs.  
 
-For example, yaml is another perfectly reasonable choice for storing nested key values stores. 
+For example, yaml is another reasonable choice for storing nested key-value stores. 
 :class:`argschema.argschema_parser.ArgSchemaYamlParser` demonstrates just that functionality.  So now 
 input_yaml and output_yaml can be specified instead.
 
@@ -303,9 +303,10 @@ Finally, both :class:`argschema.sources.ArgSource` and :class:`argschema.sources
 have a property called ConfigSchema, which is a :class:`marshmallow.Schema` for how to deserialize 
 the kwargs to it's init class.  
 
-For example, the default :class:`argschema.sources.json_source.JsonSource.ConfigSchema` has one string 
+For example, the default :class:`argschema.sources.json_source.JsonSource` has one string 
 field of 'input_json'.  This is how :class:`argschema.ArgSchemaParser` is told what keys and values 
-should be read to initialize the :class:`argschema.sources.ArgSource` or  :class:`argschema.sources.ArgSink`.  
+should be read to initialize a :class:`argschema.sources.ArgSource` or
+ :class:`argschema.sources.ArgSink` instance.  
 
 So for example, if you wanted to define a :class:`argschema.sources.ArgSource` which loaded a dictionary
 from a particular host, port and url, and a module which had a command line interface for setting that 
@@ -313,9 +314,11 @@ host port and url you could do so like this.
 
 .. literalinclude:: ../../test/sources/url_source.py
 
-so now a UrlArgSchemaParser would expect command line flags of '--input_host', '--input_port', '--input_url' 
-(or look for them in input_data) and will look to download the json from that http location via requests
-or an existing :class:`argschema.ArgSchemaParser` module could be simply passed a configured UrlSource via input_source.
+so now a UrlArgSchemaParser would expect command line flags of '--input_host' and '--input_url', and 
+optionally '--input_port','--input_protocol' (or look for them in input_data) and will look to download
+the json from that http location via requests.  In addition, an existing :class:`argschema.ArgSchemaParser`
+module could be simply passed a configured UrlSource via input_source, 
+and it would get its parameters from there.
 
 Sphinx Documentation
 --------------------
