@@ -36,7 +36,6 @@ class MySchema2(argschema.ArgSchema):
     nest = argschema.fields.Nested(MyNestedSchemaWithDefaults,description="a nested schema")
 
 
-
 def test_my_default_nested_parser():
     input_data = {
         'a':5
@@ -44,3 +43,35 @@ def test_my_default_nested_parser():
     mod = argschema.ArgSchemaParser(input_data = input_data, 
                                     schema_type=MySchema2,
                                     args=None)
+
+
+@pytest.mark.parametrize("default,args,expected", [
+    (True, ["--nest.two", "False"], False),
+    (True, ["--nest.two", "0"], False),
+    (True, ["--nest.two", "'f'"], False),
+    (False, ["--nest.two", "True"], True),
+    (False, ["--nest.two", "1"], True)
+])
+def test_boolean_command_line(default, args, expected):
+    input_data = {
+        'a':5,
+        'nest':{
+            'one':7,
+            'two':default
+        }
+    }
+    mod = MyParser(input_data=input_data, args=args)
+    assert(isinstance(mod.args['nest']['two'], bool))
+    assert(mod.args['nest']['two'] == expected)
+
+
+def test_bad_cli_input():
+    input_data = {
+        'a':5,
+        'nest':{
+            'one':7,
+            'two':True
+        }
+    }
+    with pytest.raises(SystemExit):
+        mod = MyParser(input_data=input_data, args=["--nest.two", "notabool"])

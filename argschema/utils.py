@@ -2,6 +2,7 @@
 marshmallow schemas to argparse and merging dictionaries from both systems
 '''
 import logging
+import ast
 import argparse
 from operator import add
 import inspect
@@ -228,9 +229,11 @@ def build_schema_arguments(schema, arguments=None, path=None, description =None)
                 if isinstance(validator,mm.validate.OneOf):
                     arg['help']+= " (valid options are {})".format(validator.choices)
 
-            #catch lists to figure out desired type
             field_type = type(field)
-            if isinstance(field, mm.fields.List):
+            if isinstance(field, mm.fields.Boolean):
+                arg['type'] = ast.literal_eval
+            #catch lists to figure out desired type
+            elif isinstance(field, mm.fields.List):
                 arg['nargs'] = '*'
                 container_type = type(field.container)
 
