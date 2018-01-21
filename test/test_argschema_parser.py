@@ -36,7 +36,6 @@ class MySchema2(argschema.ArgSchema):
     nest = argschema.fields.Nested(MyNestedSchemaWithDefaults,description="a nested schema")
 
 
-
 def test_my_default_nested_parser():
     input_data = {
         'a':5
@@ -44,3 +43,24 @@ def test_my_default_nested_parser():
     mod = argschema.ArgSchemaParser(input_data = input_data, 
                                     schema_type=MySchema2,
                                     args=None)
+
+
+def test_boolean_command_line():
+    input_data = {
+        'a':5,
+        'nest':{
+            'one':7,
+            'two':True
+        }
+    }
+    mod = MyParser(input_data = input_data, args=["--nest.two", "False"])
+    assert(not mod.args['nest']['two'])
+    mod = MyParser(input_data = input_data, args=["--nest.two", "0"])
+    assert(not mod.args['nest']['two'])
+    input_data["nest"]["two"] = False
+    mod = MyParser(input_data = input_data, args=["--nest.two", "True"])
+    assert(mod.args['nest']['two'])
+    mod = MyParser(input_data = input_data, args=["--nest.two", "1"])
+    assert(mod.args['nest']['two'])
+    with pytest.raises(SystemExit):
+        mod = MyParser(input_data = input_data, args=["--nest.two", "notabool"])
