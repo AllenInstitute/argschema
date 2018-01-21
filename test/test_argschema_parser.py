@@ -45,7 +45,27 @@ def test_my_default_nested_parser():
                                     args=None)
 
 
-def test_boolean_command_line():
+@pytest.mark.parametrize("default,args,expected", [
+    (True, ["--nest.two", "False"], False),
+    (True, ["--nest.two", "0"], False),
+    (True, ["--nest.two", "'f'"], False),
+    (False, ["--nest.two", "True"], True),
+    (False, ["--nest.two", "1"], True)
+])
+def test_boolean_command_line(default, args, expected):
+    input_data = {
+        'a':5,
+        'nest':{
+            'one':7,
+            'two':default
+        }
+    }
+    mod = MyParser(input_data=input_data, args=args)
+    assert(isinstance(mod.args['nest']['two'], bool))
+    assert(mod.args['nest']['two'] == expected)
+
+
+def test_bad_cli_input():
     input_data = {
         'a':5,
         'nest':{
@@ -53,14 +73,5 @@ def test_boolean_command_line():
             'two':True
         }
     }
-    mod = MyParser(input_data = input_data, args=["--nest.two", "False"])
-    assert(not mod.args['nest']['two'])
-    mod = MyParser(input_data = input_data, args=["--nest.two", "0"])
-    assert(not mod.args['nest']['two'])
-    input_data["nest"]["two"] = False
-    mod = MyParser(input_data = input_data, args=["--nest.two", "True"])
-    assert(mod.args['nest']['two'])
-    mod = MyParser(input_data = input_data, args=["--nest.two", "1"])
-    assert(mod.args['nest']['two'])
     with pytest.raises(SystemExit):
-        mod = MyParser(input_data = input_data, args=["--nest.two", "notabool"])
+        mod = MyParser(input_data=input_data, args=["--nest.two", "notabool"])
