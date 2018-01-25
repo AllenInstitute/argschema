@@ -9,6 +9,28 @@ import marshmallow as mm
 import collections
 FIELD_TYPE_MAP = {v: k for k, v in mm.Schema.TYPE_MAPPING.items()}
 
+def prune_dict_with_none(d):
+    """function to remove all dictionaries from a nested dictionary
+    when all the values of a particular dictionary are None
+
+    Parameters
+    ----------
+    d: dictionary to prune
+
+    Returns
+    -------
+    dict
+        pruned dictionary
+    """
+    if all([d[key]==None for key in d.keys()]):
+        return {}
+    else:
+        keys = [key for key in d.keys() if type(d[key])==dict]
+        for key in keys:
+            pruned = prune_dict_with_none(d[key])
+            if pruned == {}:
+                d.pop(key)
+    return d
 
 def args_to_dict(argsobj):
     """function to convert namespace returned by argsparse into a nested dictionary
@@ -37,7 +59,8 @@ def args_to_dict(argsobj):
                 if parts[i] not in root.keys():
                     root[parts[i]] = {}
                 root = root[parts[i]]
-    return d
+    
+    return prune_dict_with_none(d)
 
 
 def merge_value(a, b, key, func=add):
