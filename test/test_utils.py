@@ -5,6 +5,29 @@ from argschema.schemas import ArgSchema, DefaultSchema
 from argschema import fields, ArgSchemaParser
 import marshmallow as mm
 
+
+@pytest.fixture
+def baseball_example():
+    example_situation = {
+        'batter':{
+            'name':'Barry Bonds',
+            'number':25
+        },
+        'pitcher':{
+            'name':'Roger Clemens',
+            'number':21
+        },
+        'based_occupied':[1,2,3],
+        'outs':2,
+        'strikes':2,
+        'balls':3,
+        'inning':9,
+        'bottom':True,
+        'score_home':2,
+        'score_away':3
+    }
+    return example_situation
+
 def test_merge_value_add():
     a = {'key':['a']}
     b = {'key':['b']}
@@ -87,27 +110,10 @@ class BaseballSituation(ArgSchema):
     batter = fields.Nested(Player,required=True,description="who is batting")
     pitcher = fields.Nested(Player,required=True,description="who is pitching")
     
-def test_schema_argparser_with_baseball():
-    example_situation = {
-        'batter':{
-            'name':'Barry Bonds',
-            'number':25
-        },
-        'pitcher':{
-            'name':'Roger Clemens',
-            'number':21
-        },
-        'based_occupied':[1,2,3],
-        'outs':2,
-        'strikes':2,
-        'balls':3,
-        'inning':9,
-        'bottom':True,
-        'score_home':2,
-        'score_away':3
-    }
+def test_schema_argparser_with_baseball(baseball_example):
     schema = BaseballSituation()
-    mod = ArgSchemaParser(input_data = example_situation, schema_type=BaseballSituation,args=[])
+    mod = ArgSchemaParser(input_data=baseball_example,
+                          schema_type=BaseballSituation,args=[])
     parser = utils.schema_argparser(schema)
     help = parser.format_help()
     help = help.replace('\n','').replace(' ','')
@@ -117,5 +123,8 @@ def test_schema_argparser_with_baseball():
     assert("--pitcher.numberPITCHER.NUMBERplayer'snumber(mustbe>0)(REQUIRED)" in help)
 
 
-
-
+def test_string_cli(baseball_example):
+    schema = BaseballSituation()
+    mod = ArgSchemaParser(input_data=baseball_example,
+                          schema_type=BaseballSituation,
+                          args=["--pitcher.name", "Nolan Ryan"])
