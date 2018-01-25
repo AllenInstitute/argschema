@@ -224,6 +224,9 @@ class ArgSchemaParser(object):
             output dictionary to output 
         output_path: str
             path to save to output file, optional (with default to self.mod['output_json'] location)
+        **json_dump_options :
+            will be passed through to json.dump
+         
         Raises
         ------
         marshmallow.ValidationError
