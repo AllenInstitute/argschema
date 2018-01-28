@@ -156,7 +156,7 @@ class ArgSchemaParser(object):
         # convert schema to argparse object
         p = utils.schema_argparser(self.schema)
         argsobj = p.parse_args(args)
-        argsdict = utils.args_to_dict(argsobj)
+        argsdict = utils.args_to_dict(argsobj, self.schema)
         self.logger.debug('argsdict is {}'.format(argsdict))
 
         if argsobj.input_json is not None:
