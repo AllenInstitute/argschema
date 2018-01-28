@@ -20,6 +20,30 @@ FIELD_TYPE_MAP = {fields.Boolean: ast.literal_eval,
 }
 
 
+def prune_dict_with_none(d):
+    """function to remove all dictionaries from a nested dictionary
+    when all the values of a particular dictionary are None
+
+    Parameters
+    ----------
+    d: dictionary to prune
+
+    Returns
+    -------
+    dict
+        pruned dictionary
+    """
+    if all([d[key]==None for key in d.keys()]):
+        return {}
+    else:
+        keys = [key for key in d.keys() if type(d[key])==dict]
+        for key in keys:
+            pruned = prune_dict_with_none(d[key])
+            if pruned == {}:
+                d.pop(key)
+    return d
+
+
 def cli_error_dict(arg_path, field_type, index=0):
     """Constuct a nested dictionary containing a casting error message
 
@@ -74,7 +98,10 @@ def args_to_dict(argsobj, schema=None):
         root = d
         for i in range(len(parts)):
             if current_schema is not None:
-                field_def = current_schema.fields[parts[i]]
+                if current_schema.only and parts[i] not in current_schema.only:
+                    field_def = None
+                else:
+                    field_def = current_schema.fields[parts[i]]
                 if isinstance(field_def, fields.Nested):
                     current_schema = field_def.schema
             if i == (len(parts) - 1):
@@ -92,7 +119,7 @@ def args_to_dict(argsobj, schema=None):
                 root = root[parts[i]]
     if errors:
         raise mm.ValidationError(json.dumps(errors, indent=2))
-    return d
+    return prune_dict_with_none(d)
 
 
 def merge_value(a, b, key, func=add):

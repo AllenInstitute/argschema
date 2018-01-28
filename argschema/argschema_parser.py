@@ -214,7 +214,7 @@ class ArgSchemaParser(object):
         
         return output_json
 
-    def output(self,d,output_path=None):
+    def output(self,d,output_path=None,**json_dump_options):
         """method for outputing dictionary to the output_json file path after
         validating it through the output_schema_type
 
@@ -224,6 +224,9 @@ class ArgSchemaParser(object):
             output dictionary to output 
         output_path: str
             path to save to output file, optional (with default to self.mod['output_json'] location)
+        **json_dump_options :
+            will be passed through to json.dump
+         
         Raises
         ------
         marshmallow.ValidationError
@@ -234,7 +237,7 @@ class ArgSchemaParser(object):
         
         output_json = self.get_output_json(d)
         with open(output_path,'w') as fp:
-            json.dump(output_json,fp)
+            json.dump(output_json,fp,**json_dump_options)
 
     def load_schema_with_defaults(self  ,schema, args):
         """method for deserializing the arguments dictionary (args)

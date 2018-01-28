@@ -1,3 +1,5 @@
+import json
+
 import argschema
 import marshmallow as mm
 import pytest
@@ -64,3 +66,26 @@ def test_boolean_command_line(default, args, expected):
     mod = MyParser(input_data=input_data, args=args)
     assert(isinstance(mod.args['nest']['two'], bool))
     assert(mod.args['nest']['two'] == expected)
+
+
+def test_parser_output(tmpdir_factory):
+
+    json_path = tmpdir_factory.mktemp('data').join('test_output.json')
+
+    input_data = {
+        'a':5,
+        'nest':{
+            'one':7,
+            'two':False
+        }
+    }
+    mod = MyParser(input_data=input_data)
+
+    mod.output(mod.args, output_path=str(json_path), indent=2)
+    with open(str(json_path), 'r') as jf:
+        obt = json.load(jf)
+        assert(obt['nest']['one'] == mod.args['nest']['one'])
+
+    with open(str(json_path), 'r') as jf:
+        lines = jf.readlines()
+        assert( len(lines) >= 8 ) # true if indent param worked
