@@ -1,4 +1,5 @@
 import argschema
+import marshmallow as mm
 import pytest
 
 
@@ -63,15 +64,3 @@ def test_boolean_command_line(default, args, expected):
     mod = MyParser(input_data=input_data, args=args)
     assert(isinstance(mod.args['nest']['two'], bool))
     assert(mod.args['nest']['two'] == expected)
-
-
-def test_bad_cli_input():
-    input_data = {
-        'a':5,
-        'nest':{
-            'one':7,
-            'two':True
-        }
-    }
-    with pytest.raises(SystemExit):
-        mod = MyParser(input_data=input_data, args=["--nest.two", "notabool"])
