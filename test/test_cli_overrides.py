@@ -1,6 +1,5 @@
 import pytest
 import os
-import logging
 from decimal import Decimal
 import datetime
 import uuid
@@ -101,8 +100,8 @@ class MySchema(ArgSchema):
 
 def test_unexpected_input(test_data):
     with pytest.raises(SystemExit):
-        mod = ArgSchemaParser(test_data, schema_type=MySchema,
-                               args=["--notanarg", "something"])
+        ArgSchemaParser(test_data, schema_type=MySchema,
+                        args=["--notanarg", "something"])
 
 
 def test_override_boolean(test_data):
@@ -111,7 +110,7 @@ def test_override_boolean(test_data):
     assert(not mod.args["boolean"])
     with pytest.raises(mm.ValidationError):
         mod = ArgSchemaParser(test_data, schema_type=MySchema,
-                          args=["--boolean", "invalid"])
+                              args=["--boolean", "invalid"])
 
 
 def test_override_date(test_data):
@@ -143,8 +142,8 @@ def test_override_decimal(test_data):
 
 def test_override_dict(test_data):
     with pytest.raises(SystemExit):
-        mod = ArgSchemaParser(test_data, schema_type=MySchema,
-                              args=["--dict", "{'a': 600, 'b': 'hello'}"])
+        ArgSchemaParser(test_data, schema_type=MySchema,
+                        args=["--dict", "{'a': 600, 'b': 'hello'}"])
 
 
 def test_override_email(test_data):
@@ -170,7 +169,7 @@ def test_override_inputdir(test_data, tmpdir_factory):
     mod = ArgSchemaParser(test_data, schema_type=MySchema,
                           args=["--inputdir", str(input2)])
     assert(mod.args["inputdir"] == str(input2))
-    assert(os.path.exists(mod.args["inputdir"]) and 
+    assert(os.path.exists(mod.args["inputdir"]) and
            os.path.isdir(mod.args["inputdir"]))
 
 
@@ -184,7 +183,7 @@ def test_override_inputfile(test_data, tmpdir_factory):
     mod = ArgSchemaParser(test_data, schema_type=MySchema,
                           args=["--inputfile", str(input2)])
     assert(mod.args["inputfile"] == str(input2))
-    assert(os.path.exists(mod.args["inputfile"]) and 
+    assert(os.path.exists(mod.args["inputfile"]) and
            os.path.isfile(mod.args["inputfile"]))
 
 
@@ -265,7 +264,7 @@ def test_override_outputdir(test_data, tmpdir_factory):
     mod = ArgSchemaParser(test_data, schema_type=MySchema,
                           args=["--outputdir", str(output2)])
     assert(mod.args["outputdir"] == str(output2))
-    assert(os.path.exists(mod.args["outputdir"]) and 
+    assert(os.path.exists(mod.args["outputdir"]) and
            os.path.isdir(mod.args["outputdir"]))
 
 

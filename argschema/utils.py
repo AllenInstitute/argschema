@@ -3,9 +3,7 @@ marshmallow schemas to argparse and merging dictionaries from both systems
 '''
 import logging
 import ast
-import sys
 import argparse
-import uuid
 from operator import add
 import inspect
 import json
