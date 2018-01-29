@@ -2,6 +2,7 @@
 marshmallow schemas to argparse and merging dictionaries from both systems
 '''
 import logging
+import warnings
 import ast
 import argparse
 from operator import add
@@ -40,6 +41,26 @@ def prune_dict_with_none(d):
             if pruned == {}:
                 d.pop(key)
     return d
+
+
+def get_type_from_field(field):
+    """Get type casting for command line argument from marshmallow.Field
+
+    Parameters
+    ----------
+    field : marshmallow.Field
+        Field class from input schema
+
+    Returns
+    -------
+    callable
+        Function to call to cast argument to
+    """
+    if (isinstance(field, fields.List) and
+        not field.metadata.get("cli_as_single_argument", False)):
+        return list
+    else:
+        return FIELD_TYPE_MAP.get(type(field), str)
 
 
 def cli_error_dict(arg_path, field_type, index=0):
@@ -106,7 +127,7 @@ def args_to_dict(argsobj, schema=None):
                 value = argsdict.get(field)
                 if value is not None:
                     try:
-                        value = FIELD_TYPE_MAP.get(type(field_def), str)(value)
+                        value = get_type_from_field(field_def)(value)
                     except ValueError:
                         typename = field_def.__class__.__name__
                         errors.update(cli_error_dict(parts, typename))
@@ -309,6 +330,14 @@ def build_schema_arguments(schema, arguments=None, path=None, description =None)
                     arg['help']+= " (constrained list)"
                 if isinstance(validator,mm.validate.OneOf):
                     arg['help']+= " (valid options are {})".format(validator.choices)
+
+            if (isinstance(field, mm.fields.List) and
+                not field.metadata.get("cli_as_single_argument", False)):
+                warnings.warn(("{} is using old-style command-line syntax with"
+                               " each element as a separate argument. This "
+                               "will not be supported in argschema after 2.0"),
+                               DeprecationWarning)
+                arg['nargs'] = '*'
 
             arg['type'] = str  # do type mapping after parsing so we can raise validation errors
 
