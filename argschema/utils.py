@@ -333,9 +333,10 @@ def build_schema_arguments(schema, arguments=None, path=None, description =None)
 
             if (isinstance(field, mm.fields.List) and
                 not field.metadata.get("cli_as_single_argument", False)):
-                warnings.warn(("{} is using old-style command-line syntax with"
-                               " each element as a separate argument. This "
-                               "will not be supported in argschema after 2.0"),
+                warnings.warn(("'{}' is using old-style command-line syntax "
+                               "with  each element as a separate argument. "
+                               "This will not be supported in argschema "
+                               "after 2.0").format(arg_name),
                                DeprecationWarning)
                 arg['nargs'] = '*'
 
