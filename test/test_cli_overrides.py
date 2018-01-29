@@ -48,6 +48,7 @@ def test_data(inputdir, inputfile, outputdir, outputfile):
         "inputfile": str(inputfile),
         "integer": 10,
         "list": [300, 200, 800, 1000],
+        "list_deprecated": [300, 200, 800, 1000],
         "localdatetime": "0001-01-01T00:00:00",
         "log_level": "ERROR",
         "nested": {"a": 1, "b": False},
@@ -82,7 +83,8 @@ class MySchema(ArgSchema):
     inputdir = fields.InputDir(required=True)
     inputfile = fields.InputFile(required=True)
     integer = fields.Int(required=True)
-    list = fields.List(fields.Int, required=True)
+    list = fields.List(fields.Int, required=True, cli_as_single_argument=True)
+    list_deprecated = fields.List(fields.Int, required=True)
     localdatetime = fields.LocalDateTime(required=True)
     nested = fields.Nested(MyNestedSchema, required=True)
     number = fields.Number(required=True)
@@ -203,6 +205,15 @@ def test_override_list(test_data):
     with pytest.raises(mm.ValidationError):
         mod = ArgSchemaParser(test_data, schema_type=MySchema,
                               args=["--list", "invalid"])
+
+
+def test_override_list_deprecated(test_data):
+    mod = ArgSchemaParser(test_data, schema_type=MySchema,
+                          args=["--list_deprecated", "1000", "3000"])
+    assert(mod.args["list_deprecated"] == [1000, 3000])
+    with pytest.raises(mm.ValidationError):
+        mod = ArgSchemaParser(test_data, schema_type=MySchema,
+                              args=["--list_deprecated", "[1000,3000]"])
 
 
 def test_override_localdatetime(test_data):
