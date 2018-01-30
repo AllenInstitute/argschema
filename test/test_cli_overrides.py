@@ -227,7 +227,7 @@ def test_override_list(test_data):
 
 
 def test_override_list_deprecated(deprecated_data):
-    with pytest.warns(DeprecationWarning):
+    with pytest.warns(FutureWarning):
         mod = ArgSchemaParser(deprecated_data, schema_type=MyDeprecatedSchema,
                               args=["--list_deprecated", "1000", "3000"])
         assert(mod.args["list_deprecated"] == [1000, 3000])

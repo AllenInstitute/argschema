@@ -333,11 +333,13 @@ def build_schema_arguments(schema, arguments=None, path=None, description =None)
 
             if (isinstance(field, mm.fields.List) and
                 not field.metadata.get("cli_as_single_argument", False)):
-                warnings.warn(("'{}' is using old-style command-line syntax "
-                               "with  each element as a separate argument. "
-                               "This will not be supported in argschema "
-                               "after 2.0").format(arg_name),
-                               DeprecationWarning)
+                warn_msg = ("'{}' is using old-style command-line syntax with "
+                            "each element as a separate argument. This will "
+                            "not be supported in argschema after "
+                            "2.0. See http://argschema.readthedocs.io/en/"
+                            "master/user/intro.html#command-line-specification"
+                            " for details.").format(arg_name)
+                warnings.warn(warn_msg, FutureWarning)
                 arg['nargs'] = '*'
 
             arg['type'] = str  # do type mapping after parsing so we can raise validation errors
