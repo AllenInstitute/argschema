@@ -261,7 +261,7 @@ class ArgSchemaParser(object):
 
         return output_json
 
-    def output(self, d, output_path=None, sink=None, **sink_options):
+    def output(self,d,sink=None):
         """method for outputing dictionary to the output_json file path after
         validating it through the output_schema_type
 
@@ -284,13 +284,10 @@ class ArgSchemaParser(object):
         """
 
         output_d = self.get_output_json(d)
-        if output_path is not None:
-            self.logger.warning('DEPRECATED, pass output_sink instead')
-            sink = JsonSink(output_json=output_path)
         if sink is not None:
-            sink.put_dict(output_d,**sink_options)
+            sink.put_dict(output_d)
         else:
-            self.output_sink.put_dict(output_d, **sink_options)
+            self.output_sink.put_dict(output_d)
 
     def load_schema_with_defaults(self, schema, args):
         """method for deserializing the arguments dictionary (args)

@@ -1,6 +1,7 @@
 from argschema import ArgSchemaParser
 from argschema.schemas import DefaultSchema
 from argschema.fields import Str, Int, NumpyArray
+from argschema.sources import JsonSink
 import json
 import numpy as np
 import pytest
@@ -96,7 +97,8 @@ def test_alt_output(tmpdir):
         "b": 5,
         "M": M
     }
-    mod.output(output, str(file_out_2))
+    sink = JsonSink(output_json=str(file_out))
+    mod.output(output, sink=sink)
     with open(str(file_out_2), 'r') as fp:
         actual_output = json.load(fp)
     assert actual_output == expected_output
