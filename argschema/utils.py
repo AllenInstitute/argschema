@@ -89,16 +89,42 @@ def cli_error_dict(arg_path, field_type, index=0):
         return {arg_path[index]: cli_error_dict(arg_path, field_type, index+1)}
 
 
+def get_field_def_from_schema(parts,schema):
+    """function to get a field_definition from a particular key, specified by it's parts list
 
-def args_to_dict(argsobj, schema=None):
+    Parameters
+    ----------
+    parts : list[str]
+        the list of keys to get this schema
+    schema: marshmallow.Schema
+        the marshmallow schema to look up this key
+    
+    Returns
+    -------
+    marshmallow.Field or None
+        returns the field in the schema if it exists, otherwise returns None
+    """
+    current_schema = schema
+    for part in parts:
+        if part not in current_schema.fields.keys():
+            return None
+        else:
+            if current_schema.only and part not in current_schema.only:
+                field_def = None
+            else:
+                field_def = current_schema.fields[part]
+            if isinstance(field_def, fields.Nested):
+                current_schema = field_def.schema
+    return field_def
+def args_to_dict(argsobj, schemas=None):
     """function to convert namespace returned by argsparse into a nested dictionary
 
     Parameters
     ----------
     argsobj : argparse.Namespace
         Namespace object returned by standard argparse.parse function
-    schema : marshmallow.Schema
-        Optional schema which will be used to cast fields via `FIELD_TYPE_MAP`
+    schemas : list[marshmallow.Schema]
+        Optional list of schemas which will be used to cast fields via `FIELD_TYPE_MAP`
 
 
     Returns
@@ -112,18 +138,19 @@ def args_to_dict(argsobj, schema=None):
     errors = {}
     field_def = None
     for field in argsdict.keys():
-        current_schema = schema
         parts = field.split('.')
         root = d
         for i in range(len(parts)):
-            if current_schema is not None:
-                if current_schema.only and parts[i] not in current_schema.only:
-                    field_def = None
-                else:
-                    field_def = current_schema.fields[parts[i]]
-                if isinstance(field_def, fields.Nested):
-                    current_schema = field_def.schema
+
             if i == (len(parts) - 1):
+                field_def = None
+                for schema in schemas:
+                    field_def = get_field_def_from_schema(parts,schema)
+                    if field_def is not None:
+                        break
+                
+                #field_def = next(get_field_def(parts,schema) for schema in schemas if field_in_schema(parts,schema))
+
                 value = argsdict.get(field)
                 if value is not None:
                     try:
