@@ -97,9 +97,9 @@ def test_alt_output(tmpdir):
         "b": 5,
         "M": M
     }
-    sink = JsonSink(output_json=str(file_out))
-    mod.output(output, sink=sink)
-    with open(str(file_out_2), 'r') as fp:
+    sink = JsonSink(output_json= str(file_out_2))
+    mod.output(output,sink=sink)
+    with open(str(file_out_2),'r') as fp:
         actual_output = json.load(fp)
     assert actual_output == expected_output
 
