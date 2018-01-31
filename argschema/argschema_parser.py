@@ -11,7 +11,6 @@ from .sources.json_source import JsonSource, JsonSink
 from .sources.yaml_source import YamlSource, YamlSink
 from .sources.source import NotConfiguredSourceError, MultipleConfiguredSourceError
 
-
 def contains_non_default_schemas(schema, schema_list=[]):
     """returns True if this schema contains a schema which was not an instance of DefaultSchema
 
