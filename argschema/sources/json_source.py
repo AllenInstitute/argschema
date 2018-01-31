@@ -21,7 +21,7 @@ class JsonSource(ArgSource):
 class JsonSink(ArgSink):
     ConfigSchema = JsonOutputConfigSchema
 
-    def put_dict(self,d):
+    def put_dict(self,d,**json_options):
         with open(self.output_json,'w') as fp:
-            json.dump(d,fp)
+            json.dump(d,fp,**json_options)
 

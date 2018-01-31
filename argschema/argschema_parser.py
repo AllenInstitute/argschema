@@ -136,7 +136,7 @@ class ArgSchemaParser(object):
         # build a command line parser from the input schemas and configurations
         p = utils.schema_argparser(self.schema, io_schemas)
         argsobj = p.parse_args(args)
-        argsdict = utils.args_to_dict(argsobj, self.schema)
+        argsdict = utils.args_to_dict(argsobj, [self.schema]+io_schemas)
         self.logger.debug('argsdict is {}'.format(argsdict))
 
         # if you received an input_source, get the dictionary from there
@@ -291,7 +291,7 @@ class ArgSchemaParser(object):
             self.logger.warning('DEPRECATED, pass output_sink instead')
             sink = JsonSink(output_json=output_path)
         if sink is not None:
-            sink.put_dict(output_d)
+            sink.put_dict(output_d,**sink_options)
         else:
             self.output_sink.put_dict(output_d, **sink_options)
 
