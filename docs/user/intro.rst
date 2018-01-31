@@ -1,5 +1,18 @@
 User Guide
 =====================================
+Installation
+------------
+install via source code
+
+::
+
+    $ python setup.py install
+
+or pip
+
+::
+
+    $ pip install argschema
 
 Your First Module
 ------------------
@@ -99,19 +112,19 @@ argschema uses marshmallow (http://marshmallow.readthedocs.io/)
 under the hood to define the parameters schemas.  It comes with a basic set of fields
 that you can use to define your schemas. One powerful feature of Marshmallow is that you
 can define custom fields that do arbitrary validation.
-:class:`~argschema.fields` contains all the built-in marshmallow fields, 
+:class:`argschema.fields` contains all the built-in marshmallow fields, 
 but also some useful custom ones, 
-such as :class:`~argschema.fields.InputFile`, 
-:class:`~argschema.fields.OutputFile`, 
-:class:`~argschema.fields.InputDir` that validate that the paths exist and have the proper
+such as :class:`argschema.fields.InputFile`, 
+:class:`argschema.fields.OutputFile`, 
+:class:`argschema.fields.InputDir` that validate that the paths exist and have the proper
 permissions to allow files to be read or written.
 
-Other fields, such as :class:`~argschema.fields.NumpyArray` will deserialize ordered lists of lists
+Other fields, such as :class:`argschema.fields.NumpyArray` will deserialize ordered lists of lists
 directly into a numpy array of your choosing.
 
-Finally, an important Field to know is :class:`~argschema.fields.Nested`, which allows you to define
+Finally, an important Field to know is :class:`argschema.fields.Nested`, which allows you to define
 heirarchical nested structures.  Note, that if you use Nested schemas, your Nested schemas should
-subclass :class:`~argschema.schemas.DefaultSchema` in order that they properly fill in default values,
+subclass :class:`argschema.schemas.DefaultSchema` in order that they properly fill in default values,
 as :class:`marshmallow.Schema` does not do that by itself.
 
 The template_module example shows how you might combine these features
@@ -265,13 +278,56 @@ example, having an invalid literal) we will see a casting validation error:
 argschema does not support setting :class:`~marshmallow.fields.Dict` at the
 command line.
 
+Alternate Sources/Sinks
+-----------------------
+Json files are just one way that you might decide to serialize module parameters or outputs. 
+Argschema by default provides json support because that is what we use most frequently at the Allen Institute, 
+however we have generalized the concept to allow :class:`argschema.ArgSchemaParser` to plugin alternative 
+"sources" and "sinks" of dictionary inputs and outputs.  
+
+For example, yaml is another reasonable choice for storing nested key-value stores. 
+:class:`argschema.argschema_parser.ArgSchemaYamlParser` demonstrates just that functionality.  So now 
+input_yaml and output_yaml can be specified instead.
+
+Furthermore, you can pass an ArgSchemaParser an :class:`argschema.sources.ArgSource` object which
+implements a get_dict method, and any :class:`argschema.ArgSchemaParser` will get its input parameters
+from that dictionary.  Importantly, this is true even when the original module author didn't 
+explicitly support passing parameters from that mechanism, and the parameters will still be
+deserialized and validated in a uniform manner.
+
+Similarly you can pass an :class:`argschema.sources.ArgSink` object which implements a put_dict method,
+and :class:`argschema.ArgSchemaParser.output` will output the dictionary however that 
+:class:`argschema.sources.ArgSink` specifies it should.
+
+Finally, both :class:`argschema.sources.ArgSource` and :class:`argschema.sources.ArgSink` 
+have a property called ConfigSchema, which is a :class:`marshmallow.Schema` for how to deserialize 
+the kwargs to it's init class.  
+
+For example, the default :class:`argschema.sources.json_source.JsonSource` has one string 
+field of 'input_json'.  This is how :class:`argschema.ArgSchemaParser` is told what keys and values 
+should be read to initialize a :class:`argschema.sources.ArgSource` or
+ :class:`argschema.sources.ArgSink` instance.  
+
+So for example, if you wanted to define a :class:`argschema.sources.ArgSource` which loaded a dictionary
+from a particular host, port and url, and a module which had a command line interface for setting that 
+host port and url you could do so like this.
+
+.. literalinclude:: ../../test/sources/url_source.py
+
+so now a UrlArgSchemaParser would expect command line flags of '--input_host' and '--input_url', and 
+optionally '--input_port','--input_protocol' (or look for them in input_data) and will look to download
+the json from that http location via requests.  In addition, an existing :class:`argschema.ArgSchemaParser`
+module could be simply passed a configured UrlSource via input_source, 
+and it would get its parameters from there.
+
 Sphinx Documentation
 --------------------
 argschema comes with a autodocumentation feature for Sphnix which will help you automatically
-add documentation of your Schemas and ArgSchemaParser classes in your project. This is how the 
-documentation of the :doc:`../tests/modules` suite included here was generated.
+add documentation of your Schemas and :class:`argschema.ArgSchemaParser` classes in your project. 
+This is how the documentation of the :doc:`../tests/modules` suite included here was generated.
 
-To configure sphinx to use this function, you must be using the sphnix autodoc module and add the following to your conf.py file
+To configure sphnix to use this function, you must be using the sphnix autodoc module 
+and add the following to your conf.py file
 
 .. code-block:: python
 
@@ -280,19 +336,7 @@ To configure sphinx to use this function, you must be using the sphnix autodoc m
     def setup(app):
         app.connect('autodoc-process-docstring',process_schemas)
 
-Installation
-------------
-install via source code
 
-::
-
-    $ python setup.py install
-
-or pip
-
-::
-
-    $ pip install argschema
 
 
 .. toctree::
