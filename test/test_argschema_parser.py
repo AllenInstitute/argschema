@@ -1,5 +1,4 @@
 import json
-
 import argschema
 import pytest
 
@@ -67,18 +66,6 @@ def test_boolean_command_line(default, args, expected):
     assert(mod.args['nest']['two'] == expected)
 
 
-def test_bad_cli_input():
-    input_data = {
-        'a':5,
-        'nest':{
-            'one':7,
-            'two':True
-        }
-    }
-    with pytest.raises(SystemExit):
-        mod = MyParser(input_data=input_data, args=["--nest.two", "notabool"])
-
-
 def test_parser_output(tmpdir_factory):
 
     json_path = tmpdir_factory.mktemp('data').join('test_output.json')
@@ -100,6 +87,3 @@ def test_parser_output(tmpdir_factory):
     with open(str(json_path), 'r') as jf:
         lines = jf.readlines()
         assert( len(lines) >= 8 ) # true if indent param worked
-
-
-

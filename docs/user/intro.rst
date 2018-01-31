@@ -137,7 +137,133 @@ so now if run the example commands found in run_template.sh
         --output_json output_fromjson.json
     {u'name': u'from_json', u'inc_array': [4.0, 3.0, 2.0]}
     $ python template_module.py
-    {u'name': u'from_dictionary', u'inc_array': [5.0, 7.0, 10.0]}    
+    {u'name': u'from_dictionary', u'inc_array': [5.0, 7.0, 10.0]}
+
+
+Command-Line Specification
+--------------------------
+As mentioned in the section `Your First Module`_, argschema supports
+setting arguments at the command line, along with providing arguments
+either in an input json or directly passing a dictionary as `input_data`.
+Values passed at the command line will take precedence over those
+passed to the parser or in the input json.
+
+Arguments are specified with `--argument_name <value>`, where value is
+passed by the shell. If there are spaces in the value, it will need to be
+wrapped in quotes, and any special characters will need to be escaped
+with \. Booleans are set with True or 1 for true and False or 0 for false.
+
+An exception to this rule is list formatting. If a schema contains a
+:class:`~marshmallow.fields.List` and does not set the
+`cli_as_single_argument` keyword argument to True, lists will be parsed
+as `--list_name <value1> <value2> ...`. In argschema 2.0 lists will be
+parsed in the same way as other arguments, as it allows more flexibility
+in list types and more clearly represents the intended data structure.
+
+An example script showing old and new list settings:
+
+.. literalinclude:: ../../examples/deprecated_example.py
+    :caption: deprecated_example.py
+
+Running this code can demonstrate the differences in command-line usage:
+
+.. code-block:: bash
+
+    $ python deprecated_example.py --help
+    FutureWarning: '--list_old' is using old-style command-line syntax
+    with each element as a separate argument. This will not be supported
+    in argschema after 2.0. See http://argschema.readthedocs.io/en/master/user/intro.html#command-line-specification
+    for details.
+    warnings.warn(warn_msg, FutureWarning)
+    usage: deprecated_example.py [-h] [--input_json INPUT_JSON]
+                                 [--output_json OUTPUT_JSON]
+                                 [--log_level LOG_LEVEL]
+                                 [--list_old [LIST_OLD [LIST_OLD ...]]]
+                                 [--list_new LIST_NEW]
+
+    optional arguments:
+      -h, --help            show this help message and exit
+
+    MySchema:
+      --input_json INPUT_JSON
+                            file path of input json file
+      --output_json OUTPUT_JSON
+                            file path to output json file
+      --log_level LOG_LEVEL
+                            set the logging level of the module (default=ERROR)
+      --list_old [LIST_OLD [LIST_OLD ...]]
+                            float list with deprecated cli (default=[1.1, 2.2,
+                            3.3])
+      --list_new LIST_NEW   float list with supported cli (default=[4.4, 5.5,
+                            6.6])
+    $ python deprecated_example.py --list_old 9.1 8.2 7.3 --list_new [6.4,5.5,4.6]
+    FutureWarning: '--list_old' is using old-style command-line syntax
+    with each element as a separate argument. This will not be supported
+    in argschema after 2.0. See http://argschema.readthedocs.io/en/master/user/intro.html#command-line-specification
+    for details.
+    warnings.warn(warn_msg, FutureWarning)
+    {'log_level': 'ERROR', 'list_new': [6.4, 5.5, 4.6], 'list_old': [9.1, 8.2, 7.3]}
+
+We can explore some typical examples of command line usage with the following script:
+
+.. literalinclude:: ../../examples/cli_example.py
+    :caption: cli_example.py
+
+.. code-block:: bash
+
+    $ python cli_example.py --help
+    usage: cli_example.py [-h] [--input_json INPUT_JSON]
+                          [--output_json OUTPUT_JSON] [--log_level LOG_LEVEL]
+                          [--array ARRAY] [--string_list STRING_LIST]
+                          [--int_list INT_LIST] [--nested.a NESTED.A]
+                          [--nested.b NESTED.B]
+
+    optional arguments:
+      -h, --help            show this help message and exit
+
+    MySchema:
+      --input_json INPUT_JSON
+                            file path of input json file
+      --output_json OUTPUT_JSON
+                            file path to output json file
+      --log_level LOG_LEVEL
+                            set the logging level of the module (default=ERROR)
+      --array ARRAY         my example array (default=[[1, 2, 3], [4, 5, 6]])
+      --string_list STRING_LIST
+                            list of lists of strings (default=[['hello', 'world'],
+                            ['lists!']])
+      --int_list INT_LIST   list of ints (default=[1, 2, 3])
+
+    nested:
+      --nested.a NESTED.A   my first parameter (default=42)
+      --nested.b NESTED.B   my boolean (default=True)
+
+We can set some values and observe the output:
+
+::
+
+    $ python cli_example.py --nested.b 0 --string_list "[['foo','bar'],['baz','buz']]"
+    {'int_list': [1, 2, 3], 'string_list': [['foo', 'bar'], ['baz', 'buz']], 'array': array([[1, 2, 3],
+       [4, 5, 6]], dtype=uint8), 'log_level': 'ERROR', 'nested': {'a': 42, 'b': False}}
+
+If we try to set a field in a way the parser can't cast the variable (for
+example, having an invalid literal) we will see a casting validation error:
+
+::
+
+    $ python cli_example.py --array [1,foo,3]
+    Traceback (most recent call last):
+      File "cli_example.py", line 25, in <module>
+        mod = ArgSchemaParser(schema_type=MySchema)
+      ...
+    marshmallow.exceptions.ValidationError: {
+      "array": [
+        "Command-line argument can't cast to NumpyArray"
+      ]
+    }
+
+argschema does not support setting :class:`~marshmallow.fields.Dict` at the
+command line.
 
 Sphinx Documentation
 --------------------
@@ -145,7 +271,7 @@ argschema comes with a autodocumentation feature for Sphnix which will help you 
 add documentation of your Schemas and ArgSchemaParser classes in your project. This is how the 
 documentation of the :doc:`../tests/modules` suite included here was generated.
 
-To configure sphnix to use this function, you must be using the sphnix autodoc module and add the following to your conf.py file
+To configure sphinx to use this function, you must be using the sphnix autodoc module and add the following to your conf.py file
 
 .. code-block:: python
 

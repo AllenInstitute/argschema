@@ -86,7 +86,8 @@ class BaseballSituation(ArgSchema):
     bases_occupied = fields.List(fields.Int,description="which bases are occupied",validate = mm.validate.ContainsOnly([1,2,3]))
     batter = fields.Nested(Player,required=True,description="who is batting")
     pitcher = fields.Nested(Player,required=True,description="who is pitching")
-    
+
+
 def test_schema_argparser_with_baseball():
     example_situation = {
         'batter':{
@@ -115,7 +116,3 @@ def test_schema_argparser_with_baseball():
     assert('--bases_occupied[BASES_OCCUPIED[BASES_OCCUPIED...]]whichbasesareoccupied(constrainedlist)(validoptionsare[1,2,3])' in help)
     assert('--ballsBALLSnumberofballs(0-4)(default=0)(validoptionsare[0,1,2,3])' in help)
     assert("--pitcher.numberPITCHER.NUMBERplayer'snumber(mustbe>0)(REQUIRED)" in help)
-
-
-
-
