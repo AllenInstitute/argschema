@@ -102,8 +102,8 @@ class ArgSchemaParser(object):
     """
     default_schema = schemas.ArgSchema
     default_output_schema = None
-    default_configurable_sources = [ JsonSource ]
-    default_configurable_sinks = [ JsonSink ]
+    default_configurable_sources = [JsonSource]
+    default_configurable_sinks = [JsonSink]
 
     def __init__(self,
                  input_data=None,  # dictionary input as option instead of --input_json
@@ -155,8 +155,8 @@ class ArgSchemaParser(object):
         self.logger.debug('args after merge {}'.format(args))
 
         # if the output sink was not passed in, see if there is a configuration in the combined args
-        if output_sink is None: 
-            output_sink = self.__get_output_sink_from_config(args)     
+        if output_sink is None:
+            output_sink = self.__get_output_sink_from_config(args)
         # save the output sink for later
         self.output_sink = output_sink
 
@@ -168,14 +168,14 @@ class ArgSchemaParser(object):
         self.logger = self.initialize_logger(
             logger_name, self.args.get('log_level'))
 
-    def __get_output_sink_from_config(self,d):
+    def __get_output_sink_from_config(self, d):
         """private function to check for ArgSink configuration in a dictionary and return a configured ArgSink
 
         Parameters
         ----------
         d : dict
             dictionary to look for ArgSink Configuration parameters in
-        
+
         Returns
         -------
         ArgSink
@@ -189,17 +189,19 @@ class ArgSchemaParser(object):
         output_set = False
         output_sink = None
         for OutputSink in self.default_configurable_sinks:
-                try: 
-                    output_config_d = OutputSink.get_config(OutputSink.ConfigSchema,d)
-                    if output_set:
-                        raise MultipleConfiguredSourceError("more then one OutputSink configuration present in {}".format(d))
-                    output_sink = OutputSink(**output_config_d)
-                    output_set=True
-                except NotConfiguredSourceError:
-                    pass
+            try:
+                output_config_d = OutputSink.get_config(
+                    OutputSink.ConfigSchema, d)
+                if output_set:
+                    raise MultipleConfiguredSourceError(
+                        "more then one OutputSink configuration present in {}".format(d))
+                output_sink = OutputSink(**output_config_d)
+                output_set = True
+            except NotConfiguredSourceError:
+                pass
         return output_sink
-    
-    def __get_input_data_from_config(self,d):
+
+    def __get_input_data_from_config(self, d):
         """private function to check for ArgSource configurations in a dictionary
         and return the data if it exists
 
@@ -212,7 +214,7 @@ class ArgSchemaParser(object):
         -------
         dict or None
             dictionary of InputData if it found a valid configuration, None otherwise
-        
+
         Raises
         ------
         MultipleConfiguredSourceError
@@ -224,7 +226,8 @@ class ArgSchemaParser(object):
             try: 
                 input_data = get_input(InputSource, d)
                 if input_set:
-                    raise MultipleConfiguredSourceError("more then one InputSource configuration present in {}".format(d))
+                    raise MultipleConfiguredSourceError(
+                        "more then one InputSource configuration present in {}".format(d))
                 input_set = True
             except NotConfiguredSourceError as e:
                 pass
