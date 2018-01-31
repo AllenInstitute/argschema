@@ -7,7 +7,9 @@ from . import schemas
 from . import utils
 from . import fields
 import marshmallow as mm
-from .sources.json_source import JsonSource
+from .sources.json_source import JsonSource, JsonSink
+from .sources.yaml_source import YamlSource, YamlSink
+from .sources.source import NotConfiguredSourceError
 
 def contains_non_default_schemas(schema, schema_list=[]):
     """returns True if this schema contains a schema which was not an instance of DefaultSchema
@@ -100,7 +102,7 @@ class ArgSchemaParser(object):
     default_schema = schemas.ArgSchema
     default_output_schema = None
     input_config_map = [ JsonSource ]
-    output_config_map = [ JsonSource ]
+    output_config_map = [ JsonSink ]
 
     def __init__(self,
                  input_data=None,  # dictionary input as option instead of --input_json
@@ -108,7 +110,7 @@ class ArgSchemaParser(object):
                  output_schema_type=None,  # schema for parsing output_json
                  args=None,
                  input_source = None,
-                 output_source = None,
+                 output_sink = None,
                  logger_name=__name__):
 
         if schema_type is None:
@@ -121,7 +123,17 @@ class ArgSchemaParser(object):
         self.logger.debug('input_data is {}'.format(input_data))
 
         # convert schema to argparse object
-        p = utils.schema_argparser(self.schema)
+
+        #consolidate a list of the input and output source
+        #command line configuration schemas
+        io_schemas = []
+        for in_cfg in self.input_config_map:
+            io_schemas.append(in_cfg.ConfigSchema())
+        for out_cfg in self.output_config_map:
+            io_schemas.append(out_cfg.ConfigSchema())
+
+        #build a command line parser from the input schemas and configurations
+        p = utils.schema_argparser(self.schema,io_schemas)
         argsobj = p.parse_args(args)
         argsdict = utils.args_to_dict(argsobj, self.schema)
         self.logger.debug('argsdict is {}'.format(argsdict))
@@ -129,23 +141,37 @@ class ArgSchemaParser(object):
         #if you received an input_source, get the dictionary from there
         if input_source is not None:
             input_data = input_source.get_dict()
+        else: #see if the input_data itself contains an InputSource configuration use that
+            for InputSource in self.input_config_map:
+                try: 
+                    input_data = get_input(InputSource,input_data)
+                except NotConfiguredSourceError as e:
+                    pass
 
-        #loop over the set of input_configurations to see if the command line arguments include a valid configuration
-        #for one of them
+        #loop over the set of input_configurations to see if the command line arguments
+        # include a valid configuration for an input_source
         for InputSource in self.input_config_map:
             try:
-                input_config_d = InputSource.get_config(InputSource.InputConfigSchema,argsdict)
-                input_source = InputSource(**input_config_d)
-                input_data = input_source.get_dict()
+                input_data = get_input(InputSource,argsdict)
             #if the command line argument dictionary doesn't contain a valid configuration
             #simply move on to the next one
-            except mm.ValidationError as e:
+            except NotConfiguredSourceError as e:
                 pass
-  
+
         # merge the command line dictionary into the input json
         args = utils.smart_merge(input_data, argsdict)
         self.logger.debug('args after merge {}'.format(args))
 
+        # if the output source was not passed in, see if there is a configuration in the combined args
+        if output_sink is None: 
+            for OutputSink in self.output_config_map:
+                try: 
+                    output_config_d = OutputSink.get_config(OutputSink.ConfigSchema,args)
+                    output_sink = OutputSink(**output_config_d)
+                except NotConfiguredSourceError:
+                    pass
+        # save the output source for later
+        self.output_sink = output_sink
         # validate with load!
         result = self.load_schema_with_defaults(self.schema, args)
 
@@ -182,30 +208,36 @@ class ArgSchemaParser(object):
 
         return output_json
 
-    def output(self, d, output_path=None, **json_dump_options):
+    def output(self,d,output_path=None,sink=None,**sink_options):
         """method for outputing dictionary to the output_json file path after
         validating it through the output_schema_type
 
         Parameters
         ----------
         d:dict
-            output dictionary to output
+            output dictionary to output 
+        sink: argschema.sources.source.ArgSink
+            output_sink to output to (optional default to self.output_source)
         output_path: str
             path to save to output file, optional (with default to self.mod['output_json'] location)
-        **json_dump_options :
-            will be passed through to json.dump
-
+        **sink_options :
+            will be passed through to sink.put_dict
+         
+            (DEPRECATED path to save to output file, optional (with default to self.mod['output_json'] location)
         Raises
         ------
         marshmallow.ValidationError
             If any of the output dictionary doesn't meet the output schema
         """
-        if output_path is None:
-            output_path = self.args['output_json']
-
-        output_json = self.get_output_json(d)
-        with open(output_path, 'w') as fp:
-            json.dump(output_json, fp, **json_dump_options)
+        
+        output_d = self.get_output_json(d)
+        if output_path is not None:
+            self.logger.warning('DEPRECATED, pass sink instead')
+            sink = JsonSink(output_json=output_path)
+        if sink is not None:
+            sink.put_dict(output_d)
+        else:
+            self.output_sink.put_dict(output_d,**sink_options)
 
     def load_schema_with_defaults(self, schema, args):
         """method for deserializing the arguments dictionary (args)
@@ -260,3 +292,7 @@ class ArgSchemaParser(object):
         logger = logging.getLogger(name)
         logger.setLevel(level=level)
         return logger
+
+class ArgSchemaYamlParser(ArgSchemaParser):
+    input_config_map = [YamlSource]
+    output_config_map = [YamlSink]

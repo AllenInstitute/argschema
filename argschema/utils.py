@@ -345,35 +345,42 @@ def build_schema_arguments(schema, arguments=None, path=None, description=None):
     return arguments
 
 
-def schema_argparser(schema):
+def schema_argparser(schema, additional_schemas=None):
     """given a jsonschema, build an argparse.ArgumentParser
 
     Parameters
     ----------
     schema : argschema.schemas.ArgSchema
         schema to build an argparser from
-
+    additional_schemas : list[marshmallow.schema]
+        list of additional schemas to add to the command line arguments
     Returns
     -------
     argparse.ArgumentParser
-        the represents the schema
+        that represents the schemas
 
     """
 
-    # build up a list of argument groups using recursive function
-    # to traverse the tree, root node gets the description given by doc string
-    # of the schema
-    arguments = build_schema_arguments(schema, description=schema.__doc__)
-    # make the root schema appeear first rather than last
-    arguments = [arguments[-1]] + arguments[0:-1]
+    if additional_schemas is not None:
+        schema_list = [schema] + additional_schemas
+    else:
+        schema_list = [schema]
 
     parser = argparse.ArgumentParser()
+    for s in schema_list:
+        # build up a list of argument groups using recursive function
+        # to traverse the tree, root node gets the description given by doc string
+        # of the schema
+        arguments = build_schema_arguments(s, description=schema.__doc__)
 
-    for arg_group in arguments:
-        group = parser.add_argument_group(
-            arg_group['title'], arg_group['description'])
-        for arg_name, arg in arg_group['args'].items():
-            group.add_argument(arg_name, **arg)
+        # make the root schema appeear first rather than last
+        arguments = [arguments[-1]] + arguments[0:-1]
+
+        for arg_group in arguments:
+            group = parser.add_argument_group(
+                arg_group['title'], arg_group['description'])
+            for arg_name, arg in arg_group['args'].items():
+                group.add_argument(arg_name, **arg)
     return parser
 
 
