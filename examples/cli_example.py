@@ -13,10 +13,8 @@ class MySchema(ArgSchema):
                        description="my example array")
     string_list = List(List(Str),
                        default=[["hello", "world"], ["lists!"]],
-                       cli_as_single_argument=True,
                        description="list of lists of strings")
     int_list = List(Int, default=[1, 2, 3],
-                    cli_as_single_argument=True,
                     description="list of ints")
     nested = Nested(MyNestedSchema, required=True)
 
