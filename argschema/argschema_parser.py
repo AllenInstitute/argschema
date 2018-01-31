@@ -318,10 +318,10 @@ class ArgSchemaParser(object):
             output_sink to output to (optional default to self.output_source)
         output_path: str
             path to save to output file, optional (with default to self.mod['output_json'] location)
+            (DEPRECATED path to save to output file, optional (with default to self.mod['output_json'] location)
         **sink_options :
             will be passed through to sink.put_dict
          
-            (DEPRECATED path to save to output file, optional (with default to self.mod['output_json'] location)
         Raises
         ------
         marshmallow.ValidationError
