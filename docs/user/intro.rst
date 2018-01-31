@@ -320,10 +320,11 @@ or an existing :class:`argschema.ArgSchemaParser` module could be simply passed 
 Sphinx Documentation
 --------------------
 argschema comes with a autodocumentation feature for Sphnix which will help you automatically
-add documentation of your Schemas and :class:`argschema.ArgSchemaParser` classes in your project. This is how the 
-documentation of the :doc:`../tests/modules` suite included here was generated.
+add documentation of your Schemas and :class:`argschema.ArgSchemaParser` classes in your project. 
+This is how the documentation of the :doc:`../tests/modules` suite included here was generated.
 
-To configure sphinx to use this function, you must be using the sphnix autodoc module and add the following to your conf.py file
+To configure sphnix to use this function, you must be using the sphnix autodoc module 
+and add the following to your conf.py file
 
 .. code-block:: python
 
