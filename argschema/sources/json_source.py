@@ -10,18 +10,20 @@ class JsonInputConfigSchema(mm.Schema):
 class JsonOutputConfigSchema(mm.Schema):
     output_json = argschema.fields.OutputFile(required=True,
         description = 'filepath to save output_json')
-
+    output_json_indent = argschema.fields.Int(required=False,
+        default = mm.missing,
+        description = 'whether to indent options or not')
 class JsonSource(ArgSource):
     ConfigSchema = JsonInputConfigSchema
     
     def get_dict(self):
         with open(self.input_json,'r') as fp:
-            return json.load(fp)
+            return json.load(fp,)
 
 class JsonSink(ArgSink):
     ConfigSchema = JsonOutputConfigSchema
 
-    def put_dict(self,d,**json_options):
+    def put_dict(self,d):
         with open(self.output_json,'w') as fp:
-            json.dump(d,fp,**json_options)
+            json.dump(d,fp,indent=self.output_json_indent)
 
