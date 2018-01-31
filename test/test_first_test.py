@@ -15,15 +15,8 @@ def test_bad_path():
         jm = ArgSchemaParser(input_data=example, args=[])
 
 
-def test_simple_example(tmpdir):
-    file_in = tmpdir.join('test_input_json.json')
-    file_in.write('{}')
-
-    file_out = tmpdir.join('test_output.json')
-
+def test_simple_example():
     example = {
-        "input_json": str(file_in),
-        "output_json": str(file_out),
         "log_level": "CRITICAL"}
     jm = ArgSchemaParser(input_data=example, args=[])
 
