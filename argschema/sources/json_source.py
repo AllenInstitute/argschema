@@ -1,4 +1,4 @@
-from .source import FileSource
+from .source import FileSource, FileSink
 import json
 import marshmallow as mm
 import argschema
@@ -12,16 +12,18 @@ class JsonOutputConfigSchema(mm.Schema):
         description = 'filepath to save output_json')
 
 class JsonSource(FileSource):
-    InputConfigSchema = JsonInputConfigSchema
-    OutputConfigSchema = JsonOutputConfigSchema
-    def __init__(self,input_json=None, output_json=None):
-        if input_json is not None:
-            self.filepath = input_json
-        if output_json is not None:
-            self.filepath = output_json
+    ConfigSchema = JsonInputConfigSchema
 
+    def __init__(self,input_json=None):
+        self.filepath = input_json
     def read_file(self,fp):
         return json.load(fp)
+
+class JsonSink(FileSink):
+    ConfigSchema = JsonOutputConfigSchema
+
+    def __init__(self,output_json=None):
+        self.filepath = output_json
     
     def write_file(self,fp,d):
         json.dump(d,fp)
