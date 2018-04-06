@@ -1,2 +1,2 @@
 numpy
-marshmallow<=3.0
+marshmallow<=3.0.0

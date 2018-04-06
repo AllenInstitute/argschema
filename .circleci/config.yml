@@ -1,5 +1,4 @@
 # Python CircleCI 2.0 configuration file
-#
 # Check https://circleci.com/docs/2.0/language-python/ for more details
 #
 version: 2
@@ -31,6 +30,9 @@ jobs:
     docker:
       - image: circleci/python:3.6.1
     steps:
+      - add_ssh_keys:
+          fingerprints:
+            - "98:e6:90:a7:1e:c6:8f:77:a0:52:04:29:6f:27:6e:1a"
       - checkout
       - restore_cache:
           keys:
@@ -51,6 +53,8 @@ jobs:
 
   package:
     working_directory: ~/repo
+
+
     docker:
       - image: circleci/python:3.6.1
     steps:
@@ -153,5 +157,3 @@ jobs:
       - store_artifacts:
           path: test-reports
           destination: test-reports
-
-
