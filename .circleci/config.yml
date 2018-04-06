@@ -50,9 +50,14 @@ jobs:
 
   package:
     working_directory: ~/repo
+
+
     docker:
       - image: circleci/python:3.6.1
     steps:
+      - add_ssh_keys:
+        fingerprints:
+          - "90:3e:16:bb:36:dd:03:49:6b:d2:e8:9f:61:3e:5a:4e"
       - checkout
       - restore_cache:
           keys:
@@ -152,5 +157,3 @@ jobs:
       - store_artifacts:
           path: test-reports
           destination: test-reports
-
-
