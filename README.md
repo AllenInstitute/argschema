@@ -1,4 +1,4 @@
-[![CircleCI](https://circleci.com/gh/AllenInstitute/argschema.svg?style=svg)](https://circleci.com/gh/AllenInstitute/argschema)
+[![CircleCI](https://circleci.com/gh/AllenInstitute/argschema/tree/master.svg?style=svg)](https://circleci.com/gh/AllenInstitute/argschema/tree/master)
 [![codecov.io](https://codecov.io/github/AllenInstitute/argschema/coverage.svg?branch=master)](https://codecov.io/github/AllenInstitute/argschema?branch=master)
 [![Documentation Status](https://readthedocs.org/projects/argschema/badge/)](http://argschema.readthedocs.io/en/master/)
 [![Gitter chat](https://badges.gitter.im/gitterHQ/gitter.png)](https://gitter.im/argschema/Lobby)
