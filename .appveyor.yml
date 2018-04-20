@@ -1,0 +1,18 @@
+build: false
+
+environment:
+  matrix:
+    - MINICONDA: "C:\\Miniconda-x64"
+      PYTHON: 2.7
+    - MINICONDA: "C:\\Miniconda36-x64"
+      PYTHON: 3.6
+
+install:
+  - set PATH=%MINICONDA%;%MINICONDA%\\Scripts;%PATH%
+  - conda config --set always_yes yes --set changeps1 no
+  - conda update -q conda
+  - pip install -r test_requirements.txt
+  - pip install .
+
+test_script:
+  - python setup.py test
