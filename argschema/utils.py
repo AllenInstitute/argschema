@@ -108,9 +108,9 @@ def args_to_dict(argsobj, schema=None):
 
     """
     d = {}
-    if type(argsobj) == argparse.Namespace:
+    if isinstance(argsobj,argparse.Namespace):
         argsdict = vars(argsobj)
-    elif(type(argsobj)==dict):
+    elif isinstance(argsobj,dict):
         argsdict=argsobj
     else:
         raise(TypeError("argsobj should be dictionary or Namespace object"))
