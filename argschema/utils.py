@@ -108,7 +108,13 @@ def args_to_dict(argsobj, schema=None):
 
     """
     d = {}
-    argsdict = vars(argsobj)
+    if type(argsobj) == argparse.Namespace:
+        argsdict = vars(argsobj)
+    elif(type(argsobj)==dict):
+        argsdict=argsobj
+    else:
+        raise(TypeError("argsobj should be dictionary or Namespace object"))
+        
     errors = {}
     field_def = None
     for field in argsdict.keys():
