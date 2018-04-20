@@ -95,7 +95,7 @@ def args_to_dict(argsobj, schema=None):
 
     Parameters
     ----------
-    argsobj : argparse.Namespace
+    argsobj : argparse.Namespace or dict
         Namespace object returned by standard argparse.parse function
     schema : marshmallow.Schema
         Optional schema which will be used to cast fields via `FIELD_TYPE_MAP`
@@ -114,7 +114,7 @@ def args_to_dict(argsobj, schema=None):
         argsdict=argsobj
     else:
         raise(TypeError("argsobj should be dictionary or Namespace object"))
-        
+
     errors = {}
     field_def = None
     for field in argsdict.keys():
