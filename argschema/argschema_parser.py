@@ -75,7 +75,7 @@ def fill_defaults(schema, args):
     schema : marshmallow.Schema
         schema to get defaults from
     args :
-        
+
 
     Returns
     -------
@@ -141,17 +141,17 @@ class ArgSchemaParser(object):
     def __init__(self,
                  input_data=None,  # dictionary input as option instead of --input_json
                  schema_type=None,  # schema for parsing arguments
-                 output_schema_type = None, # schema for parsing output_json
+                 output_schema_type=None,  # schema for parsing output_json
                  args=None,
                  logger_name=__name__):
-        
+
         if schema_type is None:
             schema_type = self.default_schema
         if output_schema_type is None:
             output_schema_type = self.default_output_schema
 
         self.schema = schema_type()
-        self.logger = self.initialize_logger(logger_name,'WARNING')
+        self.logger = self.initialize_logger(logger_name, 'WARNING')
         self.logger.debug('input_data is {}'.format(input_data))
 
         # convert schema to argparse object
@@ -179,19 +179,19 @@ class ArgSchemaParser(object):
         self.logger = self.initialize_logger(
             logger_name, self.args.get('log_level'))
 
-    def get_output_json(self,d):
+    def get_output_json(self, d):
         """method for getting the output_json pushed through validation
         if validation exists
         Parameters
         ----------
         d:dict
-            output dictionary to output 
+            output dictionary to output
 
         Returns
         -------
         dict
             validated and serialized version of the dictionary
-        
+
         Raises
         ------
         marshmallow.ValidationError
@@ -199,27 +199,27 @@ class ArgSchemaParser(object):
         """
         if self.output_schema_type is not None:
             schema = self.output_schema_type()
-            output_json = utils.dump(schema,d)
+            output_json = utils.dump(schema, d)
         else:
             self.logger.warning("output_schema_type is not defined,\
                                  the output won't be validated")
             output_json = d
-        
+
         return output_json
 
-    def output(self,d,output_path=None,**json_dump_options):
+    def output(self, d, output_path=None, **json_dump_options):
         """method for outputing dictionary to the output_json file path after
         validating it through the output_schema_type
 
         Parameters
         ----------
         d:dict
-            output dictionary to output 
+            output dictionary to output
         output_path: str
             path to save to output file, optional (with default to self.mod['output_json'] location)
         **json_dump_options :
             will be passed through to json.dump
-         
+
         Raises
         ------
         marshmallow.ValidationError
@@ -227,12 +227,12 @@ class ArgSchemaParser(object):
         """
         if output_path is None:
             output_path = self.args['output_json']
-        
-        output_json = self.get_output_json(d)
-        with open(output_path,'w') as fp:
-            json.dump(output_json,fp,**json_dump_options)
 
-    def load_schema_with_defaults(self  ,schema, args):
+        output_json = self.get_output_json(d)
+        with open(output_path, 'w') as fp:
+            json.dump(output_json, fp, **json_dump_options)
+
+    def load_schema_with_defaults(self, schema, args):
         """method for deserializing the arguments dictionary (args)
         given the schema (schema) making sure that the default values have
         been filled in.
@@ -242,13 +242,13 @@ class ArgSchemaParser(object):
         args : dict
             a dictionary of input arguments
         schema :
-            
+
 
         Returns
         -------
         dict
             a deserialized dictionary of the parameters converted through marshmallow
-        
+
         Raises
         ------
         marshmallow.ValidationError
@@ -260,10 +260,10 @@ class ArgSchemaParser(object):
         is_non_default = contains_non_default_schemas(schema)
         if (not is_recursive) and is_non_default:
             # throw a warning
-            self.logger.warning("""DEPRECATED:You are using a Schema which contains 
-            a Schema which is not subclassed from argschema.DefaultSchema, 
-            default values will not work correctly in this case, 
-            this use is deprecated, and future versions will not fill in default 
+            self.logger.warning("""DEPRECATED:You are using a Schema which contains
+            a Schema which is not subclassed from argschema.DefaultSchema,
+            default values will not work correctly in this case,
+            this use is deprecated, and future versions will not fill in default
             values when you use non-DefaultSchema subclasses""")
             args = fill_defaults(schema, args)
         if is_recursive and is_non_default:
@@ -285,7 +285,7 @@ class ArgSchemaParser(object):
         name : str
             name of the logger
         log_level :
-            
+
 
         Returns
         -------

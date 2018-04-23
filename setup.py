@@ -3,7 +3,7 @@ from setuptools import setup, find_packages
 with open('requirements.txt', 'r') as f:
     required = f.read().splitlines()
 
-with open('test_requirements.txt','r') as f:
+with open('test_requirements.txt', 'r') as f:
     test_required = f.read().splitlines()
 
 setup(name='argschema',
@@ -17,4 +17,3 @@ setup(name='argschema',
       install_requires=required,
       setup_requires=['pytest-runner'],
       tests_require=test_required)
-
