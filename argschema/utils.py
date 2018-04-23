@@ -2,7 +2,6 @@
 marshmallow schemas to argparse and merging dictionaries from both systems
 '''
 import logging
-import warnings
 import ast
 import argparse
 from operator import add
@@ -55,11 +54,7 @@ def get_type_from_field(field):
     callable
         Function to call to cast argument to
     """
-    if (isinstance(field, fields.List) and
-            not field.metadata.get("cli_as_single_argument", False)):
-        return list
-    else:
-        return FIELD_TYPE_MAP.get(type(field), str)
+    return FIELD_TYPE_MAP.get(type(field), str)
 
 
 def cli_error_dict(arg_path, field_type, index=0):
@@ -334,17 +329,6 @@ def build_schema_arguments(schema, arguments=None, path=None, description=None):
                     arg['help'] += " (constrained list)"
                 if isinstance(validator, mm.validate.OneOf):
                     arg['help'] += " (valid options are {})".format(validator.choices)
-
-            if (isinstance(field, mm.fields.List) and
-                    not field.metadata.get("cli_as_single_argument", False)):
-                warn_msg = ("'{}' is using old-style command-line syntax with "
-                            "each element as a separate argument. This will "
-                            "not be supported in argschema after "
-                            "2.0. See http://argschema.readthedocs.io/en/"
-                            "master/user/intro.html#command-line-specification"
-                            " for details.").format(arg_name)
-                warnings.warn(warn_msg, FutureWarning)
-                arg['nargs'] = '*'
 
             # do type mapping after parsing so we can raise validation errors
             arg['type'] = str

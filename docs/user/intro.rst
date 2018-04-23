@@ -153,56 +153,6 @@ passed by the shell. If there are spaces in the value, it will need to be
 wrapped in quotes, and any special characters will need to be escaped
 with \. Booleans are set with True or 1 for true and False or 0 for false.
 
-An exception to this rule is list formatting. If a schema contains a
-:class:`~marshmallow.fields.List` and does not set the
-`cli_as_single_argument` keyword argument to True, lists will be parsed
-as `--list_name <value1> <value2> ...`. In argschema 2.0 lists will be
-parsed in the same way as other arguments, as it allows more flexibility
-in list types and more clearly represents the intended data structure.
-
-An example script showing old and new list settings:
-
-.. literalinclude:: ../../examples/deprecated_example.py
-    :caption: deprecated_example.py
-
-Running this code can demonstrate the differences in command-line usage:
-
-.. code-block:: bash
-
-    $ python deprecated_example.py --help
-    FutureWarning: '--list_old' is using old-style command-line syntax
-    with each element as a separate argument. This will not be supported
-    in argschema after 2.0. See http://argschema.readthedocs.io/en/master/user/intro.html#command-line-specification
-    for details.
-    warnings.warn(warn_msg, FutureWarning)
-    usage: deprecated_example.py [-h] [--input_json INPUT_JSON]
-                                 [--output_json OUTPUT_JSON]
-                                 [--log_level LOG_LEVEL]
-                                 [--list_old [LIST_OLD [LIST_OLD ...]]]
-                                 [--list_new LIST_NEW]
-
-    optional arguments:
-      -h, --help            show this help message and exit
-
-    MySchema:
-      --input_json INPUT_JSON
-                            file path of input json file
-      --output_json OUTPUT_JSON
-                            file path to output json file
-      --log_level LOG_LEVEL
-                            set the logging level of the module (default=ERROR)
-      --list_old [LIST_OLD [LIST_OLD ...]]
-                            float list with deprecated cli (default=[1.1, 2.2,
-                            3.3])
-      --list_new LIST_NEW   float list with supported cli (default=[4.4, 5.5,
-                            6.6])
-    $ python deprecated_example.py --list_old 9.1 8.2 7.3 --list_new [6.4,5.5,4.6]
-    FutureWarning: '--list_old' is using old-style command-line syntax
-    with each element as a separate argument. This will not be supported
-    in argschema after 2.0. See http://argschema.readthedocs.io/en/master/user/intro.html#command-line-specification
-    for details.
-    warnings.warn(warn_msg, FutureWarning)
-    {'log_level': 'ERROR', 'list_new': [6.4, 5.5, 4.6], 'list_old': [9.1, 8.2, 7.3]}
 
 We can explore some typical examples of command line usage with the following script:
 
