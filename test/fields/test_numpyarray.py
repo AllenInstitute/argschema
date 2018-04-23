@@ -1,7 +1,7 @@
 import pytest
 from argschema import ArgSchemaParser, ArgSchema
 from argschema.fields import NumpyArray
-from argschema.utils import load,dump
+from argschema.utils import dump
 import marshmallow as mm
 import numpy as np
 
