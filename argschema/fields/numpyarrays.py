@@ -20,8 +20,6 @@ class NumpyArray(mm.fields.List):
 
     def __init__(self, dtype=None, *args, **kwargs):
         self.dtype = dtype
-        if "cli_as_single_argument" not in kwargs:
-            kwargs["cli_as_single_argument"] = True
         super(NumpyArray, self).__init__(mm.fields.Field, *args, **kwargs)
 
     def _deserialize(self, value, attr, obj):

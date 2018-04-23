@@ -48,7 +48,6 @@ def test_data(inputdir, inputfile, outputdir, outputfile):
         "inputfile": str(inputfile),
         "integer": 10,
         "list": [300, 200, 800, 1000],
-        "list_deprecated": [300, 200, 800, 1000],
         "localdatetime": "0001-01-01T00:00:00",
         "log_level": "ERROR",
         "nested": {"a": 1, "b": False},
@@ -63,14 +62,6 @@ def test_data(inputdir, inputfile, outputdir, outputfile):
         "timedelta": "945890400",
         "url": "http://www.example.com",
         "uuid": "f4a1c5ee-c214-4a2b-9e62-e4ba6beb771b"
-    }
-    return data
-
-
-@pytest.fixture
-def deprecated_data():
-    data = {
-        "list_deprecated": [300, 200, 800, 1000],
     }
     return data
 
@@ -91,7 +82,7 @@ class MySchema(ArgSchema):
     inputdir = fields.InputDir(required=True)
     inputfile = fields.InputFile(required=True)
     integer = fields.Int(required=True)
-    list = fields.List(fields.Int, required=True, cli_as_single_argument=True)
+    list = fields.List(fields.Int, required=True)
     localdatetime = fields.LocalDateTime(required=True)
     nested = fields.Nested(MyNestedSchema, required=True)
     number = fields.Number(required=True)
@@ -105,10 +96,6 @@ class MySchema(ArgSchema):
     timedelta = fields.TimeDelta(required=True)
     url = fields.URL(required=True)
     uuid = fields.UUID(required=True)
-
-
-class MyDeprecatedSchema(ArgSchema):
-    list_deprecated = fields.List(fields.Int, required=True)
 
 
 def test_unexpected_input(test_data):
@@ -223,17 +210,6 @@ def test_override_list(test_data):
     with pytest.raises(mm.ValidationError):
         mod = ArgSchemaParser(test_data, schema_type=MySchema,
                               args=["--list", "invalid"])
-
-
-def test_override_list_deprecated(deprecated_data):
-    with pytest.warns(FutureWarning):
-        mod = ArgSchemaParser(deprecated_data, schema_type=MyDeprecatedSchema,
-                              args=["--list_deprecated", "1000", "3000"])
-        assert(mod.args["list_deprecated"] == [1000, 3000])
-        with pytest.raises(mm.ValidationError):
-            mod = ArgSchemaParser(deprecated_data,
-                                  schema_type=MyDeprecatedSchema,
-                                  args=["--list_deprecated", "[1000,3000]"])
 
 
 def test_override_localdatetime(test_data):

@@ -3,7 +3,6 @@ subclassed when using this library
 '''
 import json
 import logging
-import copy
 from . import schemas
 from . import utils
 from . import fields
@@ -64,47 +63,6 @@ def is_recursive_schema(schema, schema_list=[]):
                 if is_recursive_schema(v.schema, schema_list):
                     return True
     return False
-
-
-def fill_defaults(schema, args):
-    """DEPRECATED, function to fill in default values from schema into args
-    bug: goes into an infinite loop when there is a recursively defined schema
-
-    Parameters
-    ----------
-    schema : marshmallow.Schema
-        schema to get defaults from
-    args :
-
-
-    Returns
-    -------
-    dict
-        dictionary with missing default values filled in
-
-    """
-
-    defaults = []
-
-    # find all of the schema entries with default values
-    schemata = [(schema, [])]
-    while schemata:
-        subschema, path = schemata.pop()
-        for k, v in subschema.declared_fields.items():
-            if isinstance(v, mm.fields.Nested):
-                schemata.append((v.schema, path + [k]))
-            elif v.default != mm.missing:
-                defaults.append((path + [k], v.default))
-
-    # put the default entries into the args dictionary
-    args = copy.deepcopy(args)
-    for path, val in defaults:
-        d = args
-        for path_item in path[:-1]:
-            d = d.setdefault(path_item, {})
-        if path[-1] not in d:
-            d[path[-1]] = val
-    return args
 
 
 class ArgSchemaParser(object):
@@ -256,20 +214,6 @@ class ArgSchemaParser(object):
             because these won't work with loading defaults.
 
         """
-        is_recursive = is_recursive_schema(schema)
-        is_non_default = contains_non_default_schemas(schema)
-        if (not is_recursive) and is_non_default:
-            # throw a warning
-            self.logger.warning("""DEPRECATED:You are using a Schema which contains
-            a Schema which is not subclassed from argschema.DefaultSchema,
-            default values will not work correctly in this case,
-            this use is deprecated, and future versions will not fill in default
-            values when you use non-DefaultSchema subclasses""")
-            args = fill_defaults(schema, args)
-        if is_recursive and is_non_default:
-            raise mm.ValidationError(
-                'Recursive schemas need to subclass argschema.DefaultSchema else defaults will not work')
-
         # load the dictionary via the schema
         result = utils.load(schema, args)
 
