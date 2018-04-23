@@ -1,7 +1,7 @@
 import pytest
 from argschema import ArgSchemaParser, ArgSchema
 from argschema.fields import NumpyArray
-from argschema.utils import load,dump
+from argschema.utils import dump
 import marshmallow as mm
 import numpy as np
 
@@ -29,7 +29,7 @@ def test_bad_shape():
         'a': [[1, 2], [3]]
     }
     with pytest.raises(mm.ValidationError):
-        mod = ArgSchemaParser(
+        mod = ArgSchemaParser(  # noQA: F841
             input_data=bad_shape, schema_type=NumpyFileuint16, args=[])
 
 
@@ -38,7 +38,7 @@ def test_bad_data():
         'a': [['a', 'b']]
     }
     with pytest.raises(mm.ValidationError):
-        mod = ArgSchemaParser(
+        mod = ArgSchemaParser(  # noQA: F841
             input_data=bad_shape, schema_type=NumpyFileuint16, args=[])
 
 
