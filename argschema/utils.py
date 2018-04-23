@@ -407,10 +407,6 @@ def load(schema, d):
     -------
     dict
         deserialized and validated dictionary
-    Raises
-    ------
-    marshmallow.ValidationError
-        if the dictionary does not conform to the schema
     """
 
     results = schema.load(d)
@@ -435,10 +431,6 @@ def dump(schema, d):
     -------
     dict
         serialized and validated dictionary
-    Raises
-    ------
-    marshmallow.ValidationError
-        if the dictionary does not conform to the schema
     """
 
     results = schema.dump(d)
