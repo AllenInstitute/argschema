@@ -6,6 +6,7 @@ import logging
 import copy
 from . import schemas
 from . import utils
+from . import fields
 import marshmallow as mm
 
 
@@ -160,26 +161,20 @@ class ArgSchemaParser(object):
         self.logger.debug('argsdict is {}'.format(argsdict))
 
         if argsobj.input_json is not None:
-            result = self.schema.load(argsdict)
-            if 'input_json' in result.errors:
-                raise mm.ValidationError(result.errors['input_json'])
-            with open(result.data['input_json'], 'r') as j:
+            fields.files.validate_input_path(argsobj.input_json)
+            with open(argsobj.input_json, 'r') as j:
                 jsonargs = json.load(j)
         else:
             jsonargs = input_data if input_data else {}
 
-        
         # merge the command line dictionary into the input json
         args = utils.smart_merge(jsonargs, argsdict)
         self.logger.debug('args after merge {}'.format(args))
 
         # validate with load!
         result = self.load_schema_with_defaults(self.schema, args)
-        if len(result.errors) > 0:
-            raise mm.ValidationError(json.dumps(result.errors, indent=2))
 
-        self.schema_args = result
-        self.args = result.data
+        self.args = result
         self.output_schema_type = output_schema_type
         self.logger = self.initialize_logger(
             logger_name, self.args.get('log_level'))
@@ -204,9 +199,7 @@ class ArgSchemaParser(object):
         """
         if self.output_schema_type is not None:
             schema = self.output_schema_type()
-            (output_json,errors)=schema.dump(d)
-            if len(errors)>0:
-                raise mm.ValidationError(json.dumps(errors))
+            output_json = utils.dump(schema,d)
         else:
             self.logger.warning("output_schema_type is not defined,\
                                  the output won't be validated")
@@ -278,7 +271,7 @@ class ArgSchemaParser(object):
                 'Recursive schemas need to subclass argschema.DefaultSchema else defaults will not work')
 
         # load the dictionary via the schema
-        result = schema.load(args)
+        result = utils.load(schema, args)
 
         return result
 

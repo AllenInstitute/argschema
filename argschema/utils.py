@@ -371,11 +371,11 @@ def schema_argparser(schema):
 
     """
 
-    #build up a list of argument groups using recursive function
-    #to traverse the tree, root node gets the description given by doc string
-    #of the schema
+    # build up a list of argument groups using recursive function
+    # to traverse the tree, root node gets the description given by doc string
+    # of the schema
     arguments = build_schema_arguments(schema,description=schema.__doc__)
-    #make the root schema appeear first rather than last
+    # make the root schema appeear first rather than last
     arguments = [arguments[-1]]+arguments[0:-1]
 
     parser = argparse.ArgumentParser()
@@ -385,3 +385,64 @@ def schema_argparser(schema):
         for arg_name,arg in arg_group['args'].items():
             group.add_argument(arg_name, **arg)
     return parser
+
+def load(schema, d):
+    """ function to wrap marshmallow load to smooth 
+        differences from marshmallow 2 to 3 
+        
+    Parameters
+    ----------
+    schema: marshmallow.Schema
+        schema that you want to use to validate
+    d: dict
+        dictionary to validate and load
+    
+    Returns
+    -------
+    dict
+        deserialized and validated dictionary
+    
+    Raises
+    ------
+    marshmallow.ValidationError
+        if the dictionary does not conform to the schema
+    """
+
+    results = schema.load(d)
+    if isinstance(results, tuple):
+        (results, errors) = results
+        if len(errors) > 0:
+            raise mm.ValidationError(errors)
+
+    return results
+
+
+def dump(schema, d):
+    """ function to wrap marshmallow dump to smooth 
+        differences from marshmallow 2 to 3 
+        
+    Parameters
+    ----------
+    schema: marshmallow.Schema
+        schema that you want to use to validate and dump
+    d: dict
+        dictionary to validate and dump
+    
+    Returns
+    -------
+    dict
+        serialized and validated dictionary
+    
+    Raises
+    ------
+    marshmallow.ValidationError
+        if the dictionary does not conform to the schema
+    """
+
+    results = schema.dump(d)
+    if isinstance(results, tuple):
+        (results, errors) = results
+        if len(errors) > 0:
+            raise mm.ValidationError(errors)
+
+    return results
