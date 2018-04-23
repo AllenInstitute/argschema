@@ -3,6 +3,7 @@ from argschema import ArgSchemaParser, ArgSchema
 from argschema.fields import InputFile, OutputFile, InputDir, OutputDir
 import marshmallow as mm
 import os
+import stat
 
 
 # OUTPUT FILE TESTS
@@ -22,11 +23,12 @@ enoent_outfile_example = {
 
 def test_outputfile_no_write(tmpdir):
     outdir = tmpdir.mkdir('cannot_write_here')
-    outdir.chmod(0o222)
+    outdir.chmod(0o444)
     outfile = outdir.join('test')
     with pytest.raises(mm.ValidationError):
         mod = ArgSchemaParser(input_data={'output_file': str(outfile)},
                               schema_type=BasicOutputFile)
+    outdir.chmod(0o666)
 
 
 def test_outputfile_not_a_path():
@@ -71,18 +73,21 @@ class BasicOutputDir(ArgSchema):
     output_dir = OutputDir(required=True, description="basic output dir")
 
 
-def test_output_dir_basic():
+def test_output_dir_basic(tmpdir):
+    outdir = tmpdir.mkdir('mytmp')
     output_dir_example = {
-        'output_dir': '/tmp/mytmp'
+        'output_dir': str(outdir)
     }
     mod = ArgSchemaParser(schema_type=BasicOutputDir,
                           input_data=output_dir_example,
                           args=[])
 
 
-def test_output_dir_bad_permission():
+def test_output_dir_bad_permission(tmpdir):
+    outdir = tmpdir.mkdir('no_write')
+    outdir.chmod(0o222)
     output_dir_example = {
-        'output_dir': '/'
+        'output_dir': outdir
     }
     with pytest.raises(mm.ValidationError):
         mod = ArgSchemaParser(schema_type=BasicOutputDir,
