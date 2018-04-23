@@ -4,14 +4,6 @@ fields package
 Submodules
 ----------
 
-fields\.test\_deprecated module
--------------------------------
-
-.. automodule:: fields.test_deprecated
-    :members:
-    :undoc-members:
-    :show-inheritance:
-
 fields\.test\_files module
 --------------------------
 

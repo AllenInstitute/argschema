@@ -65,14 +65,6 @@ def test_data(inputdir, inputfile, outputdir, outputfile):
     return data
 
 
-@pytest.fixture
-def deprecated_data():
-    data = {
-        "list_deprecated": [300, 200, 800, 1000],
-    }
-    return data
-
-
 class MyNestedSchema(DefaultSchema):
     a = fields.Int(required=True)
     b = fields.Boolean(required=True)
@@ -102,10 +94,6 @@ class MySchema(ArgSchema):
     timedelta = fields.TimeDelta(required=True)
     url = fields.URL(required=True)
     uuid = fields.UUID(required=True)
-
-
-class MyDeprecatedSchema(ArgSchema):
-    list_deprecated = fields.List(fields.Int, required=True)
 
 
 def test_unexpected_input(test_data):
