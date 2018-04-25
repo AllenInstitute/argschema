@@ -1,6 +1,7 @@
 import pytest
 from argschema import ArgSchemaParser, ArgSchema
 from argschema.fields import NumpyArray
+from argschema.utils import load,dump
 import marshmallow as mm
 import numpy as np
 
@@ -46,7 +47,6 @@ def test_serialize():
     object_dict = {
         'a': np.array([1, 2])
     }
-    (json_dict, errors) = schema.dump(object_dict)
-    assert(len(errors) == 0)
+    json_dict = dump(schema, object_dict)
     assert(type(json_dict['a']) == list)
     assert(json_dict['a'] == object_dict['a'].tolist())
