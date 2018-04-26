@@ -7,7 +7,7 @@ with open('test_requirements.txt', 'r') as f:
     test_required = f.read().splitlines()
 
 setup(name='argschema',
-      version='1.17.0',
+      version='1.17.1',
       description=' a wrapper for setting up modules that can have parameters specified by command line arguments,\
        json_files, or dictionary objects. Providing a common wrapper for data processing modules.',
       author='Forrest Collman,David Feng',

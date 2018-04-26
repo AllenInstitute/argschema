@@ -403,12 +403,10 @@ def load(schema, d):
         schema that you want to use to validate
     d: dict
         dictionary to validate and load
-
     Returns
     -------
     dict
         deserialized and validated dictionary
-
     Raises
     ------
     marshmallow.ValidationError
@@ -433,12 +431,10 @@ def dump(schema, d):
         schema that you want to use to validate and dump
     d: dict
         dictionary to validate and dump
-
     Returns
     -------
     dict
         serialized and validated dictionary
-
     Raises
     ------
     marshmallow.ValidationError
