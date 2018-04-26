@@ -18,5 +18,4 @@ def test_nested_example():
 
 def test_nested_marshmallow_example():
     schema = MySchema()
-    (result,errors)=schema.load({})
-    assert(len(errors)==0)
+    argschema.utils.load(schema, {})
