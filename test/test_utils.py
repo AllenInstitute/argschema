@@ -131,8 +131,11 @@ def test_schema_argparser_with_baseball():
                     schema_type=BaseballSituation, args=[])
     parser = utils.schema_argparser(schema)
     help = parser.format_help()
-    help = help.replace('\n','').replace(' ','')
-    assert('--strikesSTRIKEShowmanystrikes(0-2)(REQUIRED)(validoptionsare[0,1,2])' in help)
-    assert('--bases_occupiedBASES_OCCUPIEDwhichbasesareoccupied(constrainedlist)(validoptionsare[1,2,3])' in help)
-    assert('--ballsBALLSnumberofballs(0-4)(default=0)(validoptionsare[0,1,2,3])' in help)
+    help = help.replace('\n', '').replace(' ', '')
+    assert(
+        '--strikesSTRIKEShowmanystrikes(0-2)(REQUIRED)(validoptionsare[0,1,2])' in help)
+    assert(
+        '--bases_occupied[BASES_OCCUPIED[BASES_OCCUPIED...]]whichbasesareoccupied(constrainedlist)(validoptionsare[1,2,3])' in help)
+    assert(
+        '--ballsBALLSnumberofballs(0-4)(default=0)(validoptionsare[0,1,2,3])' in help)
     assert("--pitcher.numberPITCHER.NUMBERplayer'snumber(mustbe>0)(REQUIRED)" in help)
