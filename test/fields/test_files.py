@@ -3,7 +3,6 @@ from argschema import ArgSchemaParser, ArgSchema
 from argschema.fields import InputFile, OutputFile, InputDir, OutputDir
 import marshmallow as mm
 import os
-import stat
 
 
 # OUTPUT FILE TESTS
@@ -26,47 +25,47 @@ def test_outputfile_no_write(tmpdir):
     outdir.chmod(0o444)
     outfile = outdir.join('test')
     with pytest.raises(mm.ValidationError):
-        mod = ArgSchemaParser(input_data={'output_file': str(outfile)},
-                              schema_type=BasicOutputFile)
+        ArgSchemaParser(input_data={'output_file': str(outfile)},
+                        schema_type=BasicOutputFile)
     outdir.chmod(0o666)
 
 
 def test_outputfile_not_a_path():
     with pytest.raises(mm.ValidationError):
-        mod = ArgSchemaParser(input_data={'output_file': 10},
-                              schema_type=BasicOutputFile, args=[])
+        ArgSchemaParser(input_data={'output_file': 10},
+                        schema_type=BasicOutputFile, args=[])
 
 
 def test_enoent_outputfile_failed():
     with pytest.raises(mm.ValidationError):
-        mod = ArgSchemaParser(
+        ArgSchemaParser(
             input_data=enoent_outfile_example,
             schema_type=BasicOutputFile, args=[])
 
 
 def test_output_file_relative():
-    mod = ArgSchemaParser(
+    ArgSchemaParser(
         input_data=output_file_example, schema_type=BasicOutputFile, args=[])
 
 
 def test_output_path(tmpdir):
     file_ = tmpdir.join('testoutput.json')
     args = ['--output_json', str(file_)]
-    mod = ArgSchemaParser(args=args)
+    ArgSchemaParser(args=args)
 
 
 def test_output_path_cannot_write():
     with pytest.raises(mm.ValidationError):
         file_ = '/etc/notok/notalocation.json'
         args = ['--output_json', str(file_)]
-        mod = ArgSchemaParser(args=args)
+        ArgSchemaParser(args=args)
 
 
 def test_output_path_noapath():
     with pytest.raises(mm.ValidationError):
         file_ = '@/afa\\//'
         args = ['--output_json', str(file_)]
-        mod = ArgSchemaParser(args=args)
+        ArgSchemaParser(args=args)
 
 
 class BasicOutputDir(ArgSchema):
@@ -78,9 +77,9 @@ def test_output_dir_basic(tmpdir):
     output_dir_example = {
         'output_dir': str(outdir)
     }
-    mod = ArgSchemaParser(schema_type=BasicOutputDir,
-                          input_data=output_dir_example,
-                          args=[])
+    ArgSchemaParser(schema_type=BasicOutputDir,
+                    input_data=output_dir_example,
+                    args=[])
 
 
 def test_output_dir_bad_permission(tmpdir):
@@ -90,9 +89,9 @@ def test_output_dir_bad_permission(tmpdir):
         'output_dir': outdir
     }
     with pytest.raises(mm.ValidationError):
-        mod = ArgSchemaParser(schema_type=BasicOutputDir,
-                              input_data=output_dir_example,
-                              args=[])
+        ArgSchemaParser(schema_type=BasicOutputDir,
+                        input_data=output_dir_example,
+                        args=[])
 
 
 def test_output_dir_bad_location():
@@ -100,9 +99,9 @@ def test_output_dir_bad_location():
         'output_dir': '///\\\//\/'
     }
     with pytest.raises(mm.ValidationError):
-        mod = ArgSchemaParser(schema_type=BasicOutputDir,
-                              input_data=output_dir_example,
-                              args=[])
+        ArgSchemaParser(schema_type=BasicOutputDir,
+                        input_data=output_dir_example,
+                        args=[])
 
 
 class ModeOutputDirSchema(ArgSchema):
@@ -130,9 +129,9 @@ def test_failed_mode(tmpdir):
         'output_dir': str(outdir)
     }
     with pytest.raises(mm.ValidationError):
-        mod = ArgSchemaParser(schema_type=ModeOutputDirSchema,
-                              input_data=output_dir_example,
-                              args=[])
+        ArgSchemaParser(schema_type=ModeOutputDirSchema,
+                        input_data=output_dir_example,
+                        args=[])
 
 # INPUT FILE TESTS
 
@@ -150,14 +149,14 @@ input_file_example = {
 def test_relative_file_input():
     with open(input_file_example['input_file'], 'w') as fp:
         fp.write("test")
-    mod = ArgSchemaParser(
+    ArgSchemaParser(
         input_data=input_file_example, schema_type=BasicInputFile, args=[])
     os.remove(input_file_example['input_file'])
 
 
 def test_relative_file_input_failed():
     with pytest.raises(mm.ValidationError):
-        mod = ArgSchemaParser(
+        ArgSchemaParser(
             input_data=input_file_example, schema_type=BasicInputFile, args=[])
 
 
@@ -166,7 +165,7 @@ def test_access_inputfile_failed():
         fp.write('test')
     os.chmod(input_file_example['input_file'], 0o222)
     with pytest.raises(mm.ValidationError):
-        mod = ArgSchemaParser(
+        ArgSchemaParser(
             input_data=input_file_example, schema_type=BasicInputFile, args=[])
     os.remove(input_file_example['input_file'])
 
@@ -181,8 +180,8 @@ def test_basic_inputdir(tmpdir):
     input_data = {
         'input_dir': str(tmpdir)
     }
-    mod = ArgSchemaParser(input_data=input_data,
-                          schema_type=BasicInputDir, args=[])
+    ArgSchemaParser(input_data=input_data,
+                    schema_type=BasicInputDir, args=[])
 
 
 def test_bad_inputdir():
@@ -190,8 +189,8 @@ def test_bad_inputdir():
         'input_dir': 'not_a_dir'
     }
     with pytest.raises(mm.ValidationError):
-        mod = ArgSchemaParser(input_data=input_data,
-                              schema_type=BasicInputDir, args=[])
+        ArgSchemaParser(input_data=input_data,
+                        schema_type=BasicInputDir, args=[])
 
 
 def test_inputdir_no_access(tmpdir):
@@ -201,5 +200,5 @@ def test_inputdir_no_access(tmpdir):
         'input_dir': str(input_dir)
     }
     with pytest.raises(mm.ValidationError):
-        mod = ArgSchemaParser(input_data=input_data,
-                              schema_type=BasicInputDir, args=[])
+        ArgSchemaParser(input_data=input_data,
+                        schema_type=BasicInputDir, args=[])
