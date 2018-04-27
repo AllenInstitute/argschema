@@ -3,6 +3,7 @@ import marshmallow as mm
 import logging
 logger = logging.getLogger('argschema')
 
+
 class OptionList(mm.fields.Field):
     """OptionList is a marshmallow field which enforces that this field
        is one of a finite set of options.

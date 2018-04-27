@@ -14,7 +14,7 @@ class DefaultSchema(mm.Schema):
         Parameters
         ----------
         in_data :
-            
+
 
         Returns
         -------
@@ -35,10 +35,10 @@ class ArgSchema(DefaultSchema):
     """
 
     input_json = InputFile(
-        description= "file path of input json file")
-    
+        description="file path of input json file")
+
     output_json = OutputFile(
-        description= "file path to output json file")
+        description="file path to output json file")
     log_level = LogLevel(
         default='ERROR',
         description="set the logging level of the module")

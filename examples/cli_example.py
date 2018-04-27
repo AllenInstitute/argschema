@@ -4,12 +4,12 @@ from argschema.schemas import DefaultSchema
 
 
 class MyNestedSchema(DefaultSchema):
-    a = Int(default=42, description= "my first parameter")
+    a = Int(default=42, description="my first parameter")
     b = Bool(default=True, description="my boolean")
 
 
 class MySchema(ArgSchema):
-    array = NumpyArray(default=[[1, 2, 3],[4, 5, 6]], dtype="uint8",
+    array = NumpyArray(default=[[1, 2, 3], [4, 5, 6]], dtype="uint8",
                        description="my example array")
     string_list = List(List(Str),
                        default=[["hello", "world"], ["lists!"]],
