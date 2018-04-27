@@ -139,6 +139,7 @@ def test_bad_input_json_argparse():
 # TESTS DEMONSTRATING BAD BEHAVIOR OF DEFAULT LOADING
 
 
+
 class RecursiveSchema(argschema.schemas.DefaultSchema):
     children = mm.fields.Nested("self", many=True,
                                 description='children of this node')
