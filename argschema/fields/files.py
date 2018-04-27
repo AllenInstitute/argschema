@@ -117,11 +117,6 @@ class OutputDir(mm.fields.Str):
         # use outputfile to test that a file in this location is a valid path
         validate_outpath(value)
 
-def validate_input_path(value):
-    if not os.path.isfile(value):
-        raise mm.ValidationError("%s is not a file" % value)
-    elif not os.access(value, os.R_OK):
-        raise mm.ValidationError("%s is not readable" % value)
 
 def validate_input_path(value):
     if not os.path.isfile(value):

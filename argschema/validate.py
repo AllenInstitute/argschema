@@ -1,5 +1,4 @@
 '''module for custom marshmallow validators'''
-import numpy as np
 from marshmallow.validate import Validator
 import marshmallow as mm
 
@@ -8,7 +7,7 @@ __all__ = ['Shape']
 
 class Shape(Validator):
     """Validator which succeeds if value.shape matches `shape`
-    
+
     Parameters
     ----------
     shape : tuple
@@ -42,9 +41,9 @@ class Shape(Validator):
         if len(shape) != len(self.shape):
             raise mm.ValidationError("Dimension mismatch: input shape {} does "
                                      "not match {}.".format(shape, self.shape))
-        valid = all([a==b for a,b in zip(shape, self.shape) if b is not None])
+        valid = all([a == b for a, b in zip(
+            shape, self.shape) if b is not None])
         if not valid:
             raise mm.ValidationError("Array shape {} does not match required "
                                      "shape {}.".format(shape, self.shape))
         return valid
-
