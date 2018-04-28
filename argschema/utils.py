@@ -82,7 +82,8 @@ def cli_error_dict(arg_path, field_type, index=0):
     else:
         return {arg_path[index]: cli_error_dict(arg_path, field_type, index + 1)}
 
-def get_field_def_from_schema(parts,schema):
+
+def get_field_def_from_schema(parts, schema):
     """function to get a field_definition from a particular key, specified by it's parts list
 
     Parameters
@@ -91,7 +92,7 @@ def get_field_def_from_schema(parts,schema):
         the list of keys to get this schema
     schema: marshmallow.Schema
         the marshmallow schema to look up this key
-    
+
     Returns
     -------
     marshmallow.Field or None
@@ -109,6 +110,8 @@ def get_field_def_from_schema(parts,schema):
             if isinstance(field_def, fields.Nested):
                 current_schema = field_def.schema
     return field_def
+
+
 def args_to_dict(argsobj, schemas=None):
     """function to convert namespace returned by argsparse into a nested dictionary
 
@@ -138,11 +141,11 @@ def args_to_dict(argsobj, schemas=None):
             if i == (len(parts) - 1):
                 field_def = None
                 for schema in schemas:
-                    field_def = get_field_def_from_schema(parts,schema)
+                    field_def = get_field_def_from_schema(parts, schema)
                     if field_def is not None:
                         break
-                
-                #field_def = next(get_field_def(parts,schema) for schema in schemas if field_in_schema(parts,schema))
+
+                # field_def = next(get_field_def(parts,schema) for schema in schemas if field_in_schema(parts,schema))
 
                 value = argsdict.get(field)
                 if value is not None:

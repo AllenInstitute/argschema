@@ -1,5 +1,5 @@
 import marshmallow as mm
-from .fields import LogLevel, InputFile, OutputFile
+from .fields import LogLevel
 
 
 class DefaultSchema(mm.Schema):
