@@ -13,15 +13,13 @@ class MyNestedParameters(DefaultSchema):
                        description='array to increment')
     write_output = Boolean(required=False, default=True)
 
+
 # but i'm going to nest them inside a subsection called inc
-
-
 class MyParameters(ArgSchema):
     inc = Nested(MyNestedParameters)
 
+
 # this is another schema we will use to validate and deserialize our output
-
-
 class MyOutputParams(DefaultSchema):
     name = Str(required=True, description='name of vector')
     inc_array = NumpyArray(dtype=np.float, required=True,

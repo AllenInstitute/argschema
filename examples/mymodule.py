@@ -9,4 +9,3 @@ if __name__ == '__main__':
     mod = argschema.ArgSchemaParser(schema_type=MySchema)
     mod.logger.warn("this module does nothing useful")
     print(mod.args)
-    
