@@ -1,4 +1,3 @@
-import json
 import marshmallow as mm
 
 
@@ -56,7 +55,7 @@ class ConfigurableSource(object):
     ConfigSchema = ConfigSourceSchema
 
     def __init__(self, **kwargs):
-        """Configurable source 
+        """Configurable source
 
         Parameters
         ----------
@@ -64,7 +63,7 @@ class ConfigurableSource(object):
             a set of keyword arguments which will be validated by this classes ConfigSchema
             which will define the set of fields that are allowed (and their defaults)
         """
-        schema = self.ConfigSchema()
+        self.schema = self.ConfigSchema()
         result = self.get_config(self.ConfigSchema, kwargs)
         self.__dict__.update(result)
 
@@ -95,12 +94,12 @@ class ConfigurableSource(object):
         schema = ConfigSchema()
         if not d_contains_any_fields(schema, d):
             raise NotConfiguredSourceError(
-                "This source is not present in \n" + json.dumps(d, indent=2))
+                "This source is not present in \n {}".format(d))
         else:
             result, errors = schema.load(d)
             if len(errors) > 0:
                 raise MisconfiguredSourceError(
-                    "Source incorrectly configured\n" + json.dumps(errors, indent=2))
+                    "Source incorrectly configured\n {}".format(errors))
             else:
                 return result
 
@@ -123,7 +122,7 @@ def get_input_from_config(ArgSource, config_d):
     Returns
     -------
     dict
-        a dictionary returned by ArgSource.get_dict() after validating configuration 
+        a dictionary returned by ArgSource.get_dict() after validating configuration
         and instantiating an ArgSource instance
 
     Raises
@@ -145,7 +144,7 @@ def get_input_from_config(ArgSource, config_d):
 class ArgSink(ConfigurableSource):
     def put_dict(self, d):
         """method that must be implemented to enable an ArgSink to write a dictionary
-        
+
         Parameters
         ----------
         d: dict
