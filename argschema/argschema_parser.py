@@ -1,15 +1,14 @@
 '''Module that contains the base class ArgSchemaParser which should be
 subclassed when using this library
 '''
-import json
 import logging
 from . import schemas
 from . import utils
-from . import fields
 import marshmallow as mm
 from .sources.json_source import JsonSource, JsonSink
 from .sources.yaml_source import YamlSource, YamlSink
 from .sources.source import NotConfiguredSourceError, MultipleConfiguredSourceError, get_input_from_config
+
 
 def contains_non_default_schemas(schema, schema_list=[]):
     """returns True if this schema contains a schema which was not an instance of DefaultSchema
@@ -88,7 +87,7 @@ class ArgSchemaParser(object):
     output_sink : argschema.sources.source.Source
         a generic sink to write output dictionary to
     args : list or None
-        command line arguments passed to the module, if None use argparse to parse the command line, 
+        command line arguments passed to the module, if None use argparse to parse the command line,
         set to [] if you want to bypass command line parsing
     logger_name : str
         name of logger from the logging module you want to instantiate default ('argschema')
@@ -136,7 +135,7 @@ class ArgSchemaParser(object):
         # build a command line parser from the input schemas and configurations
         p = utils.schema_argparser(self.schema, io_schemas)
         argsobj = p.parse_args(args)
-        argsdict = utils.args_to_dict(argsobj, [self.schema]+io_schemas)
+        argsdict = utils.args_to_dict(argsobj, [self.schema] + io_schemas)
         self.logger.debug('argsdict is {}'.format(argsdict))
 
         # if you received an input_source, get the dictionary from there
@@ -147,7 +146,8 @@ class ArgSchemaParser(object):
             input_data = config_data if config_data is not None else input_data
 
         # check whether the command line arguments contain an input configuration and use that
-        config_data = self.__get_input_data_from_config(utils.smart_merge({},argsdict))
+        config_data = self.__get_input_data_from_config(
+            utils.smart_merge({}, argsdict))
         input_data = config_data if config_data is not None else input_data
 
         # merge the command line dictionary into the input json
@@ -261,14 +261,14 @@ class ArgSchemaParser(object):
 
         return output_json
 
-    def output(self,d,sink=None):
+    def output(self, d, sink=None):
         """method for outputing dictionary to the output_json file path after
         validating it through the output_schema_type
 
         Parameters
         ----------
         d:dict
-            output dictionary to output 
+            output dictionary to output
         sink: argschema.sources.source.ArgSink
             output_sink to output to (optional default to self.output_source)
         output_path: str
@@ -276,7 +276,7 @@ class ArgSchemaParser(object):
             (DEPRECATED path to save to output file, optional (with default to self.mod['output_json'] location)
         **sink_options :
             will be passed through to sink.put_dict
-         
+
         Raises
         ------
         marshmallow.ValidationError
