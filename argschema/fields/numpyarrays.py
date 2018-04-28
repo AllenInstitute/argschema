@@ -12,12 +12,11 @@ class NumpyArray(mm.fields.List):
     Parameters
     ----------
     dtype : numpy.Dtype
-        dtype specifying the desired data type. if dtype is given the array 
-        will be converted to the type, otherwise numpy will decide what type 
+        dtype specifying the desired data type. if dtype is given the array
+        will be converted to the type, otherwise numpy will decide what type
         it should be. (Default=None)
 
     """
-
 
     def __init__(self, dtype=None, *args, **kwargs):
         self.dtype = dtype
