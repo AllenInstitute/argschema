@@ -9,28 +9,17 @@ Your First Module
 
 running this code produces 
 
-.. code-block:: bash
+.. command-output:: python mymodule.py
+    :cwd: /../examples/ 
 
-    $ python mymodule.py
-    {'a': 42, 'log_level': u'ERROR'}
-    $ python mymodule.py --a 2
-    {'a': 2, 'log_level': u'ERROR'}
-    $ python mymodule.py --a 2 --log_level WARNING
-    {'a': 2, 'log_level': u'WARNING'}
-    WARNING:argschema.argschema_parser:this program does nothing useful
-    $ python mymodule.py -h
-    usage: mymodule.py [-h] [--a A] [--output_json OUTPUT_JSON]
-                    [--log_level LOG_LEVEL] [--input_json INPUT_JSON]
+.. command-output:: python mymodule.py --a 2
+    :cwd: /../examples/ 
 
-    optional arguments:
-    -h, --help            show this help message and exit
-    --a A                 my first parameter
-    --output_json OUTPUT_JSON
-                            file path to output json file
-    --log_level LOG_LEVEL
-                            set the logging level of the module
-    --input_json INPUT_JSON
-                            file path of input json file
+.. command-output:: python mymodule.py --a 2 --log_level WARNING
+    :cwd: /../examples/ 
+
+.. command-output:: python mymodule.py -h
+    :cwd: /../examples/ 
 
 Great you are thinking, that is basically argparse, congratulations! 
 
@@ -51,29 +40,21 @@ or you write out a json file and pass it the path on the command line
 .. literalinclude:: ../../examples/myinput.json
     :caption: myinput.json
 
-.. code-block:: bash
-
-    $ python mymodule.py --input_json myinput.json
-    {'a': 99, 'log_level': u'ERROR', 'input_json': u'myinput.json'}
+.. command-output:: python mymodule.py --input_json myinput.json
+    :cwd: /../examples/ 
 
 or override a parameter if you want
 
-.. code-block:: bash
-
-    $ python mymodule.py --input_json myinput.json --a 100
-    {'a': 100, 'log_level': u'ERROR', 'input_json': u'myinput.json'}
+.. command-output:: python mymodule.py --input_json myinput.json --a 100
+    :cwd: /../examples/ 
 
 plus, no matter how you give it parameters, they will always be validated,
 before any of your code runs.
 
 Whether from the command line
 
-.. code-block:: bash
-
-    $ python mymodule.py --input_json myinput.json --a 5!
-    usage: mymodule.py [-h] [--a A] [--output_json OUTPUT_JSON]
-                    [--log_level LOG_LEVEL] [--input_json INPUT_JSON]
-    mymodule.py: error: argument --a: invalid int value: '5!'
+.. command-output:: python mymodule.py --input_json ../examples/myinput.json --a 5!
+    :cwd: /../examples/
 
 or from a dictionary
 ::
@@ -81,7 +62,7 @@ or from a dictionary
     >>> from argschema import ArgSchemaParser
     >>> from mymodule import MySchema
     >>> d={'a':'hello'}
-    >>> mod = ArgSchemaParser(input_data=d,schema_type=MySchema)
+    >>> mod = ArgSchemaParser(input_data=d,schema_type=MySchema,args=[])
         Traceback (most recent call last):
         File "<stdin>", line 1, in <module>
         File "/Users/forrestcollman/argschema/argschema/argschema_parser.py", line 159, in __init__
@@ -114,6 +95,30 @@ heirarchical nested structures.  Note, that if you use Nested schemas, your Nest
 subclass :class:`~argschema.schemas.DefaultSchema` in order that they properly fill in default values,
 as :class:`marshmallow.Schema` does not do that by itself.
 
+Another common question about :class:`~argschema.fields.Nested` is how you specify that 
+you want it not to be required, but want it filled in with whatever default values exist 
+in the schema it references.  Or alternatively, that you want it not required, and you only 
+want the default values used if there is any reference in the input dictionary. The key 
+to this distinction is including default={} (which will cause defaults of the subschemas to be 
+filled in) vs leaving default unspecified, which will only trigger the subschema defaults if the 
+original input contains any references to elements of that subschema. 
+
+This example illustrates the difference in the approaches
+
+.. literalinclude:: ../../examples/nested_example.py
+    :caption: nested_example.py
+
+.. command-output:: python nested_example.py
+    :cwd: /../examples
+
+.. command-output:: python nested_example.py --nest.a 4
+    :cwd: /../examples
+
+One important use case for :class:`~argschema.fields.Nested`, is where you want 
+your json to have a list of dictionaries.  You might be tempted to use the field 
+:class:`~argschema.fields.List`, with a field_type of :class:`~argschema.fields.Dict`, 
+however you should use :class:`~argschema.fields.Nested` with `many=True`.
+
 The template_module example shows how you might combine these features
 to define a more complex parameter structure.
 
@@ -125,19 +130,19 @@ so now if run the example commands found in run_template.sh
 .. literalinclude:: ../../examples/input.json
     :caption: input.json
 
-.. code-block:: bash
+.. command-output:: python template_module.py 
+      --output_json output_command.json  
+      --inc.name from_command 
+      --inc.increment 2
+    :cwd: /../examples
 
-    $ python template_module.py \
-        --output_json output_command.json \
-        --inc.name from_command \
-        --inc.increment 2
-    {u'name': u'from_command', u'inc_array': [2.0, 4.0, 7.0]}
-    $ python template_module.py \
-        --input_json input.json \
-        --output_json output_fromjson.json
-    {u'name': u'from_json', u'inc_array': [4.0, 3.0, 2.0]}
-    $ python template_module.py
-    {u'name': u'from_dictionary', u'inc_array': [5.0, 7.0, 10.0]}
+.. command-output:: python template_module.py 
+      --input_json input.json 
+      --output_json output_fromjson.json
+    :cwd: /../examples
+
+.. command-output:: python template_module.py 
+    :cwd: /../examples
 
 
 Command-Line Specification
@@ -167,101 +172,31 @@ An example script showing old and new list settings:
 
 Running this code can demonstrate the differences in command-line usage:
 
-.. code-block:: bash
+.. command-output:: python deprecated_example.py --help 
+    :cwd: /../examples
 
-    $ python deprecated_example.py --help
-    FutureWarning: '--list_old' is using old-style command-line syntax
-    with each element as a separate argument. This will not be supported
-    in argschema after 2.0. See http://argschema.readthedocs.io/en/master/user/intro.html#command-line-specification
-    for details.
-    warnings.warn(warn_msg, FutureWarning)
-    usage: deprecated_example.py [-h] [--input_json INPUT_JSON]
-                                 [--output_json OUTPUT_JSON]
-                                 [--log_level LOG_LEVEL]
-                                 [--list_old [LIST_OLD [LIST_OLD ...]]]
-                                 [--list_new LIST_NEW]
-
-    optional arguments:
-      -h, --help            show this help message and exit
-
-    MySchema:
-      --input_json INPUT_JSON
-                            file path of input json file
-      --output_json OUTPUT_JSON
-                            file path to output json file
-      --log_level LOG_LEVEL
-                            set the logging level of the module (default=ERROR)
-      --list_old [LIST_OLD [LIST_OLD ...]]
-                            float list with deprecated cli (default=[1.1, 2.2,
-                            3.3])
-      --list_new LIST_NEW   float list with supported cli (default=[4.4, 5.5,
-                            6.6])
-    $ python deprecated_example.py --list_old 9.1 8.2 7.3 --list_new [6.4,5.5,4.6]
-    FutureWarning: '--list_old' is using old-style command-line syntax
-    with each element as a separate argument. This will not be supported
-    in argschema after 2.0. See http://argschema.readthedocs.io/en/master/user/intro.html#command-line-specification
-    for details.
-    warnings.warn(warn_msg, FutureWarning)
-    {'log_level': 'ERROR', 'list_new': [6.4, 5.5, 4.6], 'list_old': [9.1, 8.2, 7.3]}
+.. command-output:: python deprecated_example.py --list_old 9.1 8.2 7.3 --list_new [6.4,5.5,4.6]
+    :cwd: /../examples
 
 We can explore some typical examples of command line usage with the following script:
 
 .. literalinclude:: ../../examples/cli_example.py
     :caption: cli_example.py
 
-.. code-block:: bash
-
-    $ python cli_example.py --help
-    usage: cli_example.py [-h] [--input_json INPUT_JSON]
-                          [--output_json OUTPUT_JSON] [--log_level LOG_LEVEL]
-                          [--array ARRAY] [--string_list STRING_LIST]
-                          [--int_list INT_LIST] [--nested.a NESTED.A]
-                          [--nested.b NESTED.B]
-
-    optional arguments:
-      -h, --help            show this help message and exit
-
-    MySchema:
-      --input_json INPUT_JSON
-                            file path of input json file
-      --output_json OUTPUT_JSON
-                            file path to output json file
-      --log_level LOG_LEVEL
-                            set the logging level of the module (default=ERROR)
-      --array ARRAY         my example array (default=[[1, 2, 3], [4, 5, 6]])
-      --string_list STRING_LIST
-                            list of lists of strings (default=[['hello', 'world'],
-                            ['lists!']])
-      --int_list INT_LIST   list of ints (default=[1, 2, 3])
-
-    nested:
-      --nested.a NESTED.A   my first parameter (default=42)
-      --nested.b NESTED.B   my boolean (default=True)
-
+.. command-output:: python cli_example.py --help
+    :cwd: /../examples
+    
 We can set some values and observe the output:
 
-::
-
-    $ python cli_example.py --nested.b 0 --string_list "[['foo','bar'],['baz','buz']]"
-    {'int_list': [1, 2, 3], 'string_list': [['foo', 'bar'], ['baz', 'buz']], 'array': array([[1, 2, 3],
-       [4, 5, 6]], dtype=uint8), 'log_level': 'ERROR', 'nested': {'a': 42, 'b': False}}
+.. command-output:: python cli_example.py --nested.b 0 --string_list "[['foo','bar'],['baz','buz']]"
+    :cwd: /../examples
 
 If we try to set a field in a way the parser can't cast the variable (for
 example, having an invalid literal) we will see a casting validation error:
 
-::
-
-    $ python cli_example.py --array [1,foo,3]
-    Traceback (most recent call last):
-      File "cli_example.py", line 25, in <module>
-        mod = ArgSchemaParser(schema_type=MySchema)
-      ...
-    marshmallow.exceptions.ValidationError: {
-      "array": [
-        "Command-line argument can't cast to NumpyArray"
-      ]
-    }
-
+.. command-output:: python cli_example.py --array [1,foo,3]
+    :cwd: /../examples
+    
 argschema does not support setting :class:`~marshmallow.fields.Dict` at the
 command line.
 

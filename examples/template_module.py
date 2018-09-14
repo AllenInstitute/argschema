@@ -2,6 +2,8 @@ from argschema import ArgSchemaParser, ArgSchema
 from argschema.fields import NumpyArray, Boolean, Int, Str, Nested
 from argschema.schemas import DefaultSchema
 import numpy as np
+import pprint as pp
+
 
 # these are the core parameters for my module
 
@@ -13,15 +15,15 @@ class MyNestedParameters(DefaultSchema):
                        description='array to increment')
     write_output = Boolean(required=False, default=True)
 
+
 # but i'm going to nest them inside a subsection called inc
 
 
 class MyParameters(ArgSchema):
     inc = Nested(MyNestedParameters)
 
+
 # this is another schema we will use to validate and deserialize our output
-
-
 class MyOutputParams(DefaultSchema):
     name = Str(required=True, description='name of vector')
     inc_array = NumpyArray(dtype=np.float, required=True,
@@ -62,3 +64,5 @@ if __name__ == '__main__':
     # if the parameters are set as such write the output
     if inc_params['write_output']:
         mod.output(output)
+
+    pp.pprint(mod.args)
