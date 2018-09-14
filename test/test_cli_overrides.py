@@ -75,7 +75,6 @@ def deprecated_data():
     return data
 
 
-
 class MyNestedSchema(DefaultSchema):
     a = fields.Int(required=True)
     b = fields.Boolean(required=True)

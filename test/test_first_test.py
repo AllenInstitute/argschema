@@ -1,10 +1,10 @@
 import pytest
-import os
 import json
 import logging
 import marshmallow as mm
 from argschema import ArgSchemaParser, ArgSchema
 import argschema
+
 
 def test_bad_path():
     with pytest.raises(mm.ValidationError):
@@ -12,7 +12,7 @@ def test_bad_path():
             "input_json": "a bad path",
             "output_json": "another example",
             "log_level": "DEBUG"}
-        jm = ArgSchemaParser(input_data=example, args=[])
+        ArgSchemaParser(input_data=example, args=[])
 
 
 def test_simple_example(tmpdir):
@@ -38,22 +38,21 @@ def test_log_catch():
 
 
 class MyExtension(argschema.schemas.DefaultSchema):
-    a = mm.fields.Str(description= 'a string',required=True)
-    b = mm.fields.Int(description= 'an integer')
-    c = mm.fields.Int(description= 'an integer', default=10)
+    a = mm.fields.Str(description='a string', required=True)
+    b = mm.fields.Int(description='an integer')
+    c = mm.fields.Int(description='an integer', default=10)
     d = mm.fields.List(mm.fields.Int,
-                       description= 'a list of integers')
+                       description='a list of integers')
 
 
 class SimpleExtension(ArgSchema):
     test = mm.fields.Nested(MyExtension, required=True)
 
 
-
 def test_simple_extension_required():
     with pytest.raises(mm.ValidationError):
         example1 = {}
-        mod = ArgSchemaParser(
+        ArgSchemaParser(
             input_data=example1, schema_type=SimpleExtension, args=[])
 
 
@@ -85,7 +84,7 @@ def simple_extension_file(tmpdir_factory):
 
 def test_simple_extension_fail():
     with pytest.raises(mm.ValidationError):
-        mod = ArgSchemaParser(
+        ArgSchemaParser(
             input_data=SimpleExtension_example_invalid,
             schema_type=SimpleExtension, args=[])
 
@@ -130,22 +129,26 @@ def test_simple_extension_write_overwrite_list(simple_extension_file):
     mod = ArgSchemaParser(schema_type=SimpleExtension, args=args)
     assert len(mod.args['test']['d']) == 4
 
+
 def test_bad_input_json_argparse():
     args = ['--input_json', 'not_a_file.json']
     with pytest.raises(mm.ValidationError):
-        mod = ArgSchemaParser(schema_type=SimpleExtension, args=args)
+        ArgSchemaParser(schema_type=SimpleExtension, args=args)
 
-#TESTS DEMONSTRATING BAD BEHAVIOR OF DEFAULT LOADING
+# TESTS DEMONSTRATING BAD BEHAVIOR OF DEFAULT LOADING
+
+
 class MyExtensionOld(mm.Schema):
-    a = mm.fields.Str(description= 'a string')
-    b = mm.fields.Int(description= 'an integer')
-    c = mm.fields.Int(description= 'an integer', default=10)
+    a = mm.fields.Str(description='a string')
+    b = mm.fields.Int(description='an integer')
+    c = mm.fields.Int(description='an integer', default=10)
     d = mm.fields.List(mm.fields.Int,
-                       description= 'a list of integers')
+                       description='a list of integers')
 
 
 class SimpleExtensionOld(ArgSchema):
     test = mm.fields.Nested(MyExtensionOld, default=None, required=True)
+
 
 def test_simple_extension_old_pass():
     mod = ArgSchemaParser(
@@ -156,37 +159,40 @@ def test_simple_extension_old_pass():
     assert mod.args['test']['c'] == 10
     assert len(mod.args['test']['d']) == 3
 
+
 class RecursiveSchema(argschema.schemas.DefaultSchema):
-    children = mm.fields.Nested("self",many=True,
-                                description= 'children of this node')
-    name = mm.fields.Str(default = "anonymous",
-                           description= 'name of this node')
+    children = mm.fields.Nested("self", many=True,
+                                description='children of this node')
+    name = mm.fields.Str(default="anonymous",
+                         description='name of this node')
+
 
 class ExampleRecursiveSchema(ArgSchema):
     tree = mm.fields.Nested(RecursiveSchema, required=True)
 
+
 recursive_data = {
     'tree': {
-                'name':'root',
-                'children':[
+        'name': 'root',
+                'children': [
                     {
-                        "name":'child1'
+                        "name": 'child1'
                     },
                     {
-                        "name":"branch1",
-                        "children":[
+                        "name": "branch1",
+                        "children": [
                             {
-                                "name":"subchild1"
+                                "name": "subchild1"
                             },
                             {
                             },
-                            {    
+                            {
                             }
                         ]
                     }
                 ]
-            }
     }
+}
 
 
 def test_recursive_schema():
@@ -197,22 +203,25 @@ def test_recursive_schema():
     assert len(mod.args['tree']['children']) == 2
     assert mod.args['tree']['children'][0]['name'] == 'child1'
     assert mod.args['tree']['children'][1]['name'] == 'branch1'
-    assert len(mod.args['tree']['children'][1]['children']) == 3 
-    assert mod.args['tree']['children'][1]['children'][2]['name']=='anonymous'
+    assert len(mod.args['tree']['children'][1]['children']) == 3
+    assert mod.args['tree']['children'][1]['children'][2]['name'] == 'anonymous'
+
 
 class BadRecursiveSchema(mm.Schema):
-    children = mm.fields.Nested("self",many=True,
-                                description= 'children of this node')
-    name = mm.fields.Str(default = "anonymous",
-                           description= 'name of this node')
+    children = mm.fields.Nested("self", many=True,
+                                description='children of this node')
+    name = mm.fields.Str(default="anonymous",
+                         description='name of this node')
+
 
 class BadExampleRecursiveSchema(ArgSchema):
     tree = mm.fields.Nested(BadRecursiveSchema, required=True)
 
+
 def bad_test_recursive_schema():
     with pytest.raises(mm.ValidationError):
-        mod = ArgSchemaParser(input_data=recursive_data,
-                            schema_type=BadExampleRecursiveSchema, args=[])
+        ArgSchemaParser(input_data=recursive_data,
+                        schema_type=BadExampleRecursiveSchema, args=[])
 
 
 class ModelFit(argschema.schemas.DefaultSchema):
@@ -229,29 +238,32 @@ class PopulationSelectionParameters(argschema.ArgSchema):
     paths = argschema.fields.Nested(PopulationSelectionPaths)
 
 
-david_data ={
-    'paths':{
-        'fits':[{
-            'fit_type':'test',
-            'hof_fit':'requirements.txt',
-            'hof':'requirements.txt'
+david_data = {
+    'paths': {
+        'fits': [{
+            'fit_type': 'test',
+            'hof_fit': 'requirements.txt',
+            'hof': 'requirements.txt'
         },
-        {
-            'fit_type':'test2',
-            'hof_fit':'requirements.txt',
-            'hof':'requirements.txt'
+            {
+            'fit_type': 'test2',
+            'hof_fit': 'requirements.txt',
+            'hof': 'requirements.txt'
         }
         ]
     }
 }
 
+
 def test_david_example(tmpdir_factory):
     file_ = tmpdir_factory.mktemp('test').join('testinput.json')
     file_.write(json.dumps(david_data))
     args = ['--input_json', str(file_)]
-    mod = argschema.ArgSchemaParser(schema_type=PopulationSelectionParameters,args=args)
+    mod = argschema.ArgSchemaParser(
+        schema_type=PopulationSelectionParameters, args=args)
     print(mod.args)
-    assert(len(mod.args['paths']['fits'])==2)
+    assert(len(mod.args['paths']['fits']) == 2)
+
 
 class MyShorterExtension(ArgSchema):
     a = mm.fields.Str(description='a string')
@@ -259,10 +271,12 @@ class MyShorterExtension(ArgSchema):
     c = mm.fields.Int(description='an integer', default=10)
     d = mm.fields.List(mm.fields.Int, description='a list of integers')
 
+
 def test_simple_description():
-    d =    {
-            'a': "hello",
-            'b': 1,
-            'd': [1, 5, 4]
-        }
-    mod = argschema.ArgSchemaParser(input_data = d, schema_type=MyShorterExtension)
+    d = {
+        'a': "hello",
+        'b': 1,
+        'd': [1, 5, 4]
+    }
+    argschema.ArgSchemaParser(
+        input_data=d, schema_type=MyShorterExtension)

@@ -3,6 +3,8 @@ from argschema.fields import NumpyArray, Boolean, Int, Str, Nested
 from argschema.schemas import DefaultSchema
 import numpy as np
 import pprint as pp
+
+
 # these are the core parameters for my module
 
 
@@ -15,6 +17,8 @@ class MyNestedParameters(DefaultSchema):
 
 
 # but i'm going to nest them inside a subsection called inc
+
+
 class MyParameters(ArgSchema):
     inc = Nested(MyNestedParameters)
 
