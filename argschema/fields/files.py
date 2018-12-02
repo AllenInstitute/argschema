@@ -95,7 +95,7 @@ class OutputDir(mm.fields.Str):
                 if self.mode is not None:
                     os.chmod(value, self.mode)
             except OSError as e:
-                if e.errno == os.errno.EEXIST:
+                if e.errno == errno.EEXIST:
                     pass
                 else:
                     raise mm.ValidationError(
