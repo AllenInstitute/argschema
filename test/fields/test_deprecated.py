@@ -1,7 +1,6 @@
 import pytest
 from argschema import ArgSchemaParser, ArgSchema
 from argschema.fields import OptionList
-import numpy as np
 import marshmallow as mm
 
 
@@ -13,7 +12,7 @@ def test_option_list():
     input_data = {
         'a': 1
     }
-    mod = ArgSchemaParser(
+    ArgSchemaParser(
         input_data=input_data, schema_type=OptionSchema, args=[])
 
 
@@ -22,5 +21,5 @@ def test_bad_option():
         'a': 4
     }
     with pytest.raises(mm.ValidationError):
-        mod = ArgSchemaParser(
+        ArgSchemaParser(
             input_data=input_data, schema_type=OptionSchema, args=[])

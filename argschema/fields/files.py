@@ -10,7 +10,7 @@ def validate_outpath(path):
         with tempfile.NamedTemporaryFile(mode='w', dir=path) as tfile:
             tfile.write('0')
             tfile.close()
-            
+
     except Exception as e:
         if isinstance(e, OSError):
             if e.errno == errno.ENOENT:
@@ -69,7 +69,7 @@ class OutputFile(mm.fields.Str):
 
 class OutputDir(mm.fields.Str):
     """OutputDir is a :class:`marshmallow.fields.Str` subclass which is a path to
-       a location where this module will write files.  Validation will check that 
+       a location where this module will write files.  Validation will check that
        the directory exists and create the directory if it is not present,
        and will fail validation if the directory cannot be created or cannot be
        written to.
@@ -95,7 +95,7 @@ class OutputDir(mm.fields.Str):
                 if self.mode is not None:
                     os.chmod(value, self.mode)
             except OSError as e:
-                if e.errno == os.errno.EEXIST:
+                if e.errno == errno.EEXIST:
                     pass
                 else:
                     raise mm.ValidationError(
@@ -105,19 +105,25 @@ class OutputDir(mm.fields.Str):
         if self.mode is not None:
             try:
                 assert((os.stat(value).st_mode & 0o777) == self.mode)
-            except:
+            except AssertionError:
                 raise mm.ValidationError(
                     "{} does not have the mode  ({}) that was specified ".format(
                         value, self.mode)
                 )
+            except os.error:
+                raise mm.ValidationError(
+                    "cannot get os.stat of {}".format(value)
+                )
         # use outputfile to test that a file in this location is a valid path
         validate_outpath(value)
+
 
 def validate_input_path(value):
     if not os.path.isfile(value):
         raise mm.ValidationError("%s is not a file" % value)
     elif not os.access(value, os.R_OK):
         raise mm.ValidationError("%s is not readable" % value)
+
 
 class InputDir(mm.fields.Str):
     """InputDir is  :class:`marshmallow.fields.Str` subclass which is a path to a

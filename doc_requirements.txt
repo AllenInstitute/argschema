@@ -1,4 +1,7 @@
 sphinxcontrib-napoleon
+sphinxcontrib-programoutput
+sphinxcontrib-inlinesyntaxhighlight
 numpy
 marshmallow
 pytest
+rstcheck

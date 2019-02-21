@@ -25,5 +25,5 @@ def test_bad_slice():
         'a': '5:7:8:9'
     }
     with pytest.raises(mm.ValidationError):
-        mod = ArgSchemaParser(
+        ArgSchemaParser(
             input_data=input_data, schema_type=SliceSchema, args=[])
