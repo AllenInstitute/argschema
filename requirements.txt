@@ -1,2 +1,2 @@
 numpy
-marshmallow
+marshmallow==3.0.0rc4
