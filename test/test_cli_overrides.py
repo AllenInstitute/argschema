@@ -48,7 +48,6 @@ def test_data(inputdir, inputfile, outputdir, outputfile):
         "inputfile": str(inputfile),
         "integer": 10,
         "list": [300, 200, 800, 1000],
-        "list_deprecated": [300, 200, 800, 1000],
         "localdatetime": "0001-01-01T00:00:00",
         "log_level": "ERROR",
         "nested": {"a": 1, "b": False},
