@@ -98,7 +98,7 @@ def test_schema_argparser_with_baseball():
             'name':'Roger Clemens',
             'number':21
         },
-        'based_occupied':[1,2,3],
+        'bases_occupied':[1,2,3],
         'outs':2,
         'strikes':2,
         'balls':3,
