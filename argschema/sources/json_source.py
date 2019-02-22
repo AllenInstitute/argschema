@@ -18,7 +18,7 @@ class JsonOutputConfigSchema(mm.Schema):
 
 class JsonSource(ArgSource):
     ConfigSchema = JsonInputConfigSchema
-    
+
     def get_dict(self):
         with open(self.input_json, 'r') as fp:
             return json.load(fp,)
