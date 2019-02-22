@@ -133,6 +133,7 @@ def test_schema_argparser_with_baseball():
     parser = utils.schema_argparser(schema)
     help = parser.format_help()
     help = help.replace('\n', '').replace(' ', '')
+    print(help)
     assert(
         '--strikesSTRIKEShowmanystrikes(0-2)(REQUIRED)(validoptionsare[0,1,2])' in help)
     # in python3.9, the format changed slightly such that
