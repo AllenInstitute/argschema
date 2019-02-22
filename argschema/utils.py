@@ -430,13 +430,7 @@ def load(schema, d):
         deserialized and validated dictionary
     """
 
-    results = schema.load(d)
-    if isinstance(results, tuple):
-        (results, errors) = results
-        if len(errors) > 0:
-            raise mm.ValidationError(errors)
-
-    return results
+    return schema.load(d, unknown=mm.EXCLUDE)
 
 
 def dump(schema, d):

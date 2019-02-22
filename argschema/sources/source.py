@@ -96,10 +96,11 @@ class ConfigurableSource(object):
             raise NotConfiguredSourceError(
                 "This source is not present in \n {}".format(d))
         else:
-            result, errors = schema.load(d)
-            if len(errors) > 0:
+            try:
+                result = schema.load(d, unknown=mm.EXCLUDE)
+            except mm.ValidationError as e:
                 raise MisconfiguredSourceError(
-                    "Source incorrectly configured\n {}".format(errors))
+                    "Source incorrectly configured\n {}".format(e))
             else:
                 return result
 
