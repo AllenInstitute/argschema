@@ -27,8 +27,8 @@ class NumpyArray(mm.fields.List):
             return np.array(value, dtype=self.dtype)
         except ValueError as e:
             raise mm.ValidationError(
-                'Cannot create numpy array with type {} from data.'.format(
-                    self.dtype))
+                'Cannot create numpy array with type {} from data: {}.'.format(
+                    self.dtype, e))
 
     def _serialize(self, value, attr, obj):
         if value is None:

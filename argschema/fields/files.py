@@ -63,7 +63,7 @@ class OutputFile(mm.fields.Str):
             path = os.path.dirname(value)
         except Exception as e:  # pragma: no cover
             raise mm.ValidationError(
-                "%s cannot be os.path.dirname-ed" % value)  # pragma: no cover
+                "{} cannot be os.path.dirname-ed: {}".format(value, e))  # pragma: no cover
         validate_outpath(path)
 
 

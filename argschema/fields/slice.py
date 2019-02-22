@@ -17,7 +17,7 @@ class Slice(mm.fields.Str):
         kwargs['metadata'] = kwargs.get(
             'metadata', {'description': 'slice the dataset'})
         kwargs['default'] = kwargs.get('default', slice(None))
-        super(Slice, self).__init__( **kwargs)
+        super(Slice, self).__init__(**kwargs)
 
     def _deserialize(self, value, attr, obj):
         try:
