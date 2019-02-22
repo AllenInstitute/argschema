@@ -10,62 +10,6 @@ from .sources.yaml_source import YamlSource, YamlSink
 from .sources.source import NotConfiguredSourceError, MultipleConfiguredSourceError, get_input_from_config
 
 
-def contains_non_default_schemas(schema, schema_list=[]):
-    """returns True if this schema contains a schema which was not an instance of DefaultSchema
-
-    Parameters
-    ----------
-    schema : marshmallow.Schema
-        schema to check
-    schema_list :
-         (Default value = [])
-
-    Returns
-    -------
-    bool
-        does this schema only contain schemas which are subclassed from schemas.DefaultSchema
-
-    """
-    if not isinstance(schema, schemas.DefaultSchema):
-        return True
-    for k, v in schema.declared_fields.items():
-        if isinstance(v, mm.fields.Nested):
-            if type(v.schema) in schema_list:
-                return False
-            else:
-                schema_list.append(type(v.schema))
-                if contains_non_default_schemas(v.schema, schema_list):
-                    return True
-    return False
-
-
-def is_recursive_schema(schema, schema_list=[]):
-    """returns true if this schema contains recursive elements
-
-    Parameters
-    ----------
-    schema : marshmallow.Schema
-        schema to check
-    schema_list :
-         (Default value = [])
-
-    Returns
-    -------
-    bool
-        does this schema contain any recursively defined schemas
-
-    """
-    for k, v in schema.declared_fields.items():
-        if isinstance(v, mm.fields.Nested):
-            if type(v.schema) in schema_list:
-                return True
-            else:
-                schema_list.append(type(v.schema))
-                if is_recursive_schema(v.schema, schema_list):
-                    return True
-    return False
-
-
 class ArgSchemaParser(object):
     """The main class you should sub-class to write your own argschema module.
     Takes input_data, reference to a input_json and the command line inputs and parses out the parameters
@@ -274,11 +218,6 @@ class ArgSchemaParser(object):
             output dictionary to output
         sink: argschema.sources.source.ArgSink
             output_sink to output to (optional default to self.output_source)
-        output_path: str
-            path to save to output file, optional (with default to self.mod['output_json'] location)
-            (DEPRECATED path to save to output file, optional (with default to self.mod['output_json'] location)
-        **sink_options :
-            will be passed through to sink.put_dict
 
         Raises
         ------
