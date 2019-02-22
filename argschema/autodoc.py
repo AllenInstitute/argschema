@@ -3,7 +3,10 @@ import marshmallow as mm
 from argschema.utils import get_description_from_field
 from argschema.argschema_parser import ArgSchemaParser
 import inspect
-
+try:
+    from inspect import getfullargspec
+except ImportError:
+    from inspect import getargspec as getfullargspec
 FIELD_TYPE_MAP = {v: k for k, v in mm.Schema.TYPE_MAPPING.items()}
 
 
