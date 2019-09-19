@@ -26,7 +26,7 @@ def test_outputfile_no_write(tmpdir):
     outfile = outdir.join('test')
     with pytest.raises(mm.ValidationError):
         ArgSchemaParser(input_data={'output_file': str(outfile)},
-                        schema_type=BasicOutputFile)
+                        schema_type=BasicOutputFile, args=[])
     outdir.chmod(0o666)
 
 

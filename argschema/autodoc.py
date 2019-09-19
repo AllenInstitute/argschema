@@ -26,12 +26,12 @@ def process_schemas(app, what, name, obj, options, lines):
         # pick out the ArgSchemaParser objects for documenting
         if issubclass(obj, ArgSchemaParser):
             # inspect the objects init function to find default schema
-            (args, vargs, varkw, defaults) = inspect.getargspec(obj.__init__)
+            fas = inspect.getfullargspec(obj.__init__)
             # find where the schema_type is as a keyword argument
             schema_index = next(i for i, arg in enumerate(
-                args) if arg == 'schema_type')
+                fas.args) if arg == 'schema_type')
             # use its default value to construct the string version of the classpath to the module
-            def_schema = defaults[schema_index - 1]
+            def_schema = fas.defaults[schema_index - 1]
 
             def_schema = def_schema or obj.default_schema
             if def_schema is not None:
@@ -86,8 +86,10 @@ def process_schemas(app, what, name, obj, options, lines):
                     try:
                         # get the set of types this field was derived from
                         if isinstance(field, mm.fields.List):
+                            print(field)
+                            print(field.inner)
                             # if it's a list we want to do this for its container
-                            base_types = inspect.getmro(type(field.container))
+                            base_types = inspect.getmro(type(field.inner))
                         else:
                             base_types = inspect.getmro(type(field))
 

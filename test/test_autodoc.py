@@ -72,6 +72,7 @@ def test_autodoc_list():
     lines = []
     process_schemas(None, 'class', 'MyShorterExtension',
                     MyShorterExtension, None, lines)
+    print(lines)
     list_field = next(line for line in lines if 'List' in line)
     assert('int' in list_field)
     validate_rst_lines(lines)
