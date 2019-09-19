@@ -7,18 +7,15 @@ workflows:
   version: 2
   build:
     jobs:
-      - test-python-2.7
       - test-python-3.6.1
       - merge:
           requires:
-              - test-python-2.7
               - test-python-3.6.1
           filters:
             branches:
               only: dev
       - package:
           requires:
-              - test-python-2.7
               - test-python-3.6.1
               - merge
           filters:
@@ -73,8 +70,6 @@ jobs:
             pip install wheel
             .circleci/circle_dist.sh
 
-
-
   test-python-3.6.1:
     working_directory: ~/repo
     docker:
@@ -100,48 +95,6 @@ jobs:
           paths:
             - ./venv
           key: python3-dependencies-{{ checksum "requirements.txt" }}-{{ checksum "test_requirements.txt"}}
-        
-      # run tests!
-      - run:
-          name: run tests
-          command: |
-            . venv/bin/activate
-            python setup.py test
-            bash <(curl -s https://codecov.io/bash)
-
-      - store_test_results:
-          path: test-reports
-
-      - store_artifacts:
-          path: test-reports
-          destination: test-reports
-      
-
-  test-python-2.7:
-    working_directory: ~/repo
-    docker:
-      - image: circleci/python:2.7
-    steps:
-      - checkout
-      # Download and cache dependencies
-      - restore_cache:
-          keys:
-          - python27-dependencies-{{ checksum "requirements.txt" }}-{{ checksum "test_requirements.txt"}}
-          # fallback to using the latest cache if no exact match is found
-          - python27-dependencies-
-
-      - run:
-          name: install dependencies
-          command: |
-            virtualenv venv
-            . venv/bin/activate
-            pip install -r requirements.txt
-            pip install -r test_requirements.txt
-
-      - save_cache:
-          paths:
-            - ./venv
-          key: python27-dependencies-{{ checksum "requirements.txt" }}-{{ checksum "test_requirements.txt"}}
         
       # run tests!
       - run:

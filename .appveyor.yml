@@ -2,8 +2,6 @@ build: false
 
 environment:
   matrix:
-    - MINICONDA: "C:\\Miniconda-x64"
-      PYTHON: 2.7
     - MINICONDA: "C:\\Miniconda36-x64"
       PYTHON: 3.6
 
