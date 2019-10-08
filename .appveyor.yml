@@ -13,5 +13,4 @@ install:
   - pip install -r requirements.txt
 
 test_script:
-  - runas /trustlevel:0x20000 "python setup.py test > test_results.txt"
-  - type test_results.txt
+  - runas /trustlevel:0x20000 "python setup.py test > CON"
