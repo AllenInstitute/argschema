@@ -8,8 +8,8 @@ import errno
 def validate_outpath(path):
     try:
         with tempfile.NamedTemporaryFile(mode='w', dir=path) as tfile:
-            tfile.write('0')
-            tfile.close()
+            tfile.file.write('0')
+            tfile.file.close()
 
     except Exception as e:
         if isinstance(e, OSError):
