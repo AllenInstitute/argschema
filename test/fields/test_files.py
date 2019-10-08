@@ -22,7 +22,7 @@ enoent_outfile_example = {
 
 def test_outputfile_no_write(tmpdir):
     outdir = tmpdir.mkdir('cannot_write_here')
-    outdir.chmod(0o444)
+    os.chmod(outdir, os.O_RDONLY)
     outfile = outdir.join('test')
     with pytest.raises(mm.ValidationError):
         ArgSchemaParser(input_data={'output_file': str(outfile)},
