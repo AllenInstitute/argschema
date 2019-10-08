@@ -13,5 +13,4 @@ install:
   - pip install -r requirements.txt
 
 test_script:
-  - runas /showtrustlevels
-  - runas /trustlevel:0x20000 python setup.py test
+  - runas /trustlevel:0x20000 "python setup.py test"
