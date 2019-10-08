@@ -13,4 +13,4 @@ install:
   - pip install -r requirements.txt
 
 test_script:
-  - runas /trustlevel:0x20000 "python setup.py test > CON"
+  - psexec.exe -l -d "python setup.py test"
