@@ -14,6 +14,6 @@ install:
 
 test_script:
   - set MYDIR=%CD%
-  - psexec.exe -w %MYDIR% -l -i echo %CD% > CON
-  - psexec.exe -w %MYDIR% -l -i python --version > CON
-  - psexec.exe -w %MYDIR% -l -i python %MYDIR%\setup.py test > CON
+  - runas /trustlevel:0x20000 "python --version"
+  - runas /trustlevel:0x20000 "python setup.py test"
+  - type %MYDIR%\test-reports\test.xml
