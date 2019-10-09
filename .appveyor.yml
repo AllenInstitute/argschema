@@ -15,4 +15,5 @@ install:
 test_script:
   - set MYDIR=%CD%
   - runas /trustlevel:0x20000 "python --version"
-  - runas /trustlevel:0x20000 "python setup.py test"
+  - runas /trustlevel:0x20000 "python --version"
+  - runas /trustlevel:0x20000 "python not_exist.py"
