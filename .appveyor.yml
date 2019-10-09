@@ -14,6 +14,6 @@ install:
 
 test_script:
   - set MYDIR=%CD%
-  - psexec.exe -w %MYDIR% -l -d echo %CD%
-  - psexec.exe -w %MYDIR% -l -d python --version
-  - psexec.exe -w %MYDIR% -l -d python setup.py test
+  - psexec.exe -w %MYDIR% -l -d -i echo %CD%
+  - psexec.exe -w %MYDIR% -l -d -i python --version
+  - psexec.exe -w %MYDIR% -l -d -i python setup.py test
