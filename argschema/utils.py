@@ -441,7 +441,7 @@ def dump(schema, d):
         if the dictionary does not conform to the schema
     """
     errors=schema.validate(d)
-    if len(errors>0):
+    if len(errors)>0:
         raise mm.ValidationError(errors)
 
     return schema.dump(d)
