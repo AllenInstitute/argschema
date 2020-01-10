@@ -106,3 +106,5 @@ test-reports/
 *DS_Store
 argschema/bin
 examples/output*.json
+
+.vscode/
