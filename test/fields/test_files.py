@@ -81,7 +81,7 @@ def test_output_dir_basic(tmpdir):
                     input_data=output_dir_example,
                     args=[])
 
-
+@pytest.skipif(sys.platform == "win32", reason="cannot reliably test permissions on windows.")
 def test_output_dir_bad_permission(tmpdir):
     outdir = tmpdir.mkdir('no_write')
     outdir.chmod(0o222)
@@ -109,7 +109,7 @@ class ModeOutputDirSchema(ArgSchema):
                            description="775 output directory",
                            mode=0o775)
 
-
+@pytest.skipif(sys.platform == "win32", reason="temp directories have different modes on windows")
 def test_mode_output_osdir(tmpdir):
     outdir = tmpdir.join('mytmp')
     output_dir_example = {
@@ -159,7 +159,7 @@ def test_relative_file_input_failed():
         ArgSchemaParser(
             input_data=input_file_example, schema_type=BasicInputFile, args=[])
 
-
+@pytest.skipif(sys.platform == "win32", reason="permissions cannot be reliably set on windows")
 def test_access_inputfile_failed():
     with open(input_file_example['input_file'], 'w') as fp:
         fp.write('test')
@@ -192,7 +192,7 @@ def test_bad_inputdir():
         ArgSchemaParser(input_data=input_data,
                         schema_type=BasicInputDir, args=[])
 
-
+@pytest.skipif(sys.platform == "win32", reason="permissions cannot be reliably set on windows")
 def test_inputdir_no_access(tmpdir):
     input_dir = tmpdir.mkdir('no_access')
     input_dir.chmod(0o222)
