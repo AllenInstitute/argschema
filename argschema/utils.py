@@ -416,10 +416,6 @@ def load(schema, d):
     """
 
     results = schema.load(d)
-    if isinstance(results, tuple):
-        (results, errors) = results
-        if len(errors) > 0:
-            raise mm.ValidationError(errors)
 
     return results
 
@@ -446,9 +442,5 @@ def dump(schema, d):
     """
 
     results = schema.dump(d)
-    if isinstance(results, tuple):
-        (results, errors) = results
-        if len(errors) > 0:
-            raise mm.ValidationError(errors)
 
     return results
