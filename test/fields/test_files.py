@@ -19,7 +19,7 @@ enoent_outfile_example = {
     'output_file': os.path.join('path', 'to', 'output.file')
 }
 
-
+@pytest.mark.skipif(sys.platform == "win32", reason="cannot reliably alter permissions on windows.")
 def test_outputfile_no_write(tmpdir):
     outdir = tmpdir.mkdir('cannot_write_here')
     outdir.chmod(0o444)
