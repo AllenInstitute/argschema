@@ -286,7 +286,7 @@ class MySchemaPostLoad(ArgSchema):
     
     @mm.post_load
     def my_post(self, data):
-        pass
+        return data
 
 class MyPostLoadClass(ArgSchemaParser):
     default_schema = MySchemaPostLoad
