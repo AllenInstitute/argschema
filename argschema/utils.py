@@ -440,7 +440,8 @@ def dump(schema, d):
     marshmallow.ValidationError
         if the dictionary does not conform to the schema
     """
+    errors=schema.validate(d)
+    if len(errors>0):
+        raise mm.ValidationError(errors)
 
-    results = schema.dump(d)
-
-    return results
+    return schema.dump(d)
