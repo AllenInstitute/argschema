@@ -3,7 +3,7 @@ from argschema import ArgSchemaParser, ArgSchema
 from argschema.fields import InputFile, OutputFile, InputDir, OutputDir
 import marshmallow as mm
 import os
-
+import sys
 
 # OUTPUT FILE TESTS
 class BasicOutputFile(ArgSchema):
