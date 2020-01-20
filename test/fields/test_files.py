@@ -4,6 +4,9 @@ from argschema.fields import InputFile, OutputFile, InputDir, OutputDir
 import marshmallow as mm
 import os
 import sys
+import win32security
+import ntsecuritycon as con
+
 
 # OUTPUT FILE TESTS
 class BasicOutputFile(ArgSchema):
@@ -19,15 +22,26 @@ enoent_outfile_example = {
     'output_file': os.path.join('path', 'to', 'output.file')
 }
 
-@pytest.mark.skipif(sys.platform == "win32", reason="cannot reliably alter permissions on windows.")
+
 def test_outputfile_no_write(tmpdir):
     outdir = tmpdir.mkdir('cannot_write_here')
-    outdir.chmod(0o444)
+    if sys.platform == "win32":
+        sd = win32security.GetFileSecurity(str(outdir), win32security.DACL_SECURITY_INFORMATION)
+        #dacl = sd.GetSecurityDescriptorDacl()
+        everyone, domain, type = win32security.LookupAccountName ("", "Everyone")
+        dacl = win32security.ACL ()
+        dacl.AddAccessAllowedAce (win32security.ACL_REVISION, con.FILE_GENERIC_READ, everyone)
+        sd.SetSecurityDescriptorDacl (1, dacl, 0)
+        win32security.SetFileSecurity (str(outdir), win32security.DACL_SECURITY_INFORMATION, sd)
+    else:
+        outdir.chmod(0o444)
     outfile = outdir.join('test')
+
     with pytest.raises(mm.ValidationError):
         ArgSchemaParser(input_data={'output_file': str(outfile)},
                         schema_type=BasicOutputFile, args=[])
-    outdir.chmod(0o666)
+    if sys.platform != "win32":
+        outdir.chmod(0o666)
 
 
 def test_outputfile_not_a_path():
