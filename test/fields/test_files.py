@@ -180,11 +180,25 @@ def test_relative_file_input_failed():
         ArgSchemaParser(
             input_data=input_file_example, schema_type=BasicInputFile, args=[])
 
-@pytest.mark.skipif(sys.platform == "win32", reason="permissions cannot be reliably set on windows")
+#@pytest.mark.skipif(sys.platform == "win32", reason="permissions cannot be reliably set on windows")
 def test_access_inputfile_failed():
     with open(input_file_example['input_file'], 'w') as fp:
         fp.write('test')
-    os.chmod(input_file_example['input_file'], 0o222)
+
+    if sys.platform == "win32":
+        sd = win32security.GetFileSecurity(
+                input_file_example['input_file'],
+                win32security.DACL_SECURITY_INFORMATION)
+        everyone, domain, type = win32security.LookupAccountName ("", "Everyone")
+        dacl = win32security.ACL ()
+        dacl.AddAccessAllowedAce (win32security.ACL_REVISION, con.FILE_GENERIC_WRITE, everyone)
+        sd.SetSecurityDescriptorDacl (1, dacl, 0)
+        win32security.SetFileSecurity (
+                input_file_example['input_file'],
+                win32security.DACL_SECURITY_INFORMATION, sd)
+    else:
+        os.chmod(input_file_example['input_file'], 0o222)
+
     with pytest.raises(mm.ValidationError):
         ArgSchemaParser(
             input_data=input_file_example, schema_type=BasicInputFile, args=[])

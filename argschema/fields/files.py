@@ -5,6 +5,7 @@ import tempfile
 import errno
 import sys
 import uuid
+import stat
 
 
 class WindowsNamedTemporaryFile():
@@ -143,8 +144,17 @@ class OutputDir(mm.fields.Str):
 def validate_input_path(value):
     if not os.path.isfile(value):
         raise mm.ValidationError("%s is not a file" % value)
-    elif not os.access(value, os.R_OK):
-        raise mm.ValidationError("%s is not readable" % value)
+    else:
+        if sys.platform == "win32":
+            try:
+                with open(value) as f:
+                    s = f.read()
+            except IOError as x:
+                if x.errno == errno.EACCES:
+                    raise mm.ValidationError("%s is not readable" % value)
+        else:
+            if not os.access(value, os.R_OK):
+                raise mm.ValidationError("%s is not readable" % value)
 
 
 class InputDir(mm.fields.Str):
