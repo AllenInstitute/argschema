@@ -4,8 +4,9 @@ from argschema.fields import InputFile, OutputFile, InputDir, OutputDir
 import marshmallow as mm
 import os
 import sys
-import win32security
-import ntsecuritycon as con
+if sys.platform == "win32":
+    import win32security
+    import ntsecuritycon as con
 
 
 # OUTPUT FILE TESTS
