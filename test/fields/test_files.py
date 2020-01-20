@@ -28,7 +28,6 @@ def test_outputfile_no_write(tmpdir):
     outdir = tmpdir.mkdir('cannot_write_here')
     if sys.platform == "win32":
         sd = win32security.GetFileSecurity(str(outdir), win32security.DACL_SECURITY_INFORMATION)
-        #dacl = sd.GetSecurityDescriptorDacl()
         everyone, domain, type = win32security.LookupAccountName ("", "Everyone")
         dacl = win32security.ACL ()
         dacl.AddAccessAllowedAce (win32security.ACL_REVISION, con.FILE_GENERIC_READ, everyone)
@@ -96,10 +95,17 @@ def test_output_dir_basic(tmpdir):
                     input_data=output_dir_example,
                     args=[])
 
-@pytest.mark.skipif(sys.platform == "win32", reason="cannot reliably test permissions on windows.")
 def test_output_dir_bad_permission(tmpdir):
-    outdir = tmpdir.mkdir('no_write')
-    outdir.chmod(0o222)
+    outdir = tmpdir.mkdir('no_read')
+    if sys.platform == "win32":
+        sd = win32security.GetFileSecurity(str(outdir), win32security.DACL_SECURITY_INFORMATION)
+        everyone, domain, type = win32security.LookupAccountName ("", "Everyone")
+        dacl = win32security.ACL ()
+        dacl.AddAccessAllowedAce (win32security.ACL_REVISION, con.FILE_GENERIC_WRITE, everyone)
+        sd.SetSecurityDescriptorDacl (1, dacl, 0)
+        win32security.SetFileSecurity (str(outdir), win32security.DACL_SECURITY_INFORMATION, sd)
+    else:
+        outdir.chmod(0o222)
     output_dir_example = {
         'output_dir': outdir
     }
