@@ -3,11 +3,33 @@ import os
 import marshmallow as mm
 import tempfile
 import errno
+import sys
+import uuid
+
+
+class WindowsNamedTemporaryFile():
+    def __init__(self, dir=None, mode=None):
+        self.filename = os.path.join(dir, str(uuid.uuid4()))
+        self.mode = mode
+
+    def __enter__(self):
+        self.open_file = open(self.filename, self.mode)
+        return self.open_file
+    
+    def __exit__(self, *args):
+        self.open_file.close()
+        os.remove(self.filename)
+
+
+if sys.platform == "win32":
+    NamedTemporaryFile = WindowsNamedTemporaryFile
+else:
+    NamedTemporaryFile = tempfile.NamedTemporaryFile
 
 
 def validate_outpath(path):
     try:
-        with tempfile.NamedTemporaryFile(mode='w', dir=path) as tfile:
+        with NamedTemporaryFile(mode='w', dir=path) as tfile:
             tfile.write('0')
             tfile.close()
 

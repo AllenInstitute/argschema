@@ -1,10 +1,13 @@
 from setuptools import setup, find_packages
+import sys
 
 with open('requirements.txt', 'r') as f:
     required = f.read().splitlines()
 
 with open('test_requirements.txt', 'r') as f:
     test_required = f.read().splitlines()
+    if sys.platform != "win32":
+        test_required = [i for i in test_required if 'pywin32' not in i]
 
 setup(name='argschema',
       version='2.0.0',
