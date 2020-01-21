@@ -121,7 +121,8 @@ class OutputDir(mm.fields.Str):
         if not os.path.isdir(value):
             try:
                 os.makedirs(value)
-                os.chmod(value, self.mode)
+                if self.mode is not None:
+                    os.chmod(value, self.mode)
             except OSError as e:
                 if e.errno == errno.EEXIST:
                     pass
