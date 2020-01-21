@@ -180,7 +180,7 @@ def test_relative_file_input_failed():
         ArgSchemaParser(
             input_data=input_file_example, schema_type=BasicInputFile, args=[])
 
-#@pytest.mark.skipif(sys.platform == "win32", reason="permissions cannot be reliably set on windows")
+
 def test_access_inputfile_failed():
     with open(input_file_example['input_file'], 'w') as fp:
         fp.write('test')
@@ -227,10 +227,21 @@ def test_bad_inputdir():
         ArgSchemaParser(input_data=input_data,
                         schema_type=BasicInputDir, args=[])
 
-@pytest.mark.skipif(sys.platform == "win32", reason="permissions cannot be reliably set on windows")
 def test_inputdir_no_access(tmpdir):
     input_dir = tmpdir.mkdir('no_access')
-    input_dir.chmod(0o222)
+    if sys.platform == "win32":
+        sd = win32security.GetFileSecurity(
+                str(input_dir),
+                win32security.DACL_SECURITY_INFORMATION)
+        everyone, domain, type = win32security.LookupAccountName ("", "Everyone")
+        dacl = win32security.ACL ()
+        dacl.AddAccessAllowedAce (win32security.ACL_REVISION, con.FILE_GENERIC_WRITE, everyone)
+        sd.SetSecurityDescriptorDacl (1, dacl, 0)
+        win32security.SetFileSecurity (
+                str(input_dir),
+                win32security.DACL_SECURITY_INFORMATION, sd)
+    else:
+        input_dir.chmod(0o222)
     input_data = {
         'input_dir': str(input_dir)
     }

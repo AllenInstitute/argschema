@@ -166,9 +166,17 @@ class InputDir(mm.fields.Str):
     def _validate(self, value):
         if not os.path.isdir(value):
             raise mm.ValidationError("%s is not a directory")
-        elif not os.access(value, os.R_OK):
-            raise mm.ValidationError(
-                "%s is not a readable directory" % value)
+
+        if sys.platform == "win32":
+            try:
+                x = list(os.scandir(value))
+            except PermissionError:
+                raise mm.ValidationError(
+                    "%s is not a readable directory" % value)
+        else:
+            if not os.access(value, os.R_OK):
+                raise mm.ValidationError(
+                    "%s is not a readable directory" % value)
 
 
 class InputFile(mm.fields.Str):
