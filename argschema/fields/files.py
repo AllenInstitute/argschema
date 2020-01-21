@@ -6,6 +6,7 @@ import errno
 import sys
 import uuid
 import stat
+import warnings
 
 
 class WindowsNamedTemporaryFile():
@@ -89,6 +90,8 @@ class OutputFile(mm.fields.Str):
                 "%s cannot be os.path.dirname-ed" % value)  # pragma: no cover
         validate_outpath(path)
 
+class OutputDirModeException(Exception):
+    pass
 
 class OutputDir(mm.fields.Str):
     """OutputDir is a :class:`marshmallow.fields.Str` subclass which is a path to
@@ -109,14 +112,16 @@ class OutputDir(mm.fields.Str):
 
     def __init__(self, mode=None, *args, **kwargs):
         self.mode = mode
+        if (self.mode is not None) & (sys.platform == "win32"):
+            raise OutputDirModeException(
+                "Setting mode of OutputDir supported only on posix systems")
         super(OutputDir, self).__init__(*args, **kwargs)
 
     def _validate(self, value):
         if not os.path.isdir(value):
             try:
                 os.makedirs(value)
-                if self.mode is not None:
-                    os.chmod(value, self.mode)
+                os.chmod(value, self.mode)
             except OSError as e:
                 if e.errno == errno.EEXIST:
                     pass
@@ -125,18 +130,18 @@ class OutputDir(mm.fields.Str):
                         "{} is not a directory and you cannot create it".format(
                             value)
                     )
-        if self.mode is not None:
-            try:
-                assert((os.stat(value).st_mode & 0o777) == self.mode)
-            except AssertionError:
-                raise mm.ValidationError(
-                    "{} does not have the mode  ({}) that was specified ".format(
-                        value, self.mode)
-                )
-            except os.error:
-                raise mm.ValidationError(
-                    "cannot get os.stat of {}".format(value)
-                )
+            if self.mode is not None:
+                try:
+                    assert((os.stat(value).st_mode & 0o777) == self.mode)
+                except AssertionError:
+                    raise mm.ValidationError(
+                        "{} does not have the mode  ({}) that was specified ".format(
+                            value, self.mode)
+                    )
+                except os.error:
+                    raise mm.ValidationError(
+                        "cannot get os.stat of {}".format(value)
+                    )
         # use outputfile to test that a file in this location is a valid path
         validate_outpath(value)
 

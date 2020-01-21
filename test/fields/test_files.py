@@ -1,6 +1,7 @@
 import pytest
 from argschema import ArgSchemaParser, ArgSchema
 from argschema.fields import InputFile, OutputFile, InputDir, OutputDir
+from argschema.fields.files import OutputDirModeException
 import marshmallow as mm
 import os
 import sys
@@ -124,13 +125,22 @@ def test_output_dir_bad_location():
                         input_data=output_dir_example,
                         args=[])
 
+if sys.platform != "win32":
+    class ModeOutputDirSchema(ArgSchema):
+        output_dir = OutputDir(required=True,
+                               description="775 output directory",
+                               mode=0o775)
 
-class ModeOutputDirSchema(ArgSchema):
-    output_dir = OutputDir(required=True,
-                           description="775 output directory",
-                           mode=0o775)
 
-@pytest.mark.skipif(sys.platform == "win32", reason="temp directories have different modes on windows")
+@pytest.mark.skipif(sys.platform != "win32", reason="no general support for chmod octal in windows")
+def test_windows_outdir_mode_fail():
+    with pytest.raises(OutputDirModeException):
+        output_dir = OutputDir(required=True,
+                               description="775 output directory",
+                               mode=0o775)
+
+
+@pytest.mark.skipif(sys.platform == "win32", reason="no general support for chmod octal in windows")
 def test_mode_output_osdir(tmpdir):
     outdir = tmpdir.join('mytmp')
     output_dir_example = {
@@ -142,6 +152,7 @@ def test_mode_output_osdir(tmpdir):
     assert((os.stat(mod.args['output_dir']).st_mode & 0o777) == 0o775)
 
 
+@pytest.mark.skipif(sys.platform == "win32", reason="no general support for chmod octal in windows")
 def test_failed_mode(tmpdir):
     outdir = tmpdir.join('mytmp_failed')
     os.makedirs(str(outdir))
