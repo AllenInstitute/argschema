@@ -131,18 +131,18 @@ class OutputDir(mm.fields.Str):
                         "{} is not a directory and you cannot create it".format(
                             value)
                     )
-            if self.mode is not None:
-                try:
-                    assert((os.stat(value).st_mode & 0o777) == self.mode)
-                except AssertionError:
-                    raise mm.ValidationError(
-                        "{} does not have the mode  ({}) that was specified ".format(
-                            value, self.mode)
-                    )
-                except os.error:
-                    raise mm.ValidationError(
-                        "cannot get os.stat of {}".format(value)
-                    )
+        if self.mode is not None:
+            try:
+                assert((os.stat(value).st_mode & 0o777) == self.mode)
+            except AssertionError:
+                raise mm.ValidationError(
+                    "{} does not have the mode  ({}) that was specified ".format(
+                        value, self.mode)
+                )
+            except os.error:
+                raise mm.ValidationError(
+                    "cannot get os.stat of {}".format(value)
+                )
         # use outputfile to test that a file in this location is a valid path
         validate_outpath(value)
 
