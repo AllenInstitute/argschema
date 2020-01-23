@@ -1,6 +1,7 @@
 import pytest
 from argschema import ArgSchemaParser, ArgSchema
 from argschema.fields import InputFile, OutputFile, InputDir, OutputDir
+from argschema.fields.files import OutputDirModeException
 import marshmallow as mm
 import os
 import sys
@@ -28,7 +29,6 @@ def test_outputfile_no_write(tmpdir):
     outdir = tmpdir.mkdir('cannot_write_here')
     if sys.platform == "win32":
         sd = win32security.GetFileSecurity(str(outdir), win32security.DACL_SECURITY_INFORMATION)
-        #dacl = sd.GetSecurityDescriptorDacl()
         everyone, domain, type = win32security.LookupAccountName ("", "Everyone")
         dacl = win32security.ACL ()
         dacl.AddAccessAllowedAce (win32security.ACL_REVISION, con.FILE_GENERIC_READ, everyone)
@@ -96,10 +96,17 @@ def test_output_dir_basic(tmpdir):
                     input_data=output_dir_example,
                     args=[])
 
-@pytest.mark.skipif(sys.platform == "win32", reason="cannot reliably test permissions on windows.")
 def test_output_dir_bad_permission(tmpdir):
-    outdir = tmpdir.mkdir('no_write')
-    outdir.chmod(0o222)
+    outdir = tmpdir.mkdir('no_read')
+    if sys.platform == "win32":
+        sd = win32security.GetFileSecurity(str(outdir), win32security.DACL_SECURITY_INFORMATION)
+        everyone, domain, type = win32security.LookupAccountName ("", "Everyone")
+        dacl = win32security.ACL ()
+        dacl.AddAccessAllowedAce (win32security.ACL_REVISION, con.FILE_GENERIC_WRITE, everyone)
+        sd.SetSecurityDescriptorDacl (1, dacl, 0)
+        win32security.SetFileSecurity (str(outdir), win32security.DACL_SECURITY_INFORMATION, sd)
+    else:
+        outdir.chmod(0o222)
     output_dir_example = {
         'output_dir': outdir
     }
@@ -118,13 +125,22 @@ def test_output_dir_bad_location():
                         input_data=output_dir_example,
                         args=[])
 
+if sys.platform != "win32":
+    class ModeOutputDirSchema(ArgSchema):
+        output_dir = OutputDir(required=True,
+                               description="775 output directory",
+                               mode=0o775)
 
-class ModeOutputDirSchema(ArgSchema):
-    output_dir = OutputDir(required=True,
-                           description="775 output directory",
-                           mode=0o775)
 
-@pytest.mark.skipif(sys.platform == "win32", reason="temp directories have different modes on windows")
+@pytest.mark.skipif(sys.platform != "win32", reason="no general support for chmod octal in windows")
+def test_windows_outdir_mode_fail():
+    with pytest.raises(OutputDirModeException):
+        output_dir = OutputDir(required=True,
+                               description="775 output directory",
+                               mode=0o775)
+
+
+@pytest.mark.skipif(sys.platform == "win32", reason="no general support for chmod octal in windows")
 def test_mode_output_osdir(tmpdir):
     outdir = tmpdir.join('mytmp')
     output_dir_example = {
@@ -136,6 +152,7 @@ def test_mode_output_osdir(tmpdir):
     assert((os.stat(mod.args['output_dir']).st_mode & 0o777) == 0o775)
 
 
+@pytest.mark.skipif(sys.platform == "win32", reason="no general support for chmod octal in windows")
 def test_failed_mode(tmpdir):
     outdir = tmpdir.join('mytmp_failed')
     os.makedirs(str(outdir))
@@ -174,11 +191,25 @@ def test_relative_file_input_failed():
         ArgSchemaParser(
             input_data=input_file_example, schema_type=BasicInputFile, args=[])
 
-@pytest.mark.skipif(sys.platform == "win32", reason="permissions cannot be reliably set on windows")
+
 def test_access_inputfile_failed():
     with open(input_file_example['input_file'], 'w') as fp:
         fp.write('test')
-    os.chmod(input_file_example['input_file'], 0o222)
+
+    if sys.platform == "win32":
+        sd = win32security.GetFileSecurity(
+                input_file_example['input_file'],
+                win32security.DACL_SECURITY_INFORMATION)
+        everyone, domain, type = win32security.LookupAccountName ("", "Everyone")
+        dacl = win32security.ACL ()
+        dacl.AddAccessAllowedAce (win32security.ACL_REVISION, con.FILE_GENERIC_WRITE, everyone)
+        sd.SetSecurityDescriptorDacl (1, dacl, 0)
+        win32security.SetFileSecurity (
+                input_file_example['input_file'],
+                win32security.DACL_SECURITY_INFORMATION, sd)
+    else:
+        os.chmod(input_file_example['input_file'], 0o222)
+
     with pytest.raises(mm.ValidationError):
         ArgSchemaParser(
             input_data=input_file_example, schema_type=BasicInputFile, args=[])
@@ -207,10 +238,21 @@ def test_bad_inputdir():
         ArgSchemaParser(input_data=input_data,
                         schema_type=BasicInputDir, args=[])
 
-@pytest.mark.skipif(sys.platform == "win32", reason="permissions cannot be reliably set on windows")
 def test_inputdir_no_access(tmpdir):
     input_dir = tmpdir.mkdir('no_access')
-    input_dir.chmod(0o222)
+    if sys.platform == "win32":
+        sd = win32security.GetFileSecurity(
+                str(input_dir),
+                win32security.DACL_SECURITY_INFORMATION)
+        everyone, domain, type = win32security.LookupAccountName ("", "Everyone")
+        dacl = win32security.ACL ()
+        dacl.AddAccessAllowedAce (win32security.ACL_REVISION, con.FILE_GENERIC_WRITE, everyone)
+        sd.SetSecurityDescriptorDacl (1, dacl, 0)
+        win32security.SetFileSecurity (
+                str(input_dir),
+                win32security.DACL_SECURITY_INFORMATION, sd)
+    else:
+        input_dir.chmod(0o222)
     input_data = {
         'input_dir': str(input_dir)
     }
