@@ -3,11 +3,35 @@ import os
 import marshmallow as mm
 import tempfile
 import errno
+import sys
+import uuid
+import stat
+import warnings
+
+
+class WindowsNamedTemporaryFile():
+    def __init__(self, dir=None, mode=None):
+        self.filename = os.path.join(dir, str(uuid.uuid4()))
+        self.mode = mode
+
+    def __enter__(self):
+        self.open_file = open(self.filename, self.mode)
+        return self.open_file
+    
+    def __exit__(self, *args):
+        self.open_file.close()
+        os.remove(self.filename)
+
+
+if sys.platform == "win32":
+    NamedTemporaryFile = WindowsNamedTemporaryFile
+else:
+    NamedTemporaryFile = tempfile.NamedTemporaryFile
 
 
 def validate_outpath(path):
     try:
-        with tempfile.NamedTemporaryFile(mode='w', dir=path) as tfile:
+        with NamedTemporaryFile(mode='w', dir=path) as tfile:
             tfile.write('0')
             tfile.close()
 
@@ -66,6 +90,8 @@ class OutputFile(mm.fields.Str):
                 "%s cannot be os.path.dirname-ed" % value)  # pragma: no cover
         validate_outpath(path)
 
+class OutputDirModeException(Exception):
+    pass
 
 class OutputDir(mm.fields.Str):
     """OutputDir is a :class:`marshmallow.fields.Str` subclass which is a path to
@@ -86,6 +112,9 @@ class OutputDir(mm.fields.Str):
 
     def __init__(self, mode=None, *args, **kwargs):
         self.mode = mode
+        if (self.mode is not None) & (sys.platform == "win32"):
+            raise OutputDirModeException(
+                "Setting mode of OutputDir supported only on posix systems")
         super(OutputDir, self).__init__(*args, **kwargs)
 
     def _validate(self, value):
@@ -121,8 +150,17 @@ class OutputDir(mm.fields.Str):
 def validate_input_path(value):
     if not os.path.isfile(value):
         raise mm.ValidationError("%s is not a file" % value)
-    elif not os.access(value, os.R_OK):
-        raise mm.ValidationError("%s is not readable" % value)
+    else:
+        if sys.platform == "win32":
+            try:
+                with open(value) as f:
+                    s = f.read()
+            except IOError as x:
+                if x.errno == errno.EACCES:
+                    raise mm.ValidationError("%s is not readable" % value)
+        else:
+            if not os.access(value, os.R_OK):
+                raise mm.ValidationError("%s is not readable" % value)
 
 
 class InputDir(mm.fields.Str):
@@ -134,9 +172,17 @@ class InputDir(mm.fields.Str):
     def _validate(self, value):
         if not os.path.isdir(value):
             raise mm.ValidationError("%s is not a directory")
-        elif not os.access(value, os.R_OK):
-            raise mm.ValidationError(
-                "%s is not a readable directory" % value)
+
+        if sys.platform == "win32":
+            try:
+                x = list(os.scandir(value))
+            except PermissionError:
+                raise mm.ValidationError(
+                    "%s is not a readable directory" % value)
+        else:
+            if not os.access(value, os.R_OK):
+                raise mm.ValidationError(
+                    "%s is not a readable directory" % value)
 
 
 class InputFile(mm.fields.Str):

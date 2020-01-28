@@ -280,3 +280,22 @@ def test_simple_description():
     }
     argschema.ArgSchemaParser(
         input_data=d, schema_type=MyShorterExtension)
+
+class MySchemaPostLoad(ArgSchema):
+    xid = argschema.fields.Int(required=True)
+    
+    @mm.post_load
+    def my_post(self, data):
+        return data
+
+class MyPostLoadClass(ArgSchemaParser):
+    default_schema = MySchemaPostLoad
+    def run(self):
+        print(self.args)
+
+def test_post_load_schema():
+    example1 = {
+        'xid': 1,
+    }
+    mb = MyPostLoadClass(input_data=example1, args=[])
+    mb.run()

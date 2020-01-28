@@ -416,10 +416,6 @@ def load(schema, d):
     """
 
     results = schema.load(d)
-    if isinstance(results, tuple):
-        (results, errors) = results
-        if len(errors) > 0:
-            raise mm.ValidationError(errors)
 
     return results
 
@@ -444,11 +440,8 @@ def dump(schema, d):
     marshmallow.ValidationError
         if the dictionary does not conform to the schema
     """
+    errors=schema.validate(d)
+    if len(errors)>0:
+        raise mm.ValidationError(errors)
 
-    results = schema.dump(d)
-    if isinstance(results, tuple):
-        (results, errors) = results
-        if len(errors) > 0:
-            raise mm.ValidationError(errors)
-
-    return results
+    return schema.dump(d)

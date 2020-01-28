@@ -8,7 +8,7 @@ class DefaultSchema(mm.Schema):
     """
 
     @mm.pre_load
-    def make_object(self, in_data):
+    def make_object(self, in_data, **kwargs):
         """marshmallow.pre_load decorated function for applying defaults on deserialation
 
         Parameters

@@ -14,6 +14,14 @@ OR pass a json_dictionary directly into the module with the parameters defined
 
 AND/OR pass parameters via the command line, in a way that will override the input_json or the json_dictionary given.
 
+## Upgrading to version 2.0
+The major change in argschema 2.0 is becoming
+compatible with marshmallow 3, which changes
+many of the ways your schemas and schema modifications work.  Some noteable differences  are that schemas are strict now by default, so tossing keys in your outputs or inputs that were ignored and stripped before now throw errors unless  
+def
+Please read this document for more guidance
+https://marshmallow.readthedocs.io/en/stable/upgrading.html
+
 ## Level of Support
 We are planning on occasional updating this tool with no fixed schedule. Community involvement is encouraged through both issues and pull requests.  Please make pull requests against the dev branch, as we will test changes there before merging into master.
 

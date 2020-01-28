@@ -26,12 +26,12 @@ def process_schemas(app, what, name, obj, options, lines):
         # pick out the ArgSchemaParser objects for documenting
         if issubclass(obj, ArgSchemaParser):
             # inspect the objects init function to find default schema
-            (args, vargs, varkw, defaults) = inspect.getargspec(obj.__init__)
+            fas = inspect.getfullargspec(obj.__init__)
             # find where the schema_type is as a keyword argument
             schema_index = next(i for i, arg in enumerate(
-                args) if arg == 'schema_type')
+                fas.args) if arg == 'schema_type')
             # use its default value to construct the string version of the classpath to the module
-            def_schema = defaults[schema_index - 1]
+            def_schema = fas.defaults[schema_index - 1]
 
             def_schema = def_schema or obj.default_schema
             if def_schema is not None:
@@ -117,7 +117,7 @@ def process_schemas(app, what, name, obj, options, lines):
                                 raw_type = '?'
                         field_line += ":class:`~{}.{}`,{}".format(
                             field_type.__module__, field_type.__name__, raw_type)
-                    except:
+                    except Exception as e:
                         # in case this fails for some reason, note it as unknown
                         # TODO handle this more elegantly, identify and patch up such cases
                         field_line += "unknown,unknown"
