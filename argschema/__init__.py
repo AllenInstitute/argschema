@@ -4,7 +4,7 @@ from .schemas import ArgSchema # noQA:F401
 from .argschema_parser import ArgSchemaParser # noQA:F401
 from .deprecated import JsonModule, ModuleParameters # noQA:F401
 
-__version__ == "2.0.0"
+__version__ = "2.0.0"
 
 def main():  # pragma: no cover
     jm = ArgSchemaParser()
