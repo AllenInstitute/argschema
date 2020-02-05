@@ -157,6 +157,7 @@ def validate_input_path(value):
         except Exception as value:
             raise mm.ValidationError("%s is not readable" % value)   
 
+
 class InputDir(mm.fields.Str):
     """InputDir is  :class:`marshmallow.fields.Str` subclass which is a path to a
        a directory that exists and that the user can access
