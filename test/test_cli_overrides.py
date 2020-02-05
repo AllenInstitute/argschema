@@ -48,7 +48,6 @@ def test_data(inputdir, inputfile, outputdir, outputfile):
         "inputfile": str(inputfile),
         "integer": 10,
         "list": [300, 200, 800, 1000],
-        "localdatetime": "0001-01-01T00:00:00",
         "log_level": "ERROR",
         "nested": {"a": 1, "b": False},
         "number": 5.5,
@@ -82,8 +81,7 @@ class MySchema(ArgSchema):
     inputdir = fields.InputDir(required=True)
     inputfile = fields.InputFile(required=True)
     integer = fields.Int(required=True)
-    list = fields.List(fields.Int, required=True)
-    localdatetime = fields.LocalDateTime(required=True)
+    list = fields.List(fields.Int, required=True, cli_as_single_argument=True)
     nested = fields.Nested(MyNestedSchema, required=True)
     number = fields.Number(required=True)
     numpyarray = fields.NumpyArray(dtype="uint8", required=True)
@@ -212,13 +210,24 @@ def test_override_list(test_data):
                               args=["--list", "invalid"])
 
 
-def test_override_localdatetime(test_data):
-    mod = ArgSchemaParser(test_data, schema_type=MySchema,
-                          args=["--localdatetime", "1977-05-04T00:00:00"])
-    assert(mod.args["localdatetime"] == datetime.datetime(1977, 5, 4, 0, 0, 0))
-    with pytest.raises(mm.ValidationError):
-        mod = ArgSchemaParser(test_data, schema_type=MySchema,
-                              args=["--localdatetime", "invalid"])
+# def test_override_list_deprecated(deprecated_data):
+#     with pytest.warns(FutureWarning):
+#         mod = ArgSchemaParser(deprecated_data, schema_type=MyDeprecatedSchema,
+#                               args=["--list_deprecated", "1000", "3000"])
+#         assert(mod.args["list_deprecated"] == [1000, 3000])
+#         with pytest.raises(mm.ValidationError):
+#             mod = ArgSchemaParser(deprecated_data,
+#                                   schema_type=MyDeprecatedSchema,
+#                                   args=["--list_deprecated", "[1000,3000]"])
+
+
+# def test_override_localdatetime(test_data):
+#     mod = ArgSchemaParser(test_data, schema_type=MySchema,
+#                           args=["--localdatetime", "1977-05-04T00:00:00"])
+#     assert(mod.args["localdatetime"] == datetime.datetime(1977, 5, 4, 0, 0, 0))
+#     with pytest.raises(mm.ValidationError):
+#         mod = ArgSchemaParser(test_data, schema_type=MySchema,
+#                               args=["--localdatetime", "invalid"])
 
 
 def test_override_log_level(test_data):

@@ -53,7 +53,7 @@ def test_my_default_nested_parser():
     }
     argschema.ArgSchemaParser(input_data=input_data,
                               schema_type=MySchema2,
-                              args=None)
+                              args=[])
 
 
 @pytest.mark.parametrize("default,args,expected", [

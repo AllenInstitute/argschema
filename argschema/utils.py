@@ -447,11 +447,8 @@ def dump(schema, d):
     dict
         serialized and validated dictionary
     """
+    errors=schema.validate(d)
+    if len(errors)>0:
+        raise mm.ValidationError(errors)
 
-    results = schema.dump(d)
-    if isinstance(results, tuple):
-        (results, errors) = results
-        if len(errors) > 0:
-            raise mm.ValidationError(errors)
-
-    return results
+    return schema.dump(d)

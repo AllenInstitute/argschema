@@ -22,7 +22,7 @@ class NumpyArray(mm.fields.List):
         self.dtype = dtype
         super(NumpyArray, self).__init__(mm.fields.Field, *args, **kwargs)
 
-    def _deserialize(self, value, attr, obj):
+    def _deserialize(self, value, attr, obj, **kwargs):
         try:
             return np.array(value, dtype=self.dtype)
         except ValueError as e:
@@ -30,7 +30,7 @@ class NumpyArray(mm.fields.List):
                 'Cannot create numpy array with type {} from data: {}.'.format(
                     self.dtype, e))
 
-    def _serialize(self, value, attr, obj):
+    def _serialize(self, value, attr, obj, **kwargs):
         if value is None:
             return None
         return mm.fields.List._serialize(self, value.tolist(), attr, obj)

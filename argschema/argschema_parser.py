@@ -197,6 +197,9 @@ class ArgSchemaParser(object):
         """
         if self.output_schema_type is not None:
             schema = self.output_schema_type()
+            errors = schema.validate(d)
+            if len(errors)>0:
+                raise(mm.ValidationError(errors))
             output_json = utils.dump(schema, d)
         else:
             self.logger.warning("output_schema_type is not defined,\
@@ -238,7 +241,6 @@ class ArgSchemaParser(object):
         args : dict
             a dictionary of input arguments
         schema :
-
 
         Returns
         -------

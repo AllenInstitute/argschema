@@ -19,7 +19,7 @@ class Slice(mm.fields.Str):
         kwargs['default'] = kwargs.get('default', slice(None))
         super(Slice, self).__init__(**kwargs)
 
-    def _deserialize(self, value, attr, obj):
+    def _deserialize(self, value, attr, obj, **kwargs):
         try:
             args = tuple([int(c) if c else None for c in value.split(':')])
             return slice(*args)

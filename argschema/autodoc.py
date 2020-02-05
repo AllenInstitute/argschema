@@ -120,7 +120,7 @@ def process_schemas(app, what, name, obj, options, lines):
                                 raw_type = '?'
                         field_line += ":class:`~{}.{}`,{}".format(
                             field_type.__module__, field_type.__name__, raw_type)
-                    except:
+                    except Exception as e:
                         # in case this fails for some reason, note it as unknown
                         # TODO handle this more elegantly, identify and patch up such cases
                         field_line += "unknown,unknown"

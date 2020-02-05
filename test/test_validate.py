@@ -63,6 +63,6 @@ def test_shape_call(validation_shape, input_array):
 def test_parser_validation(input_dict, raises):
     if raises:
         with pytest.raises(mm.ValidationError):
-            ArgSchemaParser(input_data=input_dict, schema_type=MySchema)
+            ArgSchemaParser(input_data=input_dict, schema_type=MySchema, args=[])
     else:
-        ArgSchemaParser(input_data=input_dict, schema_type=MySchema)
+        ArgSchemaParser(input_data=input_dict, schema_type=MySchema, args=[])
