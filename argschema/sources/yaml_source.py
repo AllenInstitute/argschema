@@ -1,5 +1,5 @@
 import yaml
-from .source import ArgSource, ArgSink
+from argschema.sources.source import ArgSource, ArgSink
 import argschema
 import marshmallow as mm
 
@@ -18,7 +18,7 @@ class YamlSource(ArgSource):
     ConfigSchema = YamlInputConfigSchema
 
     def get_dict(self):
-        with open(self.input_yaml, 'r') as fp:
+        with open(self.config["input_yaml"], 'r') as fp:
             return yaml.load(fp)
 
 
@@ -26,5 +26,5 @@ class YamlSink(ArgSink):
     ConfigSchema = YamlOutputConfigSchema
 
     def put_dict(self, d):
-        with open(self.output_yaml, 'w') as fp:
+        with open(self.config["output_yaml"], 'w') as fp:
             yaml.dump(d, fp, default_flow_style=False)
