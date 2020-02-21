@@ -102,7 +102,7 @@ jobs:
           name: run tests
           command: |
             . venv/bin/activate
-            python setup.py test
+            pytest test/
             bash <(curl -s https://codecov.io/bash)
 
       - store_test_results:
