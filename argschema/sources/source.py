@@ -1,3 +1,6 @@
+import abc
+from typing import Dict
+
 import marshmallow as mm
 
 
@@ -64,82 +67,29 @@ class ConfigurableSource(object):
             which will define the set of fields that are allowed (and their defaults)
         """
         self.schema = self.ConfigSchema()
-        result = self.get_config(self.ConfigSchema, kwargs)
-        self.__dict__.update(result)
+        self.config = {}
 
-    @staticmethod
-    def get_config(ConfigSchema, d):
-        """A static method to get the proper validated configuration keyword arguments/dictionary
-        of a Configurable source from a dictionary
-
-        Parameters
-        ----------
-        ConfigSchema: marshmallow.Schema
-            a marshmallow schema that defines the configuration schema for this ConfigurableSource
-        d: dict
-            a dictionary that might contain a proper configuration of this schema
-
-        Returns
-        -------
-        dict
-            a dictionary of configuration values that has been properly deserialized and validated by
-            ConfigSchema
-        Raises
-        ------
-        NotConfiguredSourceError
-            if the configation dictionary does not contain a configuration for this source
-        MisconfiguredSourceError
-            if the configuration dictionary contains a configuration but it is invalid
+    def load_config(self, candidate: Dict):
         """
-        schema = ConfigSchema()
-        if not d_contains_any_fields(schema, d):
+        """
+
+        if candidate is None:
+            raise NotConfiguredSourceError("No data was provided")
+
+        if not d_contains_any_fields(self.schema, candidate):
             raise NotConfiguredSourceError(
-                "This source is not present in \n {}".format(d))
-        else:
-            try:
-                result = schema.load(d, unknown=mm.EXCLUDE)
-            except mm.ValidationError as e:
-                raise MisconfiguredSourceError(
-                    "Source incorrectly configured\n {}".format(e))
-            else:
-                return result
+                "This source is not present in \n {}".format(candidate))
+
+        try:
+            self.config = self.schema.load(candidate, unknown=mm.EXCLUDE)
+        except mm.ValidationError as e:
+            raise MisconfiguredSourceError(
+                "Source incorrectly configured\n {}".format(e))       
 
 
 class ArgSource(ConfigurableSource):
     def get_dict(self):
         """method that must be implemented to enable an ArgSource to return a dictionary"""
-        pass
-
-
-def get_input_from_config(ArgSource, config_d):
-    """function to return the input dictionary from an ArgSource, given a configuration dictionary
-
-    Parameters
-    ----------
-    ArgSource: class(ArgSource)
-        The ArgSource class subclass that you want to get input from
-    config_d: a dictionary that might contain a configuration for this source
-
-    Returns
-    -------
-    dict
-        a dictionary returned by ArgSource.get_dict() after validating configuration
-        and instantiating an ArgSource instance
-
-    Raises
-    ------
-    NotConfiguredSourceError
-        if the configation dictionary does not contain a configuration for this source
-    MisconfiguredSourceError
-        if the configuration dictionary contains a configuration but it is invalid
-    """
-    if config_d is not None:
-        input_config_d = ArgSource.get_config(ArgSource.ConfigSchema, config_d)
-        input_source = ArgSource(**input_config_d)
-        input_data = input_source.get_dict()
-        return input_data
-    else:
-        raise NotConfiguredSourceError('No dictionary provided')
 
 
 class ArgSink(ConfigurableSource):
@@ -151,4 +101,3 @@ class ArgSink(ConfigurableSource):
         d: dict
             the dictionary to write
         """
-        pass
