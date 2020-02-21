@@ -20,16 +20,12 @@ class JsonSource(ArgSource):
     ConfigSchema = JsonInputConfigSchema
 
     def get_dict(self):
-        with open(self.input_json, 'r') as fp:
+        with open(self.config["input_json"], 'r') as fp:
             return json.load(fp,)
 
 
 class JsonSink(ArgSink):
     ConfigSchema = JsonOutputConfigSchema
-
-    def __init__(self, output_json=None, output_json_indent=None):
-        self.output_json = output_json
-        self.indent = output_json_indent
 
     def put_dict(self, d):
         with open(self.output_json, 'w') as fp:
