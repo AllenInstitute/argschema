@@ -28,5 +28,5 @@ class JsonSink(ArgSink):
     ConfigSchema = JsonOutputConfigSchema
 
     def put_dict(self, d):
-        with open(self.output_json, 'w') as fp:
-            json.dump(d, fp, indent=self.indent)
+        with open(self.config["output_json"], 'w') as fp:
+            json.dump(d, fp, indent=self.config.get("output_json_indent", None))
