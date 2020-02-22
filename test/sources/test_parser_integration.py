@@ -1,11 +1,12 @@
 import json
-import yaml
+import os
 
 import pytest
+import yaml
 
 import argschema
-from argschema.sources.json_source import JsonSource
-from argschema.sources.yaml_source import YamlSource
+from argschema.sources.json_source import JsonSource, JsonSink
+from argschema.sources.yaml_source import YamlSource, YamlSink
 from argschema.sources.source import MultipleConfiguredSourceError
 
 
@@ -70,7 +71,6 @@ def test_json_input_args(json_inp, inp_sources):
 
     assert parser.args["a"] == 5
 
-
 @pytest.mark.parametrize("inp_sources", [
     JsonSource(), [JsonSource()], JsonSource, [JsonSource]
 ])
@@ -83,7 +83,6 @@ def test_json_input_data(json_inp, inp_sources):
 
     assert parser.args["a"] == 5
 
-
 def test_multisource_arg(yaml_inp):
     parser = MyParser(
         input_sources=[JsonSource, YamlSource],
@@ -91,10 +90,36 @@ def test_multisource_arg(yaml_inp):
     )
     assert parser.args["a"] == 6
 
-
 def test_multisource_arg_conflict(json_inp, yaml_inp):
     with pytest.raises(MultipleConfiguredSourceError):
         parser = MyParser(
             input_sources=[JsonSource, YamlSource],
             args=["--input_yaml", yaml_inp, "--input_json", json_inp]
+        )
+
+def test_multisink(yaml_inp):
+    out_path = os.path.join(os.path.dirname(yaml_inp), "out.json")
+
+    parser = MyParser(
+        output_schema_type=MyOutputSchema,
+        input_sources=YamlSource,
+        output_sinks=[YamlSink, JsonSink],
+        args=["--input_yaml", yaml_inp, "--output_json", out_path]
+    )
+
+    parser.output({"a": 12, "b": "16"})
+    with open(out_path, "r") as out_file:
+        obt = json.load(out_file)
+        assert obt["a"] == 12
+
+def test_multisink_conflicting(yaml_inp, json_inp):
+    yaml_out = os.path.join(os.path.dirname(yaml_inp), "out.yaml")
+    json_out = os.path.join(os.path.dirname(json_inp), "out.json")
+
+    with pytest.raises(MultipleConfiguredSourceError):
+        parser = MyParser(
+            output_schema_type=MyOutputSchema,
+            input_sources=[YamlSource],
+            output_sinks=[JsonSink, YamlSink],
+            args=["--output_yaml", yaml_out, "--output_json", json_out]
         )
