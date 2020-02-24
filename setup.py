@@ -18,5 +18,4 @@ setup(name='argschema',
       packages=find_packages(),
       url='https://github.com/AllenInstitute/argschema',
       install_requires=required,
-      setup_requires=['pytest-runner'],
       tests_require=test_required)
