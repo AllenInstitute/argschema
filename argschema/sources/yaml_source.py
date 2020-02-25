@@ -23,7 +23,7 @@ class YamlSource(ConfigurableSource):
 
     def get_dict(self):
         with open(self.config["input_yaml"], 'r') as fp:
-            return yaml.load(fp)
+            return yaml.load(fp, Loader=yaml.FullLoader)
 
 
 class YamlSink(ConfigurableSink):
