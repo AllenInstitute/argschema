@@ -1,0 +1,3 @@
+a_subschema : 
+  an_int: 13
+a_float: 16.7
