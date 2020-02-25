@@ -1,7 +1,7 @@
 '''Module that contains the base class ArgSchemaParser which should be
 subclassed when using this library
 '''
-from typing import List, Sequence, Dict, Optional, Union
+from typing import List, Sequence, Dict, Optional, Union, Tuple, Type, TypeVar
 import logging
 from . import schemas
 from . import utils
@@ -9,11 +9,25 @@ import marshmallow as mm
 from .sources.json_source import JsonSource, JsonSink
 from .sources.yaml_source import YamlSource, YamlSink
 from .sources.source import (
-    ArgSource,
-    ArgSink,
-    NotConfiguredSourceError, 
-    MultipleConfiguredSourceError, 
+    ConfigurableSource,
+    ConfigurableSink,
+    NonconfigurationError, 
+    MultipleConfigurationError, 
 )
+
+
+SourceType = Union[ConfigurableSource, Type[ConfigurableSource]]
+RegistrableSources = Union[
+    None,
+    SourceType,
+    Sequence[SourceType],
+]
+SinkType = Union[ConfigurableSink, Type[ConfigurableSink]]
+RegistrableSinks = Union[
+    None,
+    SinkType,
+    Sequence[SinkType],
+]
 
 
 class ArgSchemaParser(object):
@@ -33,9 +47,9 @@ class ArgSchemaParser(object):
     output_schema_type : marshmallow.Schema
         the schema to use to validate the output, used by self.output
     input_sources : Sequence[argschema.sources.source.ConfigurableSource]
-        Each of these will be considered 
+        each of these will be considered as a potential source of input data
     output_sinks : Sequence[argschema.sources.source.ConfigurableSource]
-        a generic sink to write output dictionary to
+        each of these will be considered as a potential sink for output data
     args : list or None
         command line arguments passed to the module, if None use argparse to parse the command line,
         set to [] if you want to bypass command line parsing
@@ -51,25 +65,25 @@ class ArgSchemaParser(object):
     """
     default_schema = schemas.ArgSchema
     default_output_schema = None
-    default_sources = (JsonSource,)
-    default_sinks = (JsonSink,)
+    default_sources: Tuple[SourceType] = (JsonSource,)
+    default_sinks: Tuple[SinkType] = (JsonSink,)
 
     @property
-    def input_sources(self) -> List[ArgSource]:
+    def input_sources(self) -> List[ConfigurableSource]:
         if not hasattr(self, "_input_sources"):
-            self._input_sources = []
+            self._input_sources: List[ConfigurableSource] = []
         return self._input_sources
 
     @property
-    def output_sinks(self) -> List[ArgSource]:
+    def output_sinks(self) -> List[ConfigurableSink]:
         if not hasattr(self, "_output_sinks"):
-            self._output_sinks = []
+            self._output_sinks: List[ConfigurableSink] = []
         return self._output_sinks
 
     @property
     def io_schemas(self) -> List[mm.Schema]:
         if not hasattr(self, "_io_schemas"):
-            self._io_schemas = []
+            self._io_schemas: List[mm.Schema] = []
         return self._io_schemas
 
     @io_schemas.setter
@@ -105,23 +119,31 @@ class ArgSchemaParser(object):
 
         self.output_schema_type = output_schema_type
         self.logger = self.initialize_logger(
-            logger_name, self.args.get('log_level'))
+            logger_name, self.args.get('log_level'))        
 
     def register_sources(
         self, 
-        sources: Union[None, Sequence[ArgSource], ArgSource]
+        sources: RegistrableSources
     ):
-        """consolidate a list of the input and output source command line 
-        configuration schemas
+        """consolidate a list of the input source configuration schemas
+
+        Parameters
+        ----------
+        sources : 
+            Each source will be registered (and may then be configured by data 
+            passed to this parser). If None is argued, the default_sources 
+            associated with this class will be registered.
+
         """
 
-        if isinstance(sources, (ArgSource, type)):
-            sources = [sources]
+        if isinstance(sources, (ConfigurableSource, type)):
+            coerced_sources: Sequence[SourceType] = [sources]
         elif sources is None:
-            sources = self.default_sources
+            coerced_sources = self.default_sources
+        else:
+            coerced_sources = sources
 
-
-        for source in sources:
+        for source in coerced_sources:
             if isinstance(source, type):
                 source = source()
             self.io_schemas.append(source.schema)
@@ -129,25 +151,48 @@ class ArgSchemaParser(object):
 
     def register_sinks(
         self, 
-        sinks: Union[None, Sequence[ArgSink], ArgSink]
+        sinks: RegistrableSinks
     ):
-        """
+        """Consolidate a list of the output sink configuration schemas
+
+        Parameters
+        ----------
+        sinks : 
+            Each sink will be registered (and may then be configured by data 
+            passed to this parser). If None is argued, the default_sinks 
+            associated with this class will be registered.
+
         """
 
-        if isinstance(sinks, (ArgSink, type)):
-            sinks = [sinks]
+        if isinstance(sinks, (ConfigurableSink, type)):
+            coerced_sinks: Sequence[SinkType] = [sinks]
         elif sinks is None:
-            sinks = self.default_sinks
+            coerced_sinks = self.default_sinks
+        else:
+            coerced_sinks = sinks
 
-        for sink in sinks:
+        for sink in coerced_sinks:
             if isinstance(sink, type):
                 sink = sink()
             self.io_schemas.append(sink.schema)
             self.output_sinks.append(sink)
 
-    def parse_command_line(self, args: Optional[List]):
-        """ build a command line parser from the input schemas and 
-        configurations
+    def parse_command_line(self, args: Optional[List[str]]) -> Dict:
+        """Build a command line parser from the input schemas and 
+        configurations. Parse command line arguments using this parser
+
+        Parameters
+        ----------
+        args : list of str or None
+            Will be passed directly to argparse's parse_args. If None, sys.argv
+            will be used. If provided, should be formatted like:
+                ["positional_arg", "--optional_arg", "optional_value"]
+
+        Returns
+        -------
+        argsdict : dict
+            a (potentially nested) dictionary of parsed command line arguments
+
         """
         parser = utils.schema_argparser(self.schema, self.io_schemas)
         argsobj = parser.parse_args(args)
@@ -158,6 +203,25 @@ class ArgSchemaParser(object):
     def resolve_inputs(self, input_data: Dict, argsdict: Dict) -> Dict:
         """ Resolve input source by checking candidate sources against 
         constructor and command line arguments
+
+        Parameters
+        ----------
+        input_data : dict
+            Manually (on ArgschemaParser construction) specified parameters. 
+            Will be overridden if values are successfully extracted from 
+            argsdict. 
+        argsdict : dict
+            Command line parameters, parsed into a nested dictionary. 
+
+        Returns
+        -------
+        args : dict
+            A fully merged (possibly nested) collection of inputs. May draw from
+                1. input data
+                2. the argsdict
+                3. any configurable sources whose config schemas are satisfied 
+                    by values in the above 
+
         """
 
         config_data = self.__get_input_data_from_config(input_data)
@@ -175,21 +239,21 @@ class ArgSchemaParser(object):
         return args
 
     def __get_output_sink_from_config(self, d):
-        """private function to check for ArgSink configuration in a dictionary and return a configured ArgSink
+        """private function to check for ConfigurableSink configuration in a dictionary and return a configured ConfigurableSink
 
         Parameters
         ----------
         d : dict
-            dictionary to look for ArgSink Configuration parameters in
+            dictionary to look for ConfigurableSink Configuration parameters in
 
         Returns
         -------
-        ArgSink
-            A configured argsink
+        ConfigurableSink
+            A configured ConfigurableSink
 
         Raises
         ------
-        MultipleConfiguredSourceError
+        MultipleConfigurationError
             If more than one Sink is configured
         """
         output_set = False
@@ -199,16 +263,16 @@ class ArgSchemaParser(object):
                 sink.load_config(d)
                 
                 if output_set:
-                    raise MultipleConfiguredSourceError(
+                    raise MultipleConfigurationError(
                         "more then one OutputSink configuration present in {}".format(d))
                 output_sink = sink
                 output_set = True
-            except NotConfiguredSourceError:
+            except NonconfigurationError:
                 pass
         return output_sink
 
     def __get_input_data_from_config(self, d):
-        """private function to check for ArgSource configurations in a dictionary
+        """private function to check for ConfigurableSource configurations in a dictionary
         and return the data if it exists
 
         Parameters
@@ -223,7 +287,7 @@ class ArgSchemaParser(object):
 
         Raises
         ------
-        MultipleConfiguredSourceError
+        MultipleConfigurationError
             if more than one InputSource is configured
         """
         input_set = False
@@ -233,10 +297,10 @@ class ArgSchemaParser(object):
                 source.load_config(d)
                 input_data = source.get_dict()
                 if input_set:
-                    raise MultipleConfiguredSourceError(
+                    raise MultipleConfigurationError(
                         "more then one InputSource configuration present in {}".format(d))
                 input_set = True
-            except NotConfiguredSourceError as e:
+            except NonconfigurationError as e:
                 pass
         return input_data
 
@@ -279,7 +343,7 @@ class ArgSchemaParser(object):
         ----------
         d:dict
             output dictionary to output
-        sink: argschema.sources.source.ArgSink
+        sink: argschema.sources.source.ConfigurableSink
             output_sink to output to (optional default to self.output_source)
 
         Raises
@@ -346,8 +410,3 @@ class ArgSchemaParser(object):
         logger = logging.getLogger(name)
         logger.setLevel(level=level)
         return logger
-
-
-class ArgSchemaYamlParser(ArgSchemaParser):
-    default_sources = [YamlSource]
-    default_sinks = [YamlSink]

@@ -7,7 +7,7 @@ import yaml
 import argschema
 from argschema.sources.json_source import JsonSource, JsonSink
 from argschema.sources.yaml_source import YamlSource, YamlSink
-from argschema.sources.source import MultipleConfiguredSourceError
+from argschema.sources.source import MultipleConfigurationError
 
 
 class MyNestedSchema(argschema.schemas.DefaultSchema):
@@ -91,7 +91,7 @@ def test_multisource_arg(yaml_inp):
     assert parser.args["a"] == 6
 
 def test_multisource_arg_conflict(json_inp, yaml_inp):
-    with pytest.raises(MultipleConfiguredSourceError):
+    with pytest.raises(MultipleConfigurationError):
         parser = MyParser(
             input_sources=[JsonSource, YamlSource],
             args=["--input_yaml", yaml_inp, "--input_json", json_inp]
@@ -116,7 +116,7 @@ def test_multisink_conflicting(yaml_inp, json_inp):
     yaml_out = os.path.join(os.path.dirname(yaml_inp), "out.yaml")
     json_out = os.path.join(os.path.dirname(json_inp), "out.json")
 
-    with pytest.raises(MultipleConfiguredSourceError):
+    with pytest.raises(MultipleConfigurationError):
         parser = MyParser(
             output_schema_type=MyOutputSchema,
             input_sources=[YamlSource],
