@@ -1,4 +1,4 @@
-from argschema.sources import ArgSource, ArgSink
+from argschema.sources import ConfigurableSource
 from argschema.schemas import DefaultSchema
 from argschema.fields import Str,Int
 from argschema import ArgSchemaParser
@@ -14,7 +14,10 @@ class UrlSourceConfig(DefaultSchema):
     input_url = Str(required=True, description="location on host of input")
     input_protocol = Str(required=False, default='http', description="url protocol to use")
 
-class UrlSource(ArgSource):
+class UrlSource(ConfigurableSource):
+    """ A configurable source which obtains values by making a GET request, 
+    expecting a JSON response.
+    """
     ConfigSchema = UrlSourceConfig
 
     def get_dict(self):

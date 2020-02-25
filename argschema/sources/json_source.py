@@ -1,4 +1,4 @@
-from .source import ArgSource, ArgSink
+from argschema.sources.source import ConfigurableSource, ConfigurableSink
 import json
 import marshmallow as mm
 import argschema
@@ -16,7 +16,12 @@ class JsonOutputConfigSchema(mm.Schema):
         description='whether to indent options or not')
 
 
-class JsonSource(ArgSource):
+class JsonSource(ConfigurableSource):
+    """ A configurable source which reads values from a json. Expects 
+        --input_json
+    to be specified.
+    """
+
     ConfigSchema = JsonInputConfigSchema
 
     def get_dict(self):
@@ -24,9 +29,14 @@ class JsonSource(ArgSource):
             return json.load(fp,)
 
 
-class JsonSink(ArgSink):
+class JsonSink(ConfigurableSink):
+    """ A configurable sink which writes values to a json. Expects 
+        --output_json
+    to be specified.
+    """
     ConfigSchema = JsonOutputConfigSchema
 
-    def put_dict(self, d):
+    def put_dict(self, data):
         with open(self.config["output_json"], 'w') as fp:
-            json.dump(d, fp, indent=self.config.get("output_json_indent", None))
+            json.dump(
+                data, fp, indent=self.config.get("output_json_indent", None))
