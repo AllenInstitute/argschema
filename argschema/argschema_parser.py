@@ -129,7 +129,7 @@ class ArgSchemaParser(object):
 
         Parameters
         ----------
-        sources : 
+        sources : (sequence of) ConfigurableSource or None
             Each source will be registered (and may then be configured by data 
             passed to this parser). If None is argued, the default_sources 
             associated with this class will be registered.
@@ -157,7 +157,7 @@ class ArgSchemaParser(object):
 
         Parameters
         ----------
-        sinks : 
+        sinks : (sequence of) ConfigurableSink or None
             Each sink will be registered (and may then be configured by data 
             passed to this parser). If None is argued, the default_sinks 
             associated with this class will be registered.
