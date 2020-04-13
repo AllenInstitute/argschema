@@ -1,8 +1,7 @@
-from argschema.sources import ArgSource, ArgSink
+from argschema.sources import ConfigurableSource
 from argschema.schemas import DefaultSchema
 from argschema.fields import Str,Int
 from argschema import ArgSchemaParser
-from test_classes import MySchema
 import requests
 try:
     from urllib.parse import urlunparse 
@@ -15,19 +14,24 @@ class UrlSourceConfig(DefaultSchema):
     input_url = Str(required=True, description="location on host of input")
     input_protocol = Str(required=False, default='http', description="url protocol to use")
 
-class UrlSource(ArgSource):
+class UrlSource(ConfigurableSource):
+    """ A configurable source which obtains values by making a GET request, 
+    expecting a JSON response.
+    """
     ConfigSchema = UrlSourceConfig
 
     def get_dict(self):
-        if self.input_port is None:
-            netloc = self.input_host
-        else:
-            netloc = "{}:{}".format(self.input_host,self.input_port)
-        url = urlunparse((self.input_protocol,netloc,self.input_url,None,None,None))                             
+        netloc = self.config["input_host"]
+        if self.config["input_port"] is not None:
+            netloc = "{}:{}".format(netloc, self.config["input_port"])
+
+        url = urlunparse((
+            self.config["input_protocol"], 
+            netloc, 
+            self.config["input_url"],
+            None, None, None
+        ))     
+                        
         response = requests.get(url)
+        response.raise_for_status()
         return response.json()
-
-
-class UrlArgSchemaParser(ArgSchemaParser):
-    default_configurable_sources = [UrlSource]
-    default_schema = MySchema

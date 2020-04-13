@@ -251,7 +251,7 @@ def test_simple_description():
         'd': [1, 5, 4]
     }
     argschema.ArgSchemaParser(
-        input_data=d, schema_type=MyShorterExtension)
+        input_data=d, schema_type=MyShorterExtension, args=[])
 
 class MySchemaPostLoad(ArgSchema):
     xid = argschema.fields.Int(required=True)

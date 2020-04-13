@@ -1,2 +1,2 @@
-from .source import ArgSink, ArgSource
-from .json_source import JsonSource, JsonSink
+from argschema.sources.source import ConfigurableSource, ConfigurableSink
+from argschema.sources.json_source import JsonSource, JsonSink

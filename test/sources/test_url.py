@@ -1,8 +1,7 @@
 import requests
 import mock
-from url_source import UrlArgSchemaParser, UrlSource, MySchema
+from argschema.sources.url_source import UrlSource
 from argschema import ArgSchemaParser
-# This method will be used by the mock to replace requests.get
 
 
 def mocked_requests_get(*args, **kwargs):
@@ -10,6 +9,10 @@ def mocked_requests_get(*args, **kwargs):
         def __init__(self, json_data, status_code):
             self.json_data = json_data
             self.status_code = status_code
+
+        def raise_for_status(self):
+            if self.status_code >= 400:
+                raise requests.exceptions.HTTPError()
 
         def json(self):
             return self.json_data
@@ -26,16 +29,13 @@ def mocked_requests_get(*args, **kwargs):
 
 
 @mock.patch('requests.get', side_effect=mocked_requests_get)
-def test_url_parser(mock_get):
-    input_source = UrlSource(input_host='localhost',
-                             input_port=88, input_url='test.json')
-    mod = ArgSchemaParser(schema_type=MySchema,
-                          input_source=input_source, args=[])
-    assert(mod.args['a'] == 7)
+def test_url_parser_get_dict(mock_get):
+    source = UrlSource()
+    source.load_config({
+        "input_host": "localhost",
+        "input_port": 88,
+        "input_url": "test.json",
+    })
 
-
-@mock.patch('requests.get', side_effect=mocked_requests_get)
-def test_url_parser_command_line(mock_get):
-    mod = UrlArgSchemaParser(
-        args=['--input_host', 'localhost', '--input_port', '88', '--input_url', 'test.json'])
-    assert(mod.args['a'] == 7)
+    obtained = source.get_dict()
+    assert obtained["a"] == 7

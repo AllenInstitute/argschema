@@ -87,7 +87,7 @@ def test_parser_output(tmpdir_factory):
             'two': False
         }
     }
-    mod = MyParser(input_data=input_data)
+    mod = MyParser(input_data=input_data, args=[])
     json_sink = argschema.sources.JsonSink(output_json=str(json_path), output_json_indent=2)
     mod.output(mod.args, sink=json_sink)
     with open(str(json_path), 'r') as jf:

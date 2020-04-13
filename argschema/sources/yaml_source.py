@@ -1,5 +1,5 @@
 import yaml
-from .source import ArgSource, ArgSink
+from argschema.sources.source import ConfigurableSource, ConfigurableSink
 import argschema
 import marshmallow as mm
 
@@ -14,17 +14,25 @@ class YamlOutputConfigSchema(mm.Schema):
         description='filepath to save output yaml')
 
 
-class YamlSource(ArgSource):
+class YamlSource(ConfigurableSource):
+    """ A configurable source which reads values from a yaml. Expects 
+        --input_yaml
+    to be specified.
+    """
     ConfigSchema = YamlInputConfigSchema
 
     def get_dict(self):
-        with open(self.input_yaml, 'r') as fp:
-            return yaml.load(fp)
+        with open(self.config["input_yaml"], 'r') as fp:
+            return yaml.load(fp, Loader=yaml.FullLoader)
 
 
-class YamlSink(ArgSink):
+class YamlSink(ConfigurableSink):
+    """ A configurable sink which writes values to a yaml. Expects 
+        --output_yaml
+    to be specified.
+    """
     ConfigSchema = YamlOutputConfigSchema
 
-    def put_dict(self, d):
-        with open(self.output_yaml, 'w') as fp:
-            yaml.dump(d, fp, default_flow_style=False)
+    def put_dict(self, data):
+        with open(self.config["output_yaml"], 'w') as fp:
+            yaml.dump(data, fp, default_flow_style=False)
