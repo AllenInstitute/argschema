@@ -14,6 +14,10 @@ OR pass a json_dictionary directly into the module with the parameters defined
 
 AND/OR pass parameters via the command line, in a way that will override the input_json or the json_dictionary given.
 
+## Upgrading to version 3.0
+The major change in argschema 3.0 is introducing a more generalized interface for reading and writing dictionaries, referred to as ArgSource and ArgSink.
+
+
 ## Upgrading to version 2.0
 The major change in argschema 2.0 is becoming
 compatible with marshmallow 3, which changes
