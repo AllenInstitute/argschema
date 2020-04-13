@@ -430,7 +430,9 @@ def load(schema, d):
         deserialized and validated dictionary
     """
 
+
     return schema.load(d, unknown=mm.EXCLUDE)
+
 
 
 def dump(schema, d):
