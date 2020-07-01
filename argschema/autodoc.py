@@ -123,6 +123,7 @@ def process_schemas(app, what, name, obj, options, lines):
                     except Exception as e:
                         # in case this fails for some reason, note it as unknown
                         # TODO handle this more elegantly, identify and patch up such cases
+                        print(e)
                         field_line += "unknown,unknown"
                     lines.append(field_line)
                 # lines.append(table_line)
