@@ -257,7 +257,7 @@ class MySchemaPostLoad(ArgSchema):
     xid = argschema.fields.Int(required=True)
     
     @mm.post_load
-    def my_post(self, data):
+    def my_post(self, data, **kwargs):
         return data
 
 class MyPostLoadClass(ArgSchemaParser):
