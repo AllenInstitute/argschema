@@ -80,7 +80,7 @@ This is what argschema is designed to do.
 
 
 ## Upgrading to version 3.0
-The major change in argschema 3.0 is introducing a more generalized interface for reading and writing dictionaries, referred to as ArgSource and ArgSink.  One can define customized classes that read dictionaries from any source you can code, such as making a database call,  reading from a web service, reading a yaml file, etc.  Argschema isn't just for json anymore.  Similarly you can now dynamically tell your ArgSchemaParser to write output to an Argsink, which might write to a database, a webservice, or a messaging service.  This enables those integrating modules into larger workflow management solutions more flexibility in wiring up your python modules to those systems.
+The major change in argschema 3.0 is introducing a more generalized interface for reading and writing dictionaries, referred to as ConfigurableSource and ConfigurableSink.  One can define customized classes that read dictionaries from any source you can code, such as making a database call,  reading from a web service, reading a yaml file, etc.  Argschema isn't just for json anymore.  Similarly you can now dynamically tell your ArgSchemaParser to write output to a ConfigurableSink, which might write to a database, a webservice, or a messaging service.  This enables those integrating modules into larger workflow management solutions more flexibility in wiring up your python modules to those systems.
 
 It also removes features that were marked previously as deprecated. 
 
