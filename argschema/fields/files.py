@@ -151,17 +151,9 @@ def validate_input_path(value):
     if not os.path.isfile(value):
         raise mm.ValidationError("%s is not a file" % value)
     else:
-        if sys.platform == "win32":
-            try:
-                with open(value) as f:
-                    s = f.read()
-            except IOError as x:
-                if x.errno == errno.EACCES:
-                    raise mm.ValidationError("%s is not readable" % value)
-        else:
-            if not os.access(value, os.R_OK):
-                raise mm.ValidationError("%s is not readable" % value)
-
+        with open(value) as f:
+            if not f.readable():
+                raise mm.ValidationError("%s is not readable" % value)   
 
 class InputDir(mm.fields.Str):
     """InputDir is  :class:`marshmallow.fields.Str` subclass which is a path to a
