@@ -2,7 +2,6 @@
 marshmallow schemas to argparse and merging dictionaries from both systems
 '''
 import logging
-import warnings
 import ast
 import argparse
 from operator import add
@@ -55,11 +54,7 @@ def get_type_from_field(field):
     callable
         Function to call to cast argument to
     """
-    if (isinstance(field, fields.List) and
-            not field.metadata.get("cli_as_single_argument", False)):
-        return list
-    else:
-        return FIELD_TYPE_MAP.get(type(field), str)
+    return FIELD_TYPE_MAP.get(type(field), str)
 
 
 def cli_error_dict(arg_path, field_type, index=0):
@@ -88,15 +83,44 @@ def cli_error_dict(arg_path, field_type, index=0):
         return {arg_path[index]: cli_error_dict(arg_path, field_type, index + 1)}
 
 
-def args_to_dict(argsobj, schema=None):
+def get_field_def_from_schema(parts, schema):
+    """function to get a field_definition from a particular key, specified by it's parts list
+
+    Parameters
+    ----------
+    parts : list[str]
+        the list of keys to get this schema
+    schema: marshmallow.Schema
+        the marshmallow schema to look up this key
+
+    Returns
+    -------
+    marshmallow.Field or None
+        returns the field in the schema if it exists, otherwise returns None
+    """
+    current_schema = schema
+    for part in parts:
+        if part not in current_schema.fields.keys():
+            return None
+        else:
+            if current_schema.only and part not in current_schema.only:
+                field_def = None
+            else:
+                field_def = current_schema.fields[part]
+            if isinstance(field_def, fields.Nested):
+                current_schema = field_def.schema
+    return field_def
+
+
+def args_to_dict(argsobj, schemas=None):
     """function to convert namespace returned by argsparse into a nested dictionary
 
     Parameters
     ----------
     argsobj : argparse.Namespace
         Namespace object returned by standard argparse.parse function
-    schema : marshmallow.Schema
-        Optional schema which will be used to cast fields via `FIELD_TYPE_MAP`
+    schemas : list[marshmallow.Schema]
+        Optional list of schemas which will be used to cast fields via `FIELD_TYPE_MAP`
 
 
     Returns
@@ -110,18 +134,19 @@ def args_to_dict(argsobj, schema=None):
     errors = {}
     field_def = None
     for field in argsdict.keys():
-        current_schema = schema
         parts = field.split('.')
         root = d
         for i in range(len(parts)):
-            if current_schema is not None:
-                if current_schema.only and parts[i] not in current_schema.only:
-                    field_def = None
-                else:
-                    field_def = current_schema.fields[parts[i]]
-                if isinstance(field_def, fields.Nested):
-                    current_schema = field_def.schema
+
             if i == (len(parts) - 1):
+                field_def = None
+                for schema in schemas:
+                    field_def = get_field_def_from_schema(parts, schema)
+                    if field_def is not None:
+                        break
+
+                # field_def = next(get_field_def(parts,schema) for schema in schemas if field_in_schema(parts,schema))
+
                 value = argsdict.get(field)
                 if value is not None:
                     try:
@@ -335,17 +360,6 @@ def build_schema_arguments(schema, arguments=None, path=None, description=None):
                 if isinstance(validator, mm.validate.OneOf):
                     arg['help'] += " (valid options are {})".format(validator.choices)
 
-            if (isinstance(field, mm.fields.List) and
-                    not field.metadata.get("cli_as_single_argument", False)):
-                warn_msg = ("'{}' is using old-style command-line syntax with "
-                            "each element as a separate argument. This will "
-                            "not be supported in argschema after "
-                            "2.0. See http://argschema.readthedocs.io/en/"
-                            "master/user/intro.html#command-line-specification"
-                            " for details.").format(arg_name)
-                warnings.warn(warn_msg, FutureWarning)
-                arg['nargs'] = '*'
-
             # do type mapping after parsing so we can raise validation errors
             arg['type'] = str
 
@@ -361,35 +375,42 @@ def build_schema_arguments(schema, arguments=None, path=None, description=None):
     return arguments
 
 
-def schema_argparser(schema):
+def schema_argparser(schema, additional_schemas=None):
     """given a jsonschema, build an argparse.ArgumentParser
 
     Parameters
     ----------
     schema : argschema.schemas.ArgSchema
         schema to build an argparser from
-
+    additional_schemas : list[marshmallow.schema]
+        list of additional schemas to add to the command line arguments
     Returns
     -------
     argparse.ArgumentParser
-        the represents the schema
+        that represents the schemas
 
     """
 
-    # build up a list of argument groups using recursive function
-    # to traverse the tree, root node gets the description given by doc string
-    # of the schema
-    arguments = build_schema_arguments(schema, description=schema.__doc__)
-    # make the root schema appeear first rather than last
-    arguments = [arguments[-1]] + arguments[0:-1]
+    if additional_schemas is not None:
+        schema_list = [schema] + additional_schemas
+    else:
+        schema_list = [schema]
 
     parser = argparse.ArgumentParser()
+    for s in schema_list:
+        # build up a list of argument groups using recursive function
+        # to traverse the tree, root node gets the description given by doc string
+        # of the schema
+        arguments = build_schema_arguments(s, description=schema.__doc__)
 
-    for arg_group in arguments:
-        group = parser.add_argument_group(
-            arg_group['title'], arg_group['description'])
-        for arg_name, arg in arg_group['args'].items():
-            group.add_argument(arg_name, **arg)
+        # make the root schema appeear first rather than last
+        arguments = [arguments[-1]] + arguments[0:-1]
+
+        for arg_group in arguments:
+            group = parser.add_argument_group(
+                arg_group['title'], arg_group['description'])
+            for arg_name, arg in arg_group['args'].items():
+                group.add_argument(arg_name, **arg)
     return parser
 
 
@@ -403,21 +424,15 @@ def load(schema, d):
         schema that you want to use to validate
     d: dict
         dictionary to validate and load
-
     Returns
     -------
     dict
         deserialized and validated dictionary
-
-    Raises
-    ------
-    marshmallow.ValidationError
-        if the dictionary does not conform to the schema
     """
 
-    results = schema.load(d)
 
-    return results
+    return schema.load(d, unknown=mm.EXCLUDE)
+
 
 
 def dump(schema, d):
@@ -429,16 +444,10 @@ def dump(schema, d):
         schema that you want to use to validate and dump
     d: dict
         dictionary to validate and dump
-
     Returns
     -------
     dict
         serialized and validated dictionary
-
-    Raises
-    ------
-    marshmallow.ValidationError
-        if the dictionary does not conform to the schema
     """
     errors=schema.validate(d)
     if len(errors)>0:

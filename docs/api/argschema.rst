@@ -19,14 +19,6 @@ argschema\.argschema\_parser module
     :undoc-members:
     :show-inheritance:
 
-argschema\.deprecated module
-----------------------------
-
-.. automodule:: argschema.deprecated
-    :members:
-    :undoc-members:
-    :show-inheritance:
-
 argschema\.schemas module
 -------------------------
 

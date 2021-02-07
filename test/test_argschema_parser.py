@@ -89,7 +89,9 @@ def test_parser_output(tmpdir_factory):
     }
     mod = MyParser(input_data=input_data, args=[])
 
-    mod.output(mod.args, output_path=str(json_path), indent=2)
+    json_sink = argschema.sources.JsonSink(output_json=str(json_path), output_json_indent=2)
+    mod.output(mod.args, sink=json_sink)
+
     with open(str(json_path), 'r') as jf:
         obt = json.load(jf)
         assert(obt['nest']['one'] == mod.args['nest']['one'])
