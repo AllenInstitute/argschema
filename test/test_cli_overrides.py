@@ -210,15 +210,28 @@ def test_override_list(test_data):
                               args=["--list", "invalid"])
 
 
-def test_override_list_deprecated(deprecated_data):
-    with pytest.warns(FutureWarning):
-        mod = ArgSchemaParser(deprecated_data, schema_type=MyDeprecatedSchema,
-                              args=["--list_deprecated", "1000", "3000"])
-        assert(mod.args["list_deprecated"] == [1000, 3000])
-        with pytest.raises(mm.ValidationError):
-            mod = ArgSchemaParser(deprecated_data,
-                                  schema_type=MyDeprecatedSchema,
-                                  args=["--list_deprecated", "[1000,3000]"])
+# @pytest.fixture
+# def deprecated_data():
+#     data = {
+#         "list_deprecated": [300, 200, 800, 1000],
+#     }
+#     return data
+# 
+# 
+# class MyDeprecatedSchema(ArgSchema):
+#     list_deprecated = fields.List(fields.Int, required=True)
+# 
+# 
+# def test_override_list_deprecated(deprecated_data):
+#     with pytest.warns(FutureWarning):
+#         mod = ArgSchemaParser(input_data=deprecated_data,
+#                               schema_type=MyDeprecatedSchema,
+#                               args=["--list_deprecated", "1000", "3000"])
+#         assert(mod.args["list_deprecated"] == [1000, 3000])
+#         with pytest.raises(mm.ValidationError):
+#             mod = ArgSchemaParser(deprecated_data,
+#                                   schema_type=MyDeprecatedSchema,
+#                                   args=["--list_deprecated", "[1000,3000]"])
 
 
 # def test_override_localdatetime(test_data):
