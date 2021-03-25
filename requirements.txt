@@ -1,3 +1,0 @@
-numpy
-marshmallow==3.6.1
-pyyaml
