@@ -92,7 +92,6 @@ jobs:
             sed '/pywin32/d' test_requirements.txt > test_requirements_nowin.txt
             pip install -r test_requirements_nowin.txt
             pip install -e .
-
       - save_cache:
           paths:
             - ./venv

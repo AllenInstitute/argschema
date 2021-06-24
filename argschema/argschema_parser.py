@@ -1,110 +1,33 @@
 '''Module that contains the base class ArgSchemaParser which should be
 subclassed when using this library
 '''
-import json
+from typing import List, Sequence, Dict, Optional, Union, Tuple, Type, TypeVar
 import logging
-import copy
 from . import schemas
 from . import utils
-from . import fields
 import marshmallow as mm
+from .sources.json_source import JsonSource, JsonSink
+from .sources.yaml_source import YamlSource, YamlSink
+from .sources.source import (
+    ConfigurableSource,
+    ConfigurableSink,
+    NonconfigurationError, 
+    MultipleConfigurationError, 
+)
 
 
-def contains_non_default_schemas(schema, schema_list=[]):
-    """returns True if this schema contains a schema which was not an instance of DefaultSchema
-
-    Parameters
-    ----------
-    schema : marshmallow.Schema
-        schema to check
-    schema_list :
-         (Default value = [])
-
-    Returns
-    -------
-    bool
-        does this schema only contain schemas which are subclassed from schemas.DefaultSchema
-
-    """
-    if not isinstance(schema, schemas.DefaultSchema):
-        return True
-    for k, v in schema.declared_fields.items():
-        if isinstance(v, mm.fields.Nested):
-            if type(v.schema) in schema_list:
-                return False
-            else:
-                schema_list.append(type(v.schema))
-                if contains_non_default_schemas(v.schema, schema_list):
-                    return True
-    return False
-
-
-def is_recursive_schema(schema, schema_list=[]):
-    """returns true if this schema contains recursive elements
-
-    Parameters
-    ----------
-    schema : marshmallow.Schema
-        schema to check
-    schema_list :
-         (Default value = [])
-
-    Returns
-    -------
-    bool
-        does this schema contain any recursively defined schemas
-
-    """
-    for k, v in schema.declared_fields.items():
-        if isinstance(v, mm.fields.Nested):
-            if type(v.schema) in schema_list:
-                return True
-            else:
-                schema_list.append(type(v.schema))
-                if is_recursive_schema(v.schema, schema_list):
-                    return True
-    return False
-
-
-def fill_defaults(schema, args):
-    """DEPRECATED, function to fill in default values from schema into args
-    bug: goes into an infinite loop when there is a recursively defined schema
-
-    Parameters
-    ----------
-    schema : marshmallow.Schema
-        schema to get defaults from
-    args :
-
-
-    Returns
-    -------
-    dict
-        dictionary with missing default values filled in
-
-    """
-
-    defaults = []
-
-    # find all of the schema entries with default values
-    schemata = [(schema, [])]
-    while schemata:
-        subschema, path = schemata.pop()
-        for k, v in subschema.declared_fields.items():
-            if isinstance(v, mm.fields.Nested):
-                schemata.append((v.schema, path + [k]))
-            elif v.default != mm.missing:
-                defaults.append((path + [k], v.default))
-
-    # put the default entries into the args dictionary
-    args = copy.deepcopy(args)
-    for path, val in defaults:
-        d = args
-        for path_item in path[:-1]:
-            d = d.setdefault(path_item, {})
-        if path[-1] not in d:
-            d[path[-1]] = val
-    return args
+SourceType = Union[ConfigurableSource, Type[ConfigurableSource]]
+RegistrableSources = Union[
+    None,
+    SourceType,
+    Sequence[SourceType],
+]
+SinkType = Union[ConfigurableSink, Type[ConfigurableSink]]
+RegistrableSinks = Union[
+    None,
+    SinkType,
+    Sequence[SinkType],
+]
 
 
 class ArgSchemaParser(object):
@@ -118,15 +41,20 @@ class ArgSchemaParser(object):
     Parameters
     ----------
     input_data : dict or None
-        dictionary parameters instead of --input_json
+        dictionary parameters to fall back on if not source is given or configured via command line
     schema_type : schemas.ArgSchema
         the schema to use to validate the parameters
     output_schema_type : marshmallow.Schema
-        the schema to use to validate the output_json, used by self.output
+        the schema to use to validate the output, used by self.output
+    input_sources : Sequence[argschema.sources.source.ConfigurableSource]
+        each of these will be considered as a potential source of input data
+    output_sinks : Sequence[argschema.sources.source.ConfigurableSource]
+        each of these will be considered as a potential sink for output data
     args : list or None
-        command line arguments passed to the module, if None use argparse to parse the command line, set to [] if you want to bypass command line parsing
+        command line arguments passed to the module, if None use argparse to parse the command line,
+        set to [] if you want to bypass command line parsing
     logger_name : str
-        name of logger from the logging module you want to instantiate 'argschema'
+        name of logger from the logging module you want to instantiate default ('argschema')
 
     Raises
     -------
@@ -137,12 +65,38 @@ class ArgSchemaParser(object):
     """
     default_schema = schemas.ArgSchema
     default_output_schema = None
+    default_sources: Tuple[SourceType] = (JsonSource,)
+    default_sinks: Tuple[SinkType] = (JsonSink,)
+
+    @property
+    def input_sources(self) -> List[ConfigurableSource]:
+        if not hasattr(self, "_input_sources"):
+            self._input_sources: List[ConfigurableSource] = []
+        return self._input_sources
+
+    @property
+    def output_sinks(self) -> List[ConfigurableSink]:
+        if not hasattr(self, "_output_sinks"):
+            self._output_sinks: List[ConfigurableSink] = []
+        return self._output_sinks
+
+    @property
+    def io_schemas(self) -> List[mm.Schema]:
+        if not hasattr(self, "_io_schemas"):
+            self._io_schemas: List[mm.Schema] = []
+        return self._io_schemas
+
+    @io_schemas.setter
+    def io_schemas(self, schemas: List[mm.Schema]):
+        self._io_schemas = schemas
 
     def __init__(self,
                  input_data=None,  # dictionary input as option instead of --input_json
                  schema_type=None,  # schema for parsing arguments
                  output_schema_type=None,  # schema for parsing output_json
                  args=None,
+                 input_sources=None,
+                 output_sinks=None,
                  logger_name=__name__):
 
         if schema_type is None:
@@ -154,30 +108,201 @@ class ArgSchemaParser(object):
         self.logger = self.initialize_logger(logger_name, 'WARNING')
         self.logger.debug('input_data is {}'.format(input_data))
 
-        # convert schema to argparse object
-        p = utils.schema_argparser(self.schema)
-        argsobj = p.parse_args(args)
-        argsdict = utils.args_to_dict(argsobj, self.schema)
-        self.logger.debug('argsdict is {}'.format(argsdict))
+        self.register_sources(input_sources)
+        self.register_sinks(output_sinks)
 
-        if argsobj.input_json is not None:
-            fields.files.validate_input_path(argsobj.input_json)
-            with open(argsobj.input_json, 'r') as j:
-                jsonargs = json.load(j)
-        else:
-            jsonargs = input_data if input_data else {}
+        argsdict = self.parse_command_line(args)
+        resolved_args = self.resolve_inputs(input_data, argsdict)
 
-        # merge the command line dictionary into the input json
-        args = utils.smart_merge(jsonargs, argsdict)
-        self.logger.debug('args after merge {}'.format(args))
+        self.output_sink = self.__get_output_sink_from_config(resolved_args)
+        self.args = self.load_schema_with_defaults(self.schema, resolved_args)
 
-        # validate with load!
-        result = self.load_schema_with_defaults(self.schema, args)
-
-        self.args = result
         self.output_schema_type = output_schema_type
         self.logger = self.initialize_logger(
-            logger_name, self.args.get('log_level'))
+            logger_name, self.args.get('log_level'))        
+
+    def register_sources(
+        self, 
+        sources: RegistrableSources
+    ):
+        """consolidate a list of the input source configuration schemas
+
+        Parameters
+        ----------
+        sources : (sequence of) ConfigurableSource or None
+            Each source will be registered (and may then be configured by data 
+            passed to this parser). If None is argued, the default_sources 
+            associated with this class will be registered.
+
+        """
+
+        if isinstance(sources, (ConfigurableSource, type)):
+            coerced_sources: Sequence[SourceType] = [sources]
+        elif sources is None:
+            coerced_sources = self.default_sources
+        else:
+            coerced_sources = sources
+
+        for source in coerced_sources:
+            if isinstance(source, type):
+                source = source()
+            self.io_schemas.append(source.schema)
+            self.input_sources.append(source)
+
+    def register_sinks(
+        self, 
+        sinks: RegistrableSinks
+    ):
+        """Consolidate a list of the output sink configuration schemas
+
+        Parameters
+        ----------
+        sinks : (sequence of) ConfigurableSink or None
+            Each sink will be registered (and may then be configured by data 
+            passed to this parser). If None is argued, the default_sinks 
+            associated with this class will be registered.
+
+        """
+
+        if isinstance(sinks, (ConfigurableSink, type)):
+            coerced_sinks: Sequence[SinkType] = [sinks]
+        elif sinks is None:
+            coerced_sinks = self.default_sinks
+        else:
+            coerced_sinks = sinks
+
+        for sink in coerced_sinks:
+            if isinstance(sink, type):
+                sink = sink()
+            self.io_schemas.append(sink.schema)
+            self.output_sinks.append(sink)
+
+    def parse_command_line(self, args: Optional[List[str]]) -> Dict:
+        """Build a command line parser from the input schemas and 
+        configurations. Parse command line arguments using this parser
+
+        Parameters
+        ----------
+        args : list of str or None
+            Will be passed directly to argparse's parse_args. If None, sys.argv
+            will be used. If provided, should be formatted like:
+                ["positional_arg", "--optional_arg", "optional_value"]
+
+        Returns
+        -------
+        argsdict : dict
+            a (potentially nested) dictionary of parsed command line arguments
+
+        """
+        parser = utils.schema_argparser(self.schema, self.io_schemas)
+        argsobj = parser.parse_args(args)
+        argsdict = utils.args_to_dict(argsobj, [self.schema] + self.io_schemas)
+        self.logger.debug('argsdict is {}'.format(argsdict))
+        return argsdict
+
+    def resolve_inputs(self, input_data: Dict, argsdict: Dict) -> Dict:
+        """ Resolve input source by checking candidate sources against 
+        constructor and command line arguments
+
+        Parameters
+        ----------
+        input_data : dict
+            Manually (on ArgschemaParser construction) specified parameters. 
+            Will be overridden if values are successfully extracted from 
+            argsdict. 
+        argsdict : dict
+            Command line parameters, parsed into a nested dictionary. 
+
+        Returns
+        -------
+        args : dict
+            A fully merged (possibly nested) collection of inputs. May draw from
+                1. input data
+                2. the argsdict
+                3. any configurable sources whose config schemas are satisfied 
+                    by values in the above 
+
+        """
+
+        config_data = self.__get_input_data_from_config(input_data)
+        if config_data is not None:
+            input_data = config_data
+
+        config_data = self.__get_input_data_from_config(
+            utils.smart_merge({}, argsdict))
+        if config_data is not None:
+            input_data = config_data
+
+        args = utils.smart_merge(input_data, argsdict)
+        self.logger.debug('args after merge {}'.format(args))
+
+        return args
+
+    def __get_output_sink_from_config(self, d):
+        """private function to check for ConfigurableSink configuration in a dictionary and return a configured ConfigurableSink
+
+        Parameters
+        ----------
+        d : dict
+            dictionary to look for ConfigurableSink Configuration parameters in
+
+        Returns
+        -------
+        ConfigurableSink
+            A configured ConfigurableSink
+
+        Raises
+        ------
+        MultipleConfigurationError
+            If more than one Sink is configured
+        """
+        output_set = False
+        output_sink = None
+        for sink in self.output_sinks:
+            try:
+                sink.load_config(d)
+                
+                if output_set:
+                    raise MultipleConfigurationError(
+                        "more then one OutputSink configuration present in {}".format(d))
+                output_sink = sink
+                output_set = True
+            except NonconfigurationError:
+                pass
+        return output_sink
+
+    def __get_input_data_from_config(self, d):
+        """private function to check for ConfigurableSource configurations in a dictionary
+        and return the data if it exists
+
+        Parameters
+        ----------
+        d : dict
+            dictionary to look for InputSource configuration parameters in
+
+        Returns
+        -------
+        dict or None
+            dictionary of InputData if it found a valid configuration, None otherwise
+
+        Raises
+        ------
+        MultipleConfigurationError
+            if more than one InputSource is configured
+        """
+        input_set = False
+        input_data = None
+        for source in self.input_sources:
+            try:
+                source.load_config(d)
+                input_data = source.get_dict()
+                if input_set:
+                    raise MultipleConfigurationError(
+                        "more then one InputSource configuration present in {}".format(d))
+                input_set = True
+            except NonconfigurationError as e:
+                pass
+        return input_data
 
     def get_output_json(self, d):
         """method for getting the output_json pushed through validation
@@ -210,7 +335,7 @@ class ArgSchemaParser(object):
 
         return output_json
 
-    def output(self, d, output_path=None, **json_dump_options):
+    def output(self, d, sink=None):
         """method for outputing dictionary to the output_json file path after
         validating it through the output_schema_type
 
@@ -218,22 +343,20 @@ class ArgSchemaParser(object):
         ----------
         d:dict
             output dictionary to output
-        output_path: str
-            path to save to output file, optional (with default to self.mod['output_json'] location)
-        **json_dump_options :
-            will be passed through to json.dump
+        sink: argschema.sources.source.ConfigurableSink
+            output_sink to output to (optional default to self.output_source)
 
         Raises
         ------
         marshmallow.ValidationError
             If any of the output dictionary doesn't meet the output schema
         """
-        if output_path is None:
-            output_path = self.args['output_json']
 
-        output_json = self.get_output_json(d)
-        with open(output_path, 'w') as fp:
-            json.dump(output_json, fp, **json_dump_options)
+        output_d = self.get_output_json(d)
+        if sink is not None:
+            sink.put_dict(output_d)
+        else:
+            self.output_sink.put_dict(output_d)
 
     def load_schema_with_defaults(self, schema, args):
         """method for deserializing the arguments dictionary (args)
@@ -258,20 +381,6 @@ class ArgSchemaParser(object):
             because these won't work with loading defaults.
 
         """
-        is_recursive = is_recursive_schema(schema)
-        is_non_default = contains_non_default_schemas(schema)
-        if (not is_recursive) and is_non_default:
-            # throw a warning
-            self.logger.warning("""DEPRECATED:You are using a Schema which contains
-            a Schema which is not subclassed from argschema.DefaultSchema,
-            default values will not work correctly in this case,
-            this use is deprecated, and future versions will not fill in default
-            values when you use non-DefaultSchema subclasses""")
-            args = fill_defaults(schema, args)
-        if is_recursive and is_non_default:
-            raise mm.ValidationError(
-                'Recursive schemas need to subclass argschema.DefaultSchema else defaults will not work')
-
         # load the dictionary via the schema
         result = utils.load(schema, args)
 

@@ -1,8 +1,7 @@
 '''argschema: flexible definition, validation and setting of parameters'''
-from .fields import InputFile, InputDir, OutputFile, OptionList # noQA:F401
-from .schemas import ArgSchema # noQA:F401
-from .argschema_parser import ArgSchemaParser # noQA:F401
-from .deprecated import JsonModule, ModuleParameters # noQA:F401
+from argschema.fields import InputFile, InputDir, OutputFile # noQA:F401
+from argschema.schemas import ArgSchema # noQA:F401
+from argschema.argschema_parser import ArgSchemaParser # noQA:F401
 
 __version__ = "2.0.2"
 

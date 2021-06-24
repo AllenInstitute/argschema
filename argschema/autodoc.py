@@ -3,7 +3,10 @@ import marshmallow as mm
 from argschema.utils import get_description_from_field
 from argschema.argschema_parser import ArgSchemaParser
 import inspect
-
+try:
+    from inspect import getfullargspec
+except ImportError:
+    from inspect import getargspec as getfullargspec
 FIELD_TYPE_MAP = {v: k for k, v in mm.Schema.TYPE_MAPPING.items()}
 
 
@@ -26,13 +29,13 @@ def process_schemas(app, what, name, obj, options, lines):
         # pick out the ArgSchemaParser objects for documenting
         if issubclass(obj, ArgSchemaParser):
             # inspect the objects init function to find default schema
-            fas = inspect.getfullargspec(obj.__init__)
+
+            argspec = getfullargspec(obj.__init__)
             # find where the schema_type is as a keyword argument
             schema_index = next(i for i, arg in enumerate(
-                fas.args) if arg == 'schema_type')
+                argspec.args) if arg == 'schema_type')
             # use its default value to construct the string version of the classpath to the module
-            def_schema = fas.defaults[schema_index - 1]
-
+            def_schema = argspec.defaults[schema_index - 1]
             def_schema = def_schema or obj.default_schema
             if def_schema is not None:
                 def_schema_name = def_schema.__module__ + '.' + def_schema.__name__
