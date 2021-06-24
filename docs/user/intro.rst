@@ -205,30 +205,30 @@ For example, yaml is another reasonable choice for storing nested key-value stor
 :class:`argschema.argschema_parser.ArgSchemaYamlParser` demonstrates just that functionality.  So now 
 input_yaml and output_yaml can be specified instead.
 
-Furthermore, you can pass an ArgSchemaParser an :class:`argschema.sources.ArgSource` object which
+Furthermore, you can pass an ArgSchemaParser a :class:`argschema.sources.ConfigurableSource` object which
 implements a get_dict method, and any :class:`argschema.ArgSchemaParser` will get its input parameters
 from that dictionary.  Importantly, this is true even when the original module author didn't 
 explicitly support passing parameters from that mechanism, and the parameters will still be
 deserialized and validated in a uniform manner.
 
-Similarly you can pass an :class:`argschema.sources.ArgSink` object which implements a put_dict method,
+Similarly you can pass a :class:`argschema.sources.ConfigurableSink` object which implements a put_dict method,
 and :class:`argschema.ArgSchemaParser.output` will output the dictionary however that 
-:class:`argschema.sources.ArgSink` specifies it should.
+:class:`argschema.sources.ConfigurableSink` specifies it should.
 
-Finally, both :class:`argschema.sources.ArgSource` and :class:`argschema.sources.ArgSink` 
+Finally, both :class:`argschema.sources.ConfigurableSource` and :class:`argschema.sources.ConfigurableSink` 
 have a property called ConfigSchema, which is a :class:`marshmallow.Schema` for how to deserialize 
 the kwargs to it's init class.  
 
 For example, the default :class:`argschema.sources.json_source.JsonSource` has one string 
 field of 'input_json'.  This is how :class:`argschema.ArgSchemaParser` is told what keys and values 
-should be read to initialize a :class:`argschema.sources.ArgSource` or
- :class:`argschema.sources.ArgSink` instance.  
+should be read to initialize a :class:`argschema.sources.ConfigurableSource` or
+ :class:`argschema.sources.ConfigurableSink` instance.  
 
-So for example, if you wanted to define a :class:`argschema.sources.ArgSource` which loaded a dictionary
+So for example, if you wanted to define a :class:`argschema.sources.ConfigurableSource` which loaded a dictionary
 from a particular host, port and url, and a module which had a command line interface for setting that 
 host port and url you could do so like this.
 
-.. literalinclude:: ../../test/sources/url_source.py
+.. literalinclude:: ../../argschema/sources/url_source.py
 
 so now a UrlArgSchemaParser would expect command line flags of '--input_host' and '--input_url', and 
 optionally '--input_port','--input_protocol' (or look for them in input_data) and will look to download
