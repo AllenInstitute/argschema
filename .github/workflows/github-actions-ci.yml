@@ -30,7 +30,10 @@ jobs:
           pip install .[TESTING]
       - name: WindowsInstall
         if: ${{ matrix.os == 'windows-latest' }}
-        run: pip install .[WINDOWS]
+        run: |
+          pip install .[WINDOWS]
+          # need this when migrating from appveyor
+          conda install pywin32
       - name: Test
         run: |
           python -m pytest --cov argschema --cov-report xml
