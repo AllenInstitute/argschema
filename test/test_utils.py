@@ -4,6 +4,7 @@ import operator
 from argschema.schemas import ArgSchema, DefaultSchema
 from argschema import fields, ArgSchemaParser
 import marshmallow as mm
+import re
 
 
 def test_merge_value_add():
@@ -117,14 +118,14 @@ def test_schema_argparser_with_baseball():
             'name': 'Roger Clemens',
             'number': 21
         },
-        'bases_occupied':[1, 2, 3],
-        'outs':2,
-        'strikes':2,
-        'balls':3,
-        'inning':9,
-        'bottom':True,
-        'score_home':2,
-        'score_away':3
+        'bases_occupied': [1, 2, 3],
+        'outs': 2,
+        'strikes': 2,
+        'balls': 3,
+        'inning': 9,
+        'bottom': True,
+        'score_home': 2,
+        'score_away': 3
     }
     schema = BaseballSituation()
     ArgSchemaParser(input_data=example_situation,
@@ -134,8 +135,11 @@ def test_schema_argparser_with_baseball():
     help = help.replace('\n', '').replace(' ', '')
     assert(
         '--strikesSTRIKEShowmanystrikes(0-2)(REQUIRED)(validoptionsare[0,1,2])' in help)
-    assert(
-        '--bases_occupied[BASES_OCCUPIED[BASES_OCCUPIED...]]whichbasesareoccupied(constrainedlist)(validoptionsare[1,2,3])' in help)
+    # in python3.9, the format changed slightly such that
+    # --bases_occupied[BASES_OCCUPIED[BASES_OCCUPIED...]] became
+    # --bases_occupied[BASES_OCCUPIED...]
+    assert(re.match(
+        r".*--bases_occupied\[BASES_OCCUPIED.*\]whichbasesareoccupied\(constrainedlist\)\(validoptionsare\[1,2,3\]\)", help) is not None)
     assert(
         '--ballsBALLSnumberofballs(0-4)(default=0)(validoptionsare[0,1,2,3])' in help)
     assert("--pitcher.numberPITCHER.NUMBERplayer'snumber(mustbe>0)(REQUIRED)" in help)
