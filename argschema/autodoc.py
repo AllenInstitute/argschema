@@ -87,7 +87,7 @@ def process_schemas(app, what, name, obj, options, lines):
                         # get the set of types this field was derived from
                         if isinstance(field, mm.fields.List):
                             # if it's a list we want to do this for its container
-                            base_types = inspect.getmro(type(field.container))
+                            base_types = inspect.getmro(type(field.inner))
                         else:
                             base_types = inspect.getmro(type(field))
 
