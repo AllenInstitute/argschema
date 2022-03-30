@@ -130,5 +130,3 @@ def test_new_default_schema():
     lines = []
     process_schemas(None, "class", "MyModule", MyModule, None, lines)
     validate_rst_lines(lines)
-    print(lines)
-    raise (Exception("failed"))
