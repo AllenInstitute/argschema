@@ -4,6 +4,7 @@ import logging
 import marshmallow as mm
 from argschema import ArgSchemaParser, ArgSchema
 import argschema
+from pathlib import Path
 
 
 def test_bad_path():
@@ -238,30 +239,35 @@ class PopulationSelectionParameters(argschema.ArgSchema):
     paths = argschema.fields.Nested(PopulationSelectionPaths)
 
 
-david_data = {
-    'paths': {
-        'fits': [{
-            'fit_type': 'test',
-            'hof_fit': 'requirements.txt',
-            'hof': 'requirements.txt'
-        },
-            {
-            'fit_type': 'test2',
-            'hof_fit': 'requirements.txt',
-            'hof': 'requirements.txt'
+@pytest.fixture
+def david_data(tmpdir):
+    files = [Path(tmpdir / "file1.txt") for i in range(4)]
+    for ifile in files:
+        ifile.touch()
+    dict_args = {
+        'paths': {
+            'fits': [{
+                'fit_type': 'test',
+                'hof_fit': str(files[0]),
+                'hof': str(files[1])
+            },
+                {
+                'fit_type': 'test2',
+                'hof_fit': str(files[2]),
+                'hof': str(files[3])
+            }
+            ]
         }
-        ]
     }
-}
+    yield dict_args
 
 
-def test_david_example(tmpdir_factory):
+def test_david_example(tmpdir_factory, david_data):
     file_ = tmpdir_factory.mktemp('test').join('testinput.json')
     file_.write(json.dumps(david_data))
     args = ['--input_json', str(file_)]
     mod = argschema.ArgSchemaParser(
         schema_type=PopulationSelectionParameters, args=args)
-    print(mod.args)
     assert(len(mod.args['paths']['fits']) == 2)
 
 
@@ -281,17 +287,21 @@ def test_simple_description():
     argschema.ArgSchemaParser(
         input_data=d, schema_type=MyShorterExtension, args=[])
 
+
 class MySchemaPostLoad(ArgSchema):
     xid = argschema.fields.Int(required=True)
-    
+
     @mm.post_load
-    def my_post(self, data):
+    def my_post(self, data, **kwargs):
         return data
+
 
 class MyPostLoadClass(ArgSchemaParser):
     default_schema = MySchemaPostLoad
+
     def run(self):
         print(self.args)
+
 
 def test_post_load_schema():
     example1 = {

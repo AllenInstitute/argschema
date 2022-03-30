@@ -1,2 +1,0 @@
-numpy
-marshmallow==3.0.0rc6
