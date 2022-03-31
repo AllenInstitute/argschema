@@ -65,14 +65,6 @@ def test_data(inputdir, inputfile, outputdir, outputfile):
     return data
 
 
-@pytest.fixture
-def deprecated_data():
-    data = {
-        "list_deprecated": [300, 200, 800, 1000],
-    }
-    return data
-
-
 class MyNestedSchema(DefaultSchema):
     a = fields.Int(required=True)
     b = fields.Boolean(required=True)
@@ -102,10 +94,6 @@ class MySchema(ArgSchema):
     timedelta = fields.TimeDelta(required=True)
     url = fields.URL(required=True)
     uuid = fields.UUID(required=True)
-
-
-class MyDeprecatedSchema(ArgSchema):
-    list_deprecated = fields.List(fields.Int, required=True)
 
 
 def test_unexpected_input(test_data):
@@ -222,15 +210,28 @@ def test_override_list(test_data):
                               args=["--list", "invalid"])
 
 
-def test_override_list_deprecated(deprecated_data):
-    with pytest.warns(FutureWarning):
-        mod = ArgSchemaParser(deprecated_data, schema_type=MyDeprecatedSchema,
-                              args=["--list_deprecated", "1000", "3000"])
-        assert(mod.args["list_deprecated"] == [1000, 3000])
-        with pytest.raises(mm.ValidationError):
-            mod = ArgSchemaParser(deprecated_data,
-                                  schema_type=MyDeprecatedSchema,
-                                  args=["--list_deprecated", "[1000,3000]"])
+# @pytest.fixture
+# def deprecated_data():
+#     data = {
+#         "list_deprecated": [300, 200, 800, 1000],
+#     }
+#     return data
+# 
+# 
+# class MyDeprecatedSchema(ArgSchema):
+#     list_deprecated = fields.List(fields.Int, required=True)
+# 
+# 
+# def test_override_list_deprecated(deprecated_data):
+#     with pytest.warns(FutureWarning):
+#         mod = ArgSchemaParser(input_data=deprecated_data,
+#                               schema_type=MyDeprecatedSchema,
+#                               args=["--list_deprecated", "1000", "3000"])
+#         assert(mod.args["list_deprecated"] == [1000, 3000])
+#         with pytest.raises(mm.ValidationError):
+#             mod = ArgSchemaParser(deprecated_data,
+#                                   schema_type=MyDeprecatedSchema,
+#                                   args=["--list_deprecated", "[1000,3000]"])
 
 
 # def test_override_localdatetime(test_data):

@@ -16,15 +16,8 @@ def test_bad_path():
         ArgSchemaParser(input_data=example, args=[])
 
 
-def test_simple_example(tmpdir):
-    file_in = tmpdir.join('test_input_json.json')
-    file_in.write('nonesense')
-
-    file_out = tmpdir.join('test_output.json')
-
+def test_simple_example():
     example = {
-        "input_json": str(file_in),
-        "output_json": str(file_out),
         "log_level": "CRITICAL"}
     jm = ArgSchemaParser(input_data=example, args=[])
 
@@ -126,7 +119,7 @@ def test_simple_extension_write_overwrite(simple_extension_file):
 
 def test_simple_extension_write_overwrite_list(simple_extension_file):
     args = ['--input_json', str(simple_extension_file),
-            '--test.d', '6', '7', '8', '9']
+            '--test.d', "[6,7,8,9]"]
     mod = ArgSchemaParser(schema_type=SimpleExtension, args=args)
     assert len(mod.args['test']['d']) == 4
 
@@ -138,27 +131,6 @@ def test_bad_input_json_argparse():
 
 # TESTS DEMONSTRATING BAD BEHAVIOR OF DEFAULT LOADING
 
-
-class MyExtensionOld(mm.Schema):
-    a = mm.fields.Str(description='a string')
-    b = mm.fields.Int(description='an integer')
-    c = mm.fields.Int(description='an integer', default=10)
-    d = mm.fields.List(mm.fields.Int,
-                       description='a list of integers')
-
-
-class SimpleExtensionOld(ArgSchema):
-    test = mm.fields.Nested(MyExtensionOld, default=None, required=True)
-
-
-def test_simple_extension_old_pass():
-    mod = ArgSchemaParser(
-        input_data=SimpleExtension_example_valid,
-        schema_type=SimpleExtensionOld, args=[])
-    assert mod.args['test']['a'] == 'hello'
-    assert mod.args['test']['b'] == 1
-    assert mod.args['test']['c'] == 10
-    assert len(mod.args['test']['d']) == 3
 
 
 class RecursiveSchema(argschema.schemas.DefaultSchema):

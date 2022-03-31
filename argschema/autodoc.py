@@ -3,7 +3,10 @@ import marshmallow as mm
 from argschema.utils import get_description_from_field
 from argschema.argschema_parser import ArgSchemaParser
 import inspect
-
+try:
+    from inspect import getfullargspec
+except ImportError:
+    from inspect import getargspec as getfullargspec
 FIELD_TYPE_MAP = {v: k for k, v in mm.Schema.TYPE_MAPPING.items()}
 
 
@@ -128,6 +131,7 @@ def process_schemas(app, what, name, obj, options, lines):
                     except Exception as e:
                         # in case this fails for some reason, note it as unknown
                         # TODO handle this more elegantly, identify and patch up such cases
+                        print(e)
                         field_line += "unknown,unknown"
                     lines.append(field_line)
                 # lines.append(table_line)

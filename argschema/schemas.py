@@ -1,5 +1,5 @@
 import marshmallow as mm
-from .fields import LogLevel, InputFile, OutputFile
+from .fields import LogLevel
 
 
 class DefaultSchema(mm.Schema):
@@ -34,11 +34,10 @@ class ArgSchema(DefaultSchema):
     input_json and output_json files and the log_level
     """
 
-    input_json = InputFile(
-        description="file path of input json file")
-
-    output_json = OutputFile(
-        description="file path to output json file")
+    # input_json = InputFile(
+    #     description= "file path of input json file")
+    # output_json = OutputFile(
+    #     description= "file path to output json file")
     log_level = LogLevel(
         default='ERROR',
         description="set the logging level of the module")
