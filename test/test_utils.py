@@ -84,8 +84,10 @@ class Player(DefaultSchema):
     name = fields.Str(required=True, metadata={"description": "players name"})
     number = fields.Int(
         required=True,
-        metadata={"description": "player's number (must be >0)",
-        "validators":(lambda x: x >= 0)},
+        metadata={
+            "description": "player's number (must be >0)",
+            "validators": (lambda x: x >= 0),
+        },
     )
 
 
@@ -94,7 +96,7 @@ class BaseballSituation(ArgSchema):
 
     inning = fields.Int(
         required=True,
-        metadata={"description": "inning (1-9})"},
+        metadata={"description": "inning (1-9)"},
         validate=mm.validate.OneOf(range(1, 10)),
     )
     bottom = fields.Bool(
@@ -112,23 +114,26 @@ class BaseballSituation(ArgSchema):
     )
     outs = fields.Int(
         required=True,
-        metadata={"description": "number of outs (0-2})"},
+        metadata={"description": "number of outs (0-2)"},
         validate=mm.validate.OneOf([0, 1, 2]),
     )
     balls = fields.Int(
         required=False,
-        default=0,
-        metadata={"description": "number of balls (0-4})"},
+        load_default=0,
+        metadata={"description": "number of balls (0-4)"},
         validate=mm.validate.OneOf([0, 1, 2, 3]),
     )
     strikes = fields.Int(
         required=True,
-        metadata={"description": "how many strikes (0-2})"},
+        metadata={"description": "how many strikes (0-2)"},
         validate=mm.validate.OneOf([0, 1, 2]),
     )
     bases_occupied = fields.List(
         fields.Int,
-        metadata={"description": "which bases are occupied"},
+        metadata={
+            "description": "which bases are occupied",
+            "cli_as_single_argument": True,
+        },
         validate=mm.validate.ContainsOnly([1, 2, 3]),
     )
     batter = fields.Nested(
@@ -159,6 +164,7 @@ def test_schema_argparser_with_baseball():
     parser = utils.schema_argparser(schema)
     help = parser.format_help()
     help = help.replace("\n", "").replace(" ", "")
+    print(help)
     assert (
         "--strikesSTRIKEShowmanystrikes(0-2)(REQUIRED)(validoptionsare[0,1,2])" in help
     )
@@ -166,8 +172,13 @@ def test_schema_argparser_with_baseball():
     # --bases_occupied[BASES_OCCUPIED[BASES_OCCUPIED...]] became
     # --bases_occupied[BASES_OCCUPIED...]
     assert (
+        "--bases_occupiedBASES_OCCUPIEDwhichbasesareoccupied(constrainedlist)(validoptionsare[1,2,3])"
+        in help
+    )
+
+    assert (
         re.match(
-            r".*--bases_occupied\[BASES_OCCUPIED.*\]whichbasesareoccupied\(constrainedlist\)\(validoptionsare\[1,2,3\]\)",
+            r".*",
             help,
         )
         is not None
