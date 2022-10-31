@@ -1,4 +1,4 @@
-'''marshmallow fields related to reading in numpy arrays'''
+"""marshmallow fields related to reading in numpy arrays"""
 import numpy as np
 import marshmallow as mm
 
@@ -21,7 +21,10 @@ class NumpyArray(mm.fields.List):
     def __init__(self, dtype=None, *args, **kwargs):
         self.dtype = dtype
         if "cli_as_single_argument" not in kwargs:
-            kwargs["cli_as_single_argument"] = True
+            metadata = kwargs.get("metadata", {})
+            metadata.update({"cli_as_single_argument": True})
+            kwargs["metadata"] = metadata
+            # kwargs["cli_as_single_argument"] = True
         super(NumpyArray, self).__init__(mm.fields.Field, *args, **kwargs)
 
     def _deserialize(self, value, attr, obj, **kwargs):
@@ -29,8 +32,8 @@ class NumpyArray(mm.fields.List):
             return np.array(value, dtype=self.dtype)
         except ValueError as e:
             raise mm.ValidationError(
-                'Cannot create numpy array with type {} from data.'.format(
-                    self.dtype))
+                "Cannot create numpy array with type {} from data.".format(self.dtype)
+            )
 
     def _serialize(self, value, attr, obj, **kwargs):
         if value is None:

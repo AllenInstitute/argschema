@@ -1,4 +1,4 @@
-'''marshmallow fields related to setting logging levels'''
+"""marshmallow fields related to setting logging levels"""
 import logging
 import marshmallow as mm
 
@@ -10,13 +10,11 @@ class LogLevel(mm.fields.Str):
     manipulation of loglevel.
     """
 
-    options = ['FATAL', 'CRITICAL', 'ERROR',
-               'WARN', 'WARNING', 'INFO', 'DEBUG']
+    options = ["FATAL", "CRITICAL", "ERROR", "WARN", "WARNING", "INFO", "DEBUG"]
 
     def __init__(self, **kwargs):
-        kwargs['metadata'] = kwargs.get(
-            'metadata', {'description': 'set log level'})
-        kwargs['default'] = kwargs.get('default', 'WARN')
+        kwargs["metadata"] = kwargs.get("metadata", {"description": "set log level"})
+        kwargs["load_default"] = kwargs.get("load_default", "WARN")
         super(LogLevel, self).__init__(**kwargs)
 
     def _validate(self, value):
@@ -28,11 +26,12 @@ class LogLevel(mm.fields.Str):
             value to validate
 
         """
-        if (not hasattr(logging, value) or
-                type(getattr(logging, value)) is not int):
+        if not hasattr(logging, value) or type(getattr(logging, value)) is not int:
             raise mm.ValidationError(
-                    '{} is not a valid loglevel; try one of {}'.format(
-                        value, LogLevel.options))
+                "{} is not a valid loglevel; try one of {}".format(
+                    value, LogLevel.options
+                )
+            )
 
         # Would prefer this to be an argparse.Action subclass, but not yet sure how to implement this way
         logging.getLogger().setLevel(value)

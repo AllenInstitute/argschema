@@ -6,9 +6,9 @@ import numpy as np
 
 
 class MySchema(ArgSchema):
-    a = NumpyArray(dtype='float', description='Test input array schema',
+    a = NumpyArray(dtype='float', metadata = {"description":'Test input array schema'},
                    validate=validate.Shape((2, 2)))
-    b = NumpyArray(dtype='float', description='Test array',
+    b = NumpyArray(dtype='float', metadata = {"description":'Test array'},
                    validate=validate.Shape((2, None)))
 
 

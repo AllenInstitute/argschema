@@ -9,10 +9,11 @@ import pprint as pp
 
 
 class MyNestedParameters(DefaultSchema):
-    name = Str(required=True, description='name of vector')
-    increment = Int(required=True, description='value to increment')
-    array = NumpyArray(dtype=np.float, required=True,
-                       description='array to increment')
+    name = Str(required=True, metadata={"description": "name of vector"})
+    increment = Int(required=True, metadata={"description": "value to increment"})
+    array = NumpyArray(
+        dtype=np.float, required=True, metadata={"description": "array to increment"}
+    )
     write_output = Boolean(required=False, default=True)
 
 
@@ -25,12 +26,13 @@ class MyParameters(ArgSchema):
 
 # this is another schema we will use to validate and deserialize our output
 class MyOutputParams(DefaultSchema):
-    name = Str(required=True, description='name of vector')
-    inc_array = NumpyArray(dtype=np.float, required=True,
-                           description='incremented array')
+    name = Str(required=True, metadata = {'description':"name of vector"})
+    inc_array = NumpyArray(
+        dtype=np.float, required=True, description="incremented array"
+    )
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
 
     # this defines a default dictionary that will be used if input_json is not specified
     example_input = {
@@ -38,31 +40,29 @@ if __name__ == '__main__':
             "name": "from_dictionary",
             "increment": 5,
             "array": [0, 2, 5],
-
-            "write_output": True
+            "write_output": True,
         },
-        "output_json": "output_dictionary.json"
+        "output_json": "output_dictionary.json",
     }
 
     # here is my ArgSchemaParser that processes my inputs
-    mod = ArgSchemaParser(input_data=example_input,
-                          schema_type=MyParameters,
-                          output_schema_type=MyOutputParams)
+    mod = ArgSchemaParser(
+        input_data=example_input,
+        schema_type=MyParameters,
+        output_schema_type=MyOutputParams,
+    )
 
     # pull out the inc section of the parameters
-    inc_params = mod.args['inc']
+    inc_params = mod.args["inc"]
 
     # do my simple addition of the parameters
-    inc_array = inc_params['array'] + inc_params['increment']
+    inc_array = inc_params["array"] + inc_params["increment"]
 
     # define the output dictionary
-    output = {
-        'name': inc_params['name'],
-        'inc_array': inc_array
-    }
+    output = {"name": inc_params["name"], "inc_array": inc_array}
 
     # if the parameters are set as such write the output
-    if inc_params['write_output']:
+    if inc_params["write_output"]:
         mod.output(output)
 
     pp.pprint(mod.args)

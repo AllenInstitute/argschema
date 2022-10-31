@@ -1,6 +1,6 @@
-'''module that contains argschema functions for converting
+"""module that contains argschema functions for converting
 marshmallow schemas to argparse and merging dictionaries from both systems
-'''
+"""
 import logging
 import warnings
 import ast
@@ -12,10 +12,11 @@ from argschema import fields
 import collections
 
 # explicit type mappings for field types that need them (default str)
-FIELD_TYPE_MAP = {fields.Boolean: ast.literal_eval,
-                  fields.List: ast.literal_eval,
-                  fields.NumpyArray: ast.literal_eval
-                  }
+FIELD_TYPE_MAP = {
+    fields.Boolean: ast.literal_eval,
+    fields.List: ast.literal_eval,
+    fields.NumpyArray: ast.literal_eval,
+}
 
 
 def prune_dict_with_none(d):
@@ -55,8 +56,9 @@ def get_type_from_field(field):
     callable
         Function to call to cast argument to
     """
-    if (isinstance(field, fields.List) and
-            not field.metadata.get("cli_as_single_argument", False)):
+    if isinstance(field, fields.List) and not field.metadata.get(
+        "cli_as_single_argument", False
+    ):
         return list
     else:
         return FIELD_TYPE_MAP.get(type(field), str)
@@ -82,8 +84,11 @@ def cli_error_dict(arg_path, field_type, index=0):
         Dictionary representing argument path, containing error.
     """
     if index == len(arg_path) - 1:
-        return {arg_path[index]:
-                ["Command-line argument can't cast to {}".format(field_type)]}
+        return {
+            arg_path[index]: [
+                "Command-line argument can't cast to {}".format(field_type)
+            ]
+        }
     else:
         return {arg_path[index]: cli_error_dict(arg_path, field_type, index + 1)}
 
@@ -111,7 +116,7 @@ def args_to_dict(argsobj, schema=None):
     field_def = None
     for field in argsdict.keys():
         current_schema = schema
-        parts = field.split('.')
+        parts = field.split(".")
         root = d
         for i in range(len(parts)):
             if current_schema is not None:
@@ -165,9 +170,12 @@ def merge_value(a, b, key, func=add):
     try:
         return func(a[key], b[key])
     except ValueError:
-        raise Exception("Cannot merge this key {},\
-         for values {} and {} of types {} and {}".format
-                        (key, a[key], b[key], type(a[key]), type(b[key])))
+        raise Exception(
+            "Cannot merge this key {},\
+         for values {} and {} of types {} and {}".format(
+                key, a[key], b[key], type(a[key]), type(b[key])
+            )
+        )
 
 
 def smart_merge(a, b, path=None, merge_keys=None, overwrite_with_none=False):
@@ -248,13 +256,13 @@ def get_description_from_field(field):
         description string (or None)
     """
     # look for description
-    if 'description' in field.metadata:
-        desc = field.metadata.get('description')
+    if "description" in field.metadata:
+        desc = field.metadata.get("description")
     # also look to see if description was added in metadata
     else:
-        md = field.metadata.get('metadata', {})
-        if 'description' in md:
-            desc = md['description']
+        md = field.metadata.get("metadata", {})
+        if "description" in md:
+            desc = md["description"]
         else:
             desc = None
     return desc
@@ -288,19 +296,19 @@ def build_schema_arguments(schema, arguments=None, path=None, description=None):
     arggroup = {}
     # name this argument group by the path, or the schema class name if it's the root
     if len(path) == 0:
-        arggroup['title'] = schema.__class__.__name__
+        arggroup["title"] = schema.__class__.__name__
     else:
-        arggroup['title'] = '.'.join(path)
-    arggroup['args'] = collections.OrderedDict()
+        arggroup["title"] = ".".join(path)
+    arggroup["args"] = collections.OrderedDict()
     # assume the description has been handed down
-    arggroup['description'] = description
+    arggroup["description"] = description
 
     # sort the fields first by required, then by default values present or not
-    for field_name, field in sorted(schema.declared_fields.items(),
-                                    key=lambda x: 2 *
-                                    x[1].required + 1 *
-                                    (x[1].default == mm.missing),
-                                    reverse=True):
+    for field_name, field in sorted(
+        schema.declared_fields.items(),
+        key=lambda x: 2 * x[1].required + 1 * (x[1].default == mm.missing),
+        reverse=True,
+    ):
         # get this field's description
         desc = get_description_from_field(field)
 
@@ -309,52 +317,54 @@ def build_schema_arguments(schema, arguments=None, path=None, description=None):
             if field.many:
                 logging.warning("many=True not supported from argparse")
             else:
-                build_schema_arguments(field.schema,
-                                       arguments,
-                                       path + [field_name],
-                                       description=desc)
+                build_schema_arguments(
+                    field.schema, arguments, path + [field_name], description=desc
+                )
         elif isinstance(field, fields.Dict):
             logging.warning("setting Dict fields not supported from argparse")
         else:
             # it's not nested then let's build the argument
             arg = {}
-            arg_name = '--' + '.'.join(path + [field_name])
+            arg_name = "--" + ".".join(path + [field_name])
             if desc is not None:
-                arg['help'] = desc
+                arg["help"] = desc
             else:
-                arg['help'] = ''
+                arg["help"] = ""
 
             # programatically add helpful notes to help string
             if field.default is not mm.missing:
-                arg['help'] += " (default={})".format(field.default)
+                arg["help"] += " (default={})".format(field.load_default)
             if field.required:
-                arg['help'] += " (REQUIRED)"
+                arg["help"] += " (REQUIRED)"
             for validator in field.validators:
                 if isinstance(validator, mm.validate.ContainsOnly):
-                    arg['help'] += " (constrained list)"
+                    arg["help"] += " (constrained list)"
                 if isinstance(validator, mm.validate.OneOf):
-                    arg['help'] += " (valid options are {})".format(validator.choices)
+                    arg["help"] += " (valid options are {})".format(validator.choices)
 
-            if (isinstance(field, mm.fields.List) and
-                    not field.metadata.get("cli_as_single_argument", False)):
-                warn_msg = ("'{}' is using old-style command-line syntax with "
-                            "each element as a separate argument. This will "
-                            "not be supported in argschema after "
-                            "2.0. See http://argschema.readthedocs.io/en/"
-                            "master/user/intro.html#command-line-specification"
-                            " for details.").format(arg_name)
+            if isinstance(field, mm.fields.List) and not field.metadata.get(
+                "cli_as_single_argument", False
+            ):
+                warn_msg = (
+                    "'{}' is using old-style command-line syntax with "
+                    "each element as a separate argument. This will "
+                    "not be supported in argschema after "
+                    "2.0. See http://argschema.readthedocs.io/en/"
+                    "master/user/intro.html#command-line-specification"
+                    " for details."
+                ).format(arg_name)
                 warnings.warn(warn_msg, FutureWarning)
-                arg['nargs'] = '*'
+                arg["nargs"] = "*"
 
             # do type mapping after parsing so we can raise validation errors
-            arg['type'] = str
+            arg["type"] = str
 
             # DON'T WANT TO USE DEFAULT VALUES AS ARGPARSE OVERRULES JSON
             # if field.default != mm.missing:
             #    arg['default'] = field.default
 
             # add this argument to the arggroup
-            arggroup['args'][arg_name] = arg
+            arggroup["args"][arg_name] = arg
 
     # tack on this arggroup to the list and return
     arguments.append(arggroup)
@@ -386,15 +396,14 @@ def schema_argparser(schema):
     parser = argparse.ArgumentParser()
 
     for arg_group in arguments:
-        group = parser.add_argument_group(
-            arg_group['title'], arg_group['description'])
-        for arg_name, arg in arg_group['args'].items():
+        group = parser.add_argument_group(arg_group["title"], arg_group["description"])
+        for arg_name, arg in arg_group["args"].items():
             group.add_argument(arg_name, **arg)
     return parser
 
 
 def load(schema, d):
-    """ function to wrap marshmallow load to smooth
+    """function to wrap marshmallow load to smooth
         differences from marshmallow 2 to 3
 
     Parameters
@@ -421,7 +430,7 @@ def load(schema, d):
 
 
 def dump(schema, d):
-    """ function to wrap marshmallow dump to smooth
+    """function to wrap marshmallow dump to smooth
         differences from marshmallow 2 to 3
     Parameters
     ----------
@@ -440,8 +449,8 @@ def dump(schema, d):
     marshmallow.ValidationError
         if the dictionary does not conform to the schema
     """
-    errors=schema.validate(d)
-    if len(errors)>0:
+    errors = schema.validate(d)
+    if len(errors) > 0:
         raise mm.ValidationError(errors)
 
     return schema.dump(d)
