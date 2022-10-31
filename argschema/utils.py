@@ -333,6 +333,8 @@ def build_schema_arguments(schema, arguments=None, path=None, description=None):
 
             # programatically add helpful notes to help string
             if field.default is not mm.missing:
+                arg["help"] += " (default={})".format(field.default)
+            elif field.load_default is not mm.missing:
                 arg["help"] += " (default={})".format(field.load_default)
             if field.required:
                 arg["help"] += " (REQUIRED)"
