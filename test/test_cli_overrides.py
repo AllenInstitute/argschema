@@ -60,7 +60,7 @@ def test_data(inputdir, inputfile, outputdir, outputfile):
         "time": "05:00:00",
         "timedelta": "945890400",
         "url": "http://www.example.com",
-        "uuid": "f4a1c5ee-c214-4a2b-9e62-e4ba6beb771b"
+        "uuid": "f4a1c5ee-c214-4a2b-9e62-e4ba6beb771b",
     }
     return data
 
@@ -89,7 +89,9 @@ class MySchema(ArgSchema):
     inputdir = fields.InputDir(required=True)
     inputfile = fields.InputFile(required=True)
     integer = fields.Int(required=True)
-    list = fields.List(fields.Int, required=True, metadata={"cli_as_single_argument":True})
+    list = fields.List(
+        fields.Int, required=True, metadata={"cli_as_single_argument": True}
+    )
     nested = fields.Nested(MyNestedSchema, required=True)
     number = fields.Number(required=True)
     numpyarray = fields.NumpyArray(dtype="uint8", required=True)
@@ -110,127 +112,148 @@ class MyDeprecatedSchema(ArgSchema):
 
 def test_unexpected_input(test_data):
     with pytest.raises(SystemExit):
-        ArgSchemaParser(test_data, schema_type=MySchema,
-                        args=["--notanarg", "something"])
+        ArgSchemaParser(
+            test_data, schema_type=MySchema, args=["--notanarg", "something"]
+        )
 
 
 def test_no_deprecation(test_data):
-    with pytest.warns(None) as record:
-        ArgSchemaParser(test_data, schema_type=MySchema,
-                        args=[])
-    assert(len(record) == 0)
+    with pytest.deprecated_call():
+        ArgSchemaParser(test_data, schema_type=MySchema, args=[])
 
 
 def test_override_boolean(test_data):
-    mod = ArgSchemaParser(test_data, schema_type=MySchema,
-                          args=["--boolean", "False"])
-    assert(not mod.args["boolean"])
+    mod = ArgSchemaParser(test_data, schema_type=MySchema, args=["--boolean", "False"])
+    assert not mod.args["boolean"]
     with pytest.raises(mm.ValidationError):
-        mod = ArgSchemaParser(test_data, schema_type=MySchema,
-                              args=["--boolean", "invalid"])
+        mod = ArgSchemaParser(
+            test_data, schema_type=MySchema, args=["--boolean", "invalid"]
+        )
 
 
 def test_override_date(test_data):
-    mod = ArgSchemaParser(test_data, schema_type=MySchema,
-                          args=["--date", "1977-05-04"])
-    assert(mod.args["date"] == datetime.date(1977, 5, 4))
+    mod = ArgSchemaParser(
+        test_data, schema_type=MySchema, args=["--date", "1977-05-04"]
+    )
+    assert mod.args["date"] == datetime.date(1977, 5, 4)
     with pytest.raises(mm.ValidationError):
-        mod = ArgSchemaParser(test_data, schema_type=MySchema,
-                              args=["--date", "invalid"])
+        mod = ArgSchemaParser(
+            test_data, schema_type=MySchema, args=["--date", "invalid"]
+        )
 
 
 def test_override_datetime(test_data):
-    mod = ArgSchemaParser(test_data, schema_type=MySchema,
-                          args=["--datetime", "1977-05-04T00:00:00"])
-    assert(mod.args["datetime"] == datetime.datetime(1977, 5, 4, 0, 0, 0))
+    mod = ArgSchemaParser(
+        test_data, schema_type=MySchema, args=["--datetime", "1977-05-04T00:00:00"]
+    )
+    assert mod.args["datetime"] == datetime.datetime(1977, 5, 4, 0, 0, 0)
     with pytest.raises(mm.ValidationError):
-        mod = ArgSchemaParser(test_data, schema_type=MySchema,
-                              args=["--datetime", "invalid"])
+        mod = ArgSchemaParser(
+            test_data, schema_type=MySchema, args=["--datetime", "invalid"]
+        )
 
 
 def test_override_decimal(test_data):
-    mod = ArgSchemaParser(test_data, schema_type=MySchema,
-                          args=["--decimal", "1.23456789"])
-    assert(mod.args["decimal"] == Decimal("1.23456789"))
+    mod = ArgSchemaParser(
+        test_data, schema_type=MySchema, args=["--decimal", "1.23456789"]
+    )
+    assert mod.args["decimal"] == Decimal("1.23456789")
     with pytest.raises(mm.ValidationError):
-        mod = ArgSchemaParser(test_data, schema_type=MySchema,
-                              args=["--decimal", "invalid"])
+        mod = ArgSchemaParser(
+            test_data, schema_type=MySchema, args=["--decimal", "invalid"]
+        )
 
 
 def test_override_dict(test_data):
     with pytest.raises(SystemExit):
-        ArgSchemaParser(test_data, schema_type=MySchema,
-                        args=["--dict", "{'a': 600, 'b': 'hello'}"])
+        ArgSchemaParser(
+            test_data, schema_type=MySchema, args=["--dict", "{'a': 600, 'b': 'hello'}"]
+        )
 
 
 def test_override_email(test_data):
-    mod = ArgSchemaParser(test_data, schema_type=MySchema,
-                          args=["--email", "batman@batcave.org"])
-    assert(mod.args["email"] == "batman@batcave.org")
+    mod = ArgSchemaParser(
+        test_data, schema_type=MySchema, args=["--email", "batman@batcave.org"]
+    )
+    assert mod.args["email"] == "batman@batcave.org"
     with pytest.raises(mm.ValidationError):
-        mod = ArgSchemaParser(test_data, schema_type=MySchema,
-                              args=["--email", "invalid"])
+        mod = ArgSchemaParser(
+            test_data, schema_type=MySchema, args=["--email", "invalid"]
+        )
 
 
 def test_override_float(test_data):
-    mod = ArgSchemaParser(test_data, schema_type=MySchema,
-                          args=["--float", "1.23456789"])
-    assert(abs(mod.args["float"] - 1.23456789) < 1e-10)
+    mod = ArgSchemaParser(
+        test_data, schema_type=MySchema, args=["--float", "1.23456789"]
+    )
+    assert abs(mod.args["float"] - 1.23456789) < 1e-10
     with pytest.raises(mm.ValidationError):
-        mod = ArgSchemaParser(test_data, schema_type=MySchema,
-                              args=["--float", "invalid"])
+        mod = ArgSchemaParser(
+            test_data, schema_type=MySchema, args=["--float", "invalid"]
+        )
 
 
 def test_override_inputdir(test_data, tmpdir_factory):
     input2 = tmpdir_factory.mktemp("input2")
-    mod = ArgSchemaParser(test_data, schema_type=MySchema,
-                          args=["--inputdir", str(input2)])
-    assert(mod.args["inputdir"] == str(input2))
-    assert(os.path.exists(mod.args["inputdir"]) and
-           os.path.isdir(mod.args["inputdir"]))
+    mod = ArgSchemaParser(
+        test_data, schema_type=MySchema, args=["--inputdir", str(input2)]
+    )
+    assert mod.args["inputdir"] == str(input2)
+    assert os.path.exists(mod.args["inputdir"]) and os.path.isdir(mod.args["inputdir"])
 
 
 def test_override_inputfile(test_data, tmpdir_factory):
     input2 = tmpdir_factory.mktemp("input3").join("input2.file")
     with pytest.raises(mm.ValidationError):
-        mod = ArgSchemaParser(test_data, schema_type=MySchema,
-                              args=["--inputfile", str(input2)])
+        mod = ArgSchemaParser(
+            test_data, schema_type=MySchema, args=["--inputfile", str(input2)]
+        )
     with open(str(input2), "w") as f:
         f.write("")
-    mod = ArgSchemaParser(test_data, schema_type=MySchema,
-                          args=["--inputfile", str(input2)])
-    assert(mod.args["inputfile"] == str(input2))
-    assert(os.path.exists(mod.args["inputfile"]) and
-           os.path.isfile(mod.args["inputfile"]))
+    mod = ArgSchemaParser(
+        test_data, schema_type=MySchema, args=["--inputfile", str(input2)]
+    )
+    assert mod.args["inputfile"] == str(input2)
+    assert os.path.exists(mod.args["inputfile"]) and os.path.isfile(
+        mod.args["inputfile"]
+    )
 
 
 def test_override_integer(test_data):
-    mod = ArgSchemaParser(test_data, schema_type=MySchema,
-                          args=["--integer", "1000"])
-    assert(mod.args["integer"] == 1000)
+    mod = ArgSchemaParser(test_data, schema_type=MySchema, args=["--integer", "1000"])
+    assert mod.args["integer"] == 1000
     with pytest.raises(mm.ValidationError):
-        mod = ArgSchemaParser(test_data, schema_type=MySchema,
-                              args=["--integer", "invalid"])
+        mod = ArgSchemaParser(
+            test_data, schema_type=MySchema, args=["--integer", "invalid"]
+        )
 
 
 def test_override_list(test_data):
-    mod = ArgSchemaParser(test_data, schema_type=MySchema,
-                          args=["--list", "[1000,3000]"])
-    assert(mod.args["list"] == [1000, 3000])
+    mod = ArgSchemaParser(
+        test_data, schema_type=MySchema, args=["--list", "[1000,3000]"]
+    )
+    print(mod.args["list"])
+    assert mod.args["list"] == [1000, 3000]
     with pytest.raises(mm.ValidationError):
-        mod = ArgSchemaParser(test_data, schema_type=MySchema,
-                              args=["--list", "invalid"])
+        mod = ArgSchemaParser(
+            test_data, schema_type=MySchema, args=["--list", "invalid"]
+        )
 
 
 def test_override_list_deprecated(deprecated_data):
     with pytest.warns(FutureWarning):
-        mod = ArgSchemaParser(deprecated_data, schema_type=MyDeprecatedSchema,
-                              args=["--list_deprecated", "1000", "3000"])
-        assert(mod.args["list_deprecated"] == [1000, 3000])
+        mod = ArgSchemaParser(
+            deprecated_data,
+            schema_type=MyDeprecatedSchema,
+            args=["--list_deprecated", "1000", "3000"],
+        )
+        assert mod.args["list_deprecated"] == [1000, 3000]
         with pytest.raises(mm.ValidationError):
-            mod = ArgSchemaParser(deprecated_data,
-                                  schema_type=MyDeprecatedSchema,
-                                  args=["--list_deprecated", "[1000,3000]"])
+            mod = ArgSchemaParser(
+                deprecated_data,
+                schema_type=MyDeprecatedSchema,
+                args=["--list_deprecated", "[1000,3000]"],
+            )
 
 
 # def test_override_localdatetime(test_data):
@@ -243,120 +266,136 @@ def test_override_list_deprecated(deprecated_data):
 
 
 def test_override_log_level(test_data):
-    mod = ArgSchemaParser(test_data, schema_type=MySchema,
-                          args=["--log_level", "CRITICAL"])
-    assert(mod.args["log_level"] == "CRITICAL")
+    mod = ArgSchemaParser(
+        test_data, schema_type=MySchema, args=["--log_level", "CRITICAL"]
+    )
+    assert mod.args["log_level"] == "CRITICAL"
     with pytest.raises(mm.ValidationError):
-        mod = ArgSchemaParser(test_data, schema_type=MySchema,
-                              args=["--log_level", "invalid"])
+        mod = ArgSchemaParser(
+            test_data, schema_type=MySchema, args=["--log_level", "invalid"]
+        )
 
 
 def test_override_nested(test_data):
-    mod = ArgSchemaParser(test_data, schema_type=MySchema,
-                          args=["--nested.a", "-55"])
-    assert(mod.args["nested"]["a"] == -55)
+    mod = ArgSchemaParser(test_data, schema_type=MySchema, args=["--nested.a", "-55"])
+    assert mod.args["nested"]["a"] == -55
     with pytest.raises(SystemExit):
-        mod = ArgSchemaParser(test_data, schema_type=MySchema,
-                              args=["--nested", "something"])
+        mod = ArgSchemaParser(
+            test_data, schema_type=MySchema, args=["--nested", "something"]
+        )
     with pytest.raises(mm.ValidationError):
-        mod = ArgSchemaParser(test_data, schema_type=MySchema,
-                              args=["--nested.a", "invalid"])
+        mod = ArgSchemaParser(
+            test_data, schema_type=MySchema, args=["--nested.a", "invalid"]
+        )
     with pytest.raises(mm.ValidationError):
-        mod = ArgSchemaParser(test_data, schema_type=MySchema,
-                              args=["--nested.b", "foo"])
+        mod = ArgSchemaParser(
+            test_data, schema_type=MySchema, args=["--nested.b", "foo"]
+        )
     with pytest.raises(SystemExit):
-        mod = ArgSchemaParser(test_data, schema_type=MySchema,
-                              args=["--nested.c", "foo"])
+        mod = ArgSchemaParser(
+            test_data, schema_type=MySchema, args=["--nested.c", "foo"]
+        )
 
 
 def test_override_number(test_data):
-    mod = ArgSchemaParser(test_data, schema_type=MySchema,
-                          args=["--number", "10"])
-    assert(mod.args["number"] == 10)
+    mod = ArgSchemaParser(test_data, schema_type=MySchema, args=["--number", "10"])
+    assert mod.args["number"] == 10
     with pytest.raises(mm.ValidationError):
-        mod = ArgSchemaParser(test_data, schema_type=MySchema,
-                              args=["--number", "invalid"])
+        mod = ArgSchemaParser(
+            test_data, schema_type=MySchema, args=["--number", "invalid"]
+        )
 
 
 def test_override_numpyarray(test_data):
-    mod = ArgSchemaParser(test_data, schema_type=MySchema,
-                          args=["--numpyarray", "[[4,3],[2,1]]"])
-    assert(np.all(mod.args["numpyarray"] == np.array([[4, 3], [2, 1]])))
+    mod = ArgSchemaParser(
+        test_data, schema_type=MySchema, args=["--numpyarray", "[[4,3],[2,1]]"]
+    )
+    assert np.all(mod.args["numpyarray"] == np.array([[4, 3], [2, 1]]))
     with pytest.raises(mm.ValidationError):
-        mod = ArgSchemaParser(test_data, schema_type=MySchema,
-                              args=["--numpyarray", "invalid"])
+        mod = ArgSchemaParser(
+            test_data, schema_type=MySchema, args=["--numpyarray", "invalid"]
+        )
 
 
 def test_override_outputdir(test_data, tmpdir_factory):
     output2 = tmpdir_factory.mktemp("output2")
-    mod = ArgSchemaParser(test_data, schema_type=MySchema,
-                          args=["--outputdir", str(output2)])
-    assert(mod.args["outputdir"] == str(output2))
-    assert(os.path.exists(mod.args["outputdir"]) and
-           os.path.isdir(mod.args["outputdir"]))
+    mod = ArgSchemaParser(
+        test_data, schema_type=MySchema, args=["--outputdir", str(output2)]
+    )
+    assert mod.args["outputdir"] == str(output2)
+    assert os.path.exists(mod.args["outputdir"]) and os.path.isdir(
+        mod.args["outputdir"]
+    )
 
 
 def test_override_outputfile(test_data, tmpdir_factory):
     output2 = tmpdir_factory.mktemp("output3").join("output2.file")
-    mod = ArgSchemaParser(test_data, schema_type=MySchema,
-                          args=["--outputfile", str(output2)])
-    assert(mod.args["outputfile"] == str(output2))
-    assert(os.path.isdir(os.path.dirname(mod.args["outputfile"])))
+    mod = ArgSchemaParser(
+        test_data, schema_type=MySchema, args=["--outputfile", str(output2)]
+    )
+    assert mod.args["outputfile"] == str(output2)
+    assert os.path.isdir(os.path.dirname(mod.args["outputfile"]))
 
 
 def test_override_raw(test_data):
-    mod = ArgSchemaParser(test_data, schema_type=MySchema,
-                          args=["--raw", "this!{could}be$anything"])
-    assert(mod.args["raw"] == "this!{could}be$anything")
+    mod = ArgSchemaParser(
+        test_data, schema_type=MySchema, args=["--raw", "this!{could}be$anything"]
+    )
+    assert mod.args["raw"] == "this!{could}be$anything"
 
 
 def test_override_slice(test_data):
-    mod = ArgSchemaParser(test_data, schema_type=MySchema,
-                          args=["--slice", "800:3:9000"])
-    assert(mod.args["slice"] == slice(800, 3, 9000))
+    mod = ArgSchemaParser(
+        test_data, schema_type=MySchema, args=["--slice", "800:3:9000"]
+    )
+    assert mod.args["slice"] == slice(800, 3, 9000)
     with pytest.raises(mm.ValidationError):
-        mod = ArgSchemaParser(test_data, schema_type=MySchema,
-                              args=["--slice", "invalid"])
+        mod = ArgSchemaParser(
+            test_data, schema_type=MySchema, args=["--slice", "invalid"]
+        )
 
 
 def test_override_string(test_data):
-    mod = ArgSchemaParser(test_data, schema_type=MySchema,
-                          args=["--string", "I am not a crook"])
-    assert(mod.args["string"] == "I am not a crook")
+    mod = ArgSchemaParser(
+        test_data, schema_type=MySchema, args=["--string", "I am not a crook"]
+    )
+    assert mod.args["string"] == "I am not a crook"
 
 
 def test_override_time(test_data):
-    mod = ArgSchemaParser(test_data, schema_type=MySchema,
-                          args=["--time", "11:11:00"])
-    assert(mod.args["time"] == datetime.time(11, 11, 0))
+    mod = ArgSchemaParser(test_data, schema_type=MySchema, args=["--time", "11:11:00"])
+    assert mod.args["time"] == datetime.time(11, 11, 0)
     with pytest.raises(mm.ValidationError):
-        mod = ArgSchemaParser(test_data, schema_type=MySchema,
-                              args=["--time", "invalid"])
+        mod = ArgSchemaParser(
+            test_data, schema_type=MySchema, args=["--time", "invalid"]
+        )
 
 
 def test_override_timedelta(test_data):
-    mod = ArgSchemaParser(test_data, schema_type=MySchema,
-                          args=["--timedelta", "0"])
-    assert(mod.args["timedelta"] == datetime.timedelta(0))
+    mod = ArgSchemaParser(test_data, schema_type=MySchema, args=["--timedelta", "0"])
+    assert mod.args["timedelta"] == datetime.timedelta(0)
     with pytest.raises(mm.ValidationError):
-        mod = ArgSchemaParser(test_data, schema_type=MySchema,
-                              args=["--timedelta", "invalid"])
+        mod = ArgSchemaParser(
+            test_data, schema_type=MySchema, args=["--timedelta", "invalid"]
+        )
 
 
 def test_override_url(test_data):
-    mod = ArgSchemaParser(test_data, schema_type=MySchema,
-                          args=["--url", "http://www.alleninstitute.org"])
-    assert(mod.args["url"] == "http://www.alleninstitute.org")
+    mod = ArgSchemaParser(
+        test_data, schema_type=MySchema, args=["--url", "http://www.alleninstitute.org"]
+    )
+    assert mod.args["url"] == "http://www.alleninstitute.org"
     with pytest.raises(mm.ValidationError):
-        mod = ArgSchemaParser(test_data, schema_type=MySchema,
-                              args=["--url", "invalid"])
+        mod = ArgSchemaParser(
+            test_data, schema_type=MySchema, args=["--url", "invalid"]
+        )
 
 
 def test_override_uuid(test_data):
     val = "1a66e457-4d0f-474a-bb4e-bee91e61e084"
-    mod = ArgSchemaParser(test_data, schema_type=MySchema,
-                          args=["--uuid", val])
-    assert(mod.args["uuid"] == uuid.UUID(val))
+    mod = ArgSchemaParser(test_data, schema_type=MySchema, args=["--uuid", val])
+    assert mod.args["uuid"] == uuid.UUID(val)
     with pytest.raises(mm.ValidationError):
-        mod = ArgSchemaParser(test_data, schema_type=MySchema,
-                              args=["--uuid", "invalid"])
+        mod = ArgSchemaParser(
+            test_data, schema_type=MySchema, args=["--uuid", "invalid"]
+        )
