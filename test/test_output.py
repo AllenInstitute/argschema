@@ -10,7 +10,7 @@ import os
 
 class MyOutputSchema(DefaultSchema):
     a = Str(required=True, metadata={"description": "a simple string"})
-    b = Int(default=5, metadata={"description": "a default integer"})
+    b = Int(dump_default=5, metadata={"description": "a default integer"})
     M = NumpyArray(required=True, metadata={"description": "a numpy array of answers"})
 
 
