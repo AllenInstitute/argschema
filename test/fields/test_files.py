@@ -1,14 +1,13 @@
 import pytest
 from argschema import ArgSchema
-from argschema.fields import InputFile, OutputFile, InputDir, OutputDir
+from argschema.fields import OutputFile, OutputDir
 from argschema.fields.files import OutputDirModeException
-from pydantic import Field
+from pydantic import Field, FilePath, DirectoryPath
 import os
 import sys
-if sys.platform == "win32":
-    import win32security
-    import ntsecuritycon as con
-
+from pathlib import Path
+from stat import S_IREAD, S_IRGRP, S_IROTH
+import stat
 
 # OUTPUT FILE TESTS
 class BasicOutputFile(ArgSchema):
@@ -25,22 +24,17 @@ enoent_outfile_example = {
 
 
 def test_outputfile_no_write(tmpdir):
-    outdir = tmpdir.mkdir('cannot_write_here')
-    if sys.platform == "win32":
-        sd = win32security.GetFileSecurity(str(outdir), win32security.DACL_SECURITY_INFORMATION)
-        everyone, domain, type = win32security.LookupAccountName ("", "Everyone")
-        dacl = win32security.ACL ()
-        dacl.AddAccessAllowedAce (win32security.ACL_REVISION, con.FILE_GENERIC_READ, everyone)
-        sd.SetSecurityDescriptorDacl (1, dacl, 0)
-        win32security.SetFileSecurity (str(outdir), win32security.DACL_SECURITY_INFORMATION, sd)
-    else:
-        outdir.chmod(0o444)
-    outfile = outdir.join('test')
+    # this doesn't work in windows
+
+    outdir = Path(tmpdir / 'cannot_write_here')
+    outdir.mkdir(mode=S_IREAD)
+    
+    outfile = outdir / 'test'
 
     with pytest.raises(ValueError):
         BasicOutputFile(output_file=str(outfile))
-    if sys.platform != "win32":
-        outdir.chmod(0o666)
+    
+    outdir.chmod(0o666)
 
 
 def test_outputfile_not_a_path():
@@ -102,40 +96,11 @@ def test_output_dir_bad_location():
     with pytest.raises(ValueError):
         BasicOutputDir(output_dir='///\\\//\/')
 
-if sys.platform != "win32":
-    class ModeOutputDirSchema(ArgSchema):
-        output_dir = OutputDir[0o775]
-
-
-@pytest.mark.skipif(sys.platform != "win32", reason="no general support for chmod octal in windows")
-def test_windows_outdir_mode_fail():
-    with pytest.raises(OutputDirModeException):
-        output_dir = OutputDir(mode=0o775)
-
-
-@pytest.mark.skipif(sys.platform == "win32", reason="no general support for chmod octal in windows")
-def test_mode_output_osdir(tmpdir):
-    outdir = tmpdir.join('mytmp')
-    mod = ModeOutputDirSchema(output_dir=str(outdir))
-    assert((os.stat(mod.output_dir).st_mode & 0o777) == 0o775)
-
-
-@pytest.mark.skipif(sys.platform == "win32", reason="no general support for chmod octal in windows")
-def test_failed_mode(tmpdir):
-    outdir = tmpdir.join('mytmp_failed')
-    os.makedirs(str(outdir))
-    os.chmod(str(outdir), 0o777)
-    output_dir_example = {
-        'output_dir': str(outdir)
-    }
-    with pytest.raises(ValueError):
-        ModeOutputDirSchema(output_dir=str(outdir))
-
 # INPUT FILE TESTS
 
 
 class BasicInputFile(ArgSchema):
-    input_file: InputFile = Field(..., description='a simple file')
+    input_file: FilePath = Field(..., description='a simple file')
 
 
 input_file_example = {
@@ -182,7 +147,7 @@ def test_access_inputfile_failed():
 
 # INPUTDIR TESTS
 class BasicInputDir(ArgSchema):
-    input_dir: InputDir = Field(description='a simple file')
+    input_dir: DirectoryPath = Field(description='a simple file')
 
 
 def test_basic_inputdir(tmpdir):

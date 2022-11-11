@@ -31,6 +31,7 @@ else:
 def validate_outpath(path):
     try:
         with NamedTemporaryFile(mode='w', dir=path) as tfile:
+            print(tfile)
             tfile.write('0')
             tfile.close()
 
@@ -92,6 +93,7 @@ class OutputFile(str):
         except Exception as e:  # pragma: no cover
             raise ValueError(
                 "%s cannot be os.path.dirname-ed" % value)  # pragma: no cover
+
         validate_outpath(path)
 
         return cls(value)
@@ -105,44 +107,18 @@ class OutputDir(str):
        the directory exists and create the directory if it is not present,
        and will fail validation if the directory cannot be created or cannot be
        written to.
-
-       Parameters
-       ==========
-       mode: str
-          mode to create directory
     """
 
-    def __new__(cls, value='', mode=None):
-        obj = str.__new__(cls, value)
-        obj.mode = mode
-
-        if (mode is not None) & (sys.platform == "win32"):
-            raise OutputDirModeException(
-                "Setting mode of OutputDir supported only on posix systems")
-
-        return obj
-
-    def __class_getitem__(cls, mode):
-        return lambda value: cls(value, mode=mode)
 
     @classmethod
     def __get_validators__(cls):
         yield cls.validate
 
     @classmethod
-    def validate(cls, value):
-        # this gets called before pydantic attempts to typecast
-        if not isinstance(value, cls):
-            value = cls(value)
-        
-        mode = value.mode
-        value = str(value)
-
+    def validate(cls, value):       
         if not os.path.isdir(value):
             try:
                 os.makedirs(value)
-                if mode is not None:
-                    os.chmod(value, mode)
             except OSError as e:
                 if e.errno == errno.EEXIST:
                     pass
@@ -151,18 +127,6 @@ class OutputDir(str):
                         "{} is not a directory and you cannot create it".format(
                             value)
                     )
-        if mode is not None:
-            try:
-                assert((os.stat(value).st_mode & 0o777) == mode)
-            except AssertionError:
-                raise ValueError(
-                    "{} does not have the mode  ({}) that was specified ".format(
-                        value, mode)
-                )
-            except os.error:
-                raise ValueError(
-                    "cannot get os.stat of {}".format(value)
-                )
 
         # use outputfile to test that a file in this location is a valid path
         validate_outpath(value)
@@ -180,46 +144,3 @@ def validate_input_path(value):
         except Exception as value:
             raise ValueError("%s is not readable" % value)   
 
-class InputDir(str):
-    """InputDir is  :class:`marshmallow.fields.Str` subclass which is a path to a
-       a directory that exists and that the user can access
-       (presently checked with os.access)
-    """
-
-    @classmethod
-    def __get_validators__(cls):
-        yield cls.validate
-    
-    @classmethod
-    def validate(cls, value):
-        if not os.path.isdir(value):
-            raise ValueError("%s is not a directory")
-
-        if sys.platform == "win32":
-            try:
-                x = list(os.scandir(value))
-            except PermissionError:
-                raise ValueError(
-                    "%s is not a readable directory" % value)
-        else:
-            if not os.access(value, os.R_OK):
-                raise ValueError(
-                    "%s is not a readable directory" % value)
-
-        return cls(value)
-
-
-class InputFile(str):
-    """InputDile is a :class:`marshmallow.fields.Str` subclass which is a path to a
-       file location which can be read by the user
-       (presently passes os.path.isfile and os.access = R_OK)
-    """
-
-    @classmethod
-    def __get_validators__(cls):
-        yield cls.validate
-    
-    @classmethod
-    def validate(cls, value):
-        validate_input_path(value)
-        return cls(value)

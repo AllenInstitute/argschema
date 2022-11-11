@@ -1,10 +1,10 @@
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, FilePath
 from pydantic.main import ModelMetaclass
 from typing import get_origin
 from enum import Enum
 import logging
 import argparse
-from .fields import InputFile, OutputFile
+from .fields import OutputFile
 
 class LogLevel(Enum):
     DEBUG = logging.DEBUG
@@ -14,7 +14,7 @@ class LogLevel(Enum):
     CRITICAL = logging.CRITICAL
 
 class ArgSchema(BaseModel):
-    input_json: InputFile = Field('input.json', description='zee inputs')
+    input_json: FilePath = Field('input.json', description='zee inputs')
     output_json: OutputFile = Field('output.json', description='zee outputs')
     log_level: LogLevel = Field(logging.ERROR, description='zee log level')
 
