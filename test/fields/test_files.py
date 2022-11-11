@@ -104,7 +104,7 @@ def test_output_dir_bad_location():
 
 if sys.platform != "win32":
     class ModeOutputDirSchema(ArgSchema):
-        output_dir = OutputDir(mode=0o775)
+        output_dir = OutputDir[0o775]
 
 
 @pytest.mark.skipif(sys.platform != "win32", reason="no general support for chmod octal in windows")
