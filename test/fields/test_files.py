@@ -1,8 +1,8 @@
 import pytest
-from argschema import ArgSchemaParser, ArgSchema
+from argschema import ArgSchema
 from argschema.fields import InputFile, OutputFile, InputDir, OutputDir
 from argschema.fields.files import OutputDirModeException
-import marshmallow as mm
+from pydantic import Field
 import os
 import sys
 if sys.platform == "win32":
@@ -12,8 +12,7 @@ if sys.platform == "win32":
 
 # OUTPUT FILE TESTS
 class BasicOutputFile(ArgSchema):
-    output_file = OutputFile(required=True,
-                             description='a simple output file')
+    output_file: OutputFile = Field(..., description='a simple output file')
 
 
 output_file_example = {
@@ -38,63 +37,50 @@ def test_outputfile_no_write(tmpdir):
         outdir.chmod(0o444)
     outfile = outdir.join('test')
 
-    with pytest.raises(mm.ValidationError):
-        ArgSchemaParser(input_data={'output_file': str(outfile)},
-                        schema_type=BasicOutputFile, args=[])
+    with pytest.raises(ValueError):
+        BasicOutputFile(output_file=str(outfile))
     if sys.platform != "win32":
         outdir.chmod(0o666)
 
 
 def test_outputfile_not_a_path():
-    with pytest.raises(mm.ValidationError):
-        ArgSchemaParser(input_data={'output_file': 10},
-                        schema_type=BasicOutputFile, args=[])
-
+    with pytest.raises(ValueError):
+        BasicOutputFile(output_file=10)
+        
 
 def test_enoent_outputfile_failed():
-    with pytest.raises(mm.ValidationError):
-        ArgSchemaParser(
-            input_data=enoent_outfile_example,
-            schema_type=BasicOutputFile, args=[])
+    with pytest.raises(ValueError):
+        BasicOutputFile(**enoent_outfile_example)
 
 
 def test_output_file_relative():
-    ArgSchemaParser(
-        input_data=output_file_example, schema_type=BasicOutputFile, args=[])
+    BasicOutputFile(**output_file_example)
 
 
 def test_output_path(tmpdir):
     file_ = tmpdir.join('testoutput.json')
-    args = ['--output_json', str(file_)]
-    ArgSchemaParser(args=args)
+    ArgSchema(output_json=str(file_))
 
 
 def test_output_path_cannot_write():
-    with pytest.raises(mm.ValidationError):
-        file_ = '/etc/notok/notalocation.json'
-        args = ['--output_json', str(file_)]
-        ArgSchemaParser(args=args)
+    with pytest.raises(ValueError):
+        ArgSchema(output_json='/etc/notok/notalocation.json')
 
 
 def test_output_path_noapath():
-    with pytest.raises(mm.ValidationError):
-        file_ = '@/afa\\//'
-        args = ['--output_json', str(file_)]
-        ArgSchemaParser(args=args)
+    with pytest.raises(ValueError):
+        ArgSchema(output_json='@/afa\\//')
 
 
 class BasicOutputDir(ArgSchema):
-    output_dir = OutputDir(required=True, description="basic output dir")
+    output_dir: OutputDir = Field(..., description="basic output dir")
 
 
 def test_output_dir_basic(tmpdir):
     outdir = tmpdir.mkdir('mytmp')
-    output_dir_example = {
-        'output_dir': str(outdir)
-    }
-    ArgSchemaParser(schema_type=BasicOutputDir,
-                    input_data=output_dir_example,
-                    args=[])
+    
+    BasicOutputDir(output_dir=str(outdir))
+    
 
 def test_output_dir_bad_permission(tmpdir):
     outdir = tmpdir.mkdir('no_read')
@@ -107,49 +93,31 @@ def test_output_dir_bad_permission(tmpdir):
         win32security.SetFileSecurity (str(outdir), win32security.DACL_SECURITY_INFORMATION, sd)
     else:
         outdir.chmod(0o222)
-    output_dir_example = {
-        'output_dir': outdir
-    }
-    with pytest.raises(mm.ValidationError):
-        ArgSchemaParser(schema_type=BasicOutputDir,
-                        input_data=output_dir_example,
-                        args=[])
+        
+    with pytest.raises(ValueError):
+        BasicOutputDir(output_dir=outdir)
 
 
 def test_output_dir_bad_location():
-    output_dir_example = {
-        'output_dir': '///\\\//\/'
-    }
-    with pytest.raises(mm.ValidationError):
-        ArgSchemaParser(schema_type=BasicOutputDir,
-                        input_data=output_dir_example,
-                        args=[])
+    with pytest.raises(ValueError):
+        BasicOutputDir(output_dir='///\\\//\/')
 
 if sys.platform != "win32":
     class ModeOutputDirSchema(ArgSchema):
-        output_dir = OutputDir(required=True,
-                               description="775 output directory",
-                               mode=0o775)
+        output_dir = OutputDir(mode=0o775)
 
 
 @pytest.mark.skipif(sys.platform != "win32", reason="no general support for chmod octal in windows")
 def test_windows_outdir_mode_fail():
     with pytest.raises(OutputDirModeException):
-        output_dir = OutputDir(required=True,
-                               description="775 output directory",
-                               mode=0o775)
+        output_dir = OutputDir(mode=0o775)
 
 
 @pytest.mark.skipif(sys.platform == "win32", reason="no general support for chmod octal in windows")
 def test_mode_output_osdir(tmpdir):
     outdir = tmpdir.join('mytmp')
-    output_dir_example = {
-        'output_dir': str(outdir)
-    }
-    mod = ArgSchemaParser(schema_type=ModeOutputDirSchema,
-                          input_data=output_dir_example,
-                          args=[])
-    assert((os.stat(mod.args['output_dir']).st_mode & 0o777) == 0o775)
+    mod = ModeOutputDirSchema(output_dir=str(outdir))
+    assert((os.stat(mod.output_dir).st_mode & 0o777) == 0o775)
 
 
 @pytest.mark.skipif(sys.platform == "win32", reason="no general support for chmod octal in windows")
@@ -160,17 +128,14 @@ def test_failed_mode(tmpdir):
     output_dir_example = {
         'output_dir': str(outdir)
     }
-    with pytest.raises(mm.ValidationError):
-        ArgSchemaParser(schema_type=ModeOutputDirSchema,
-                        input_data=output_dir_example,
-                        args=[])
+    with pytest.raises(ValueError):
+        ModeOutputDirSchema(output_dir=str(outdir))
 
 # INPUT FILE TESTS
 
 
 class BasicInputFile(ArgSchema):
-    input_file = InputFile(required=True,
-                           description='a simple file')
+    input_file: InputFile = Field(..., description='a simple file')
 
 
 input_file_example = {
@@ -181,15 +146,15 @@ input_file_example = {
 def test_relative_file_input():
     with open(input_file_example['input_file'], 'w') as fp:
         fp.write("test")
-    ArgSchemaParser(
-        input_data=input_file_example, schema_type=BasicInputFile, args=[])
+
+    BasicInputFile(**input_file_example)
+    
     os.remove(input_file_example['input_file'])
 
 
 def test_relative_file_input_failed():
-    with pytest.raises(mm.ValidationError):
-        ArgSchemaParser(
-            input_data=input_file_example, schema_type=BasicInputFile, args=[])
+    with pytest.raises(ValueError):
+        BasicInputFile(**input_file_example)
 
 
 def test_access_inputfile_failed():
@@ -210,33 +175,22 @@ def test_access_inputfile_failed():
     else:
         os.chmod(input_file_example['input_file'], 0o222)
 
-    with pytest.raises(mm.ValidationError):
-        ArgSchemaParser(
-            input_data=input_file_example, schema_type=BasicInputFile, args=[])
+    with pytest.raises(ValueError):
+        BasicInputFile(**input_file_example)
     os.remove(input_file_example['input_file'])
 
 
 # INPUTDIR TESTS
 class BasicInputDir(ArgSchema):
-    input_dir = InputDir(required=True,
-                         description='a simple file')
+    input_dir: InputDir = Field(description='a simple file')
 
 
 def test_basic_inputdir(tmpdir):
-    input_data = {
-        'input_dir': str(tmpdir)
-    }
-    ArgSchemaParser(input_data=input_data,
-                    schema_type=BasicInputDir, args=[])
-
+    BasicInputDir(input_dir=str(tmpdir))
 
 def test_bad_inputdir():
-    input_data = {
-        'input_dir': 'not_a_dir'
-    }
-    with pytest.raises(mm.ValidationError):
-        ArgSchemaParser(input_data=input_data,
-                        schema_type=BasicInputDir, args=[])
+    with pytest.raises(ValueError):
+        BasicInputDir(input_dir='not_a_dir')
 
 @pytest.mark.skipif(sys.platform == "win32",
                     reason="can't get working after migrating from appveyor to"
@@ -256,9 +210,6 @@ def test_inputdir_no_access(tmpdir):
                 win32security.DACL_SECURITY_INFORMATION, sd)
     else:
         input_dir.chmod(0o222)
-    input_data = {
-        'input_dir': str(input_dir)
-    }
-    with pytest.raises(mm.ValidationError):
-        ArgSchemaParser(input_data=input_data,
-                        schema_type=BasicInputDir, args=[])
+        
+    with pytest.raises(ValueError):
+        BasicInputDir(input_dir=str(input_dir))
